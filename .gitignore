@@ -1,0 +1,15 @@
+.DS_Store
+._*
+
+.vscode/
+.idea/
+
+# Typst (outputs compilados)
+*.pdf
+paper/*.pdf
+
+
+# Ficheiros temporários e logs
+*.log
+*.tmp
+*~
