@@ -1,0 +1,208 @@
+{
+  "schema_version": 1,
+  "split": "development",
+  "source_language": "en",
+  "target_language": "pt-PT",
+  "provenance": "Exemplos sintéticos preparados com assistência do Codex para desenvolvimento do protótipo. Não são traduções recolhidas de participantes.",
+  "annotation_status": "pending_author_review",
+  "categories": {
+    "empty_translation": "Tradução vazia ou composta apenas por espaços em branco.",
+    "numeric_mismatch": "Alteração de um valor numérico, distinguindo o valor da sua representação nas duas línguas.",
+    "terminology": "Ausência de um equivalente aceite pelo glossário quando o termo de origem está presente."
+  },
+  "annotation_policy": [
+    "As anotações são propostas iniciais a rever pelos autores; não constituem validação linguística especializada.",
+    "A ausência de alertas refere-se às três categorias deste conjunto e não certifica a qualidade global da tradução.",
+    "Uma tradução vazia recebe apenas empty_translation, evitando alertas derivados de números ou termos ausentes.",
+    "Os números do original usam convenções en-US; a tradução pode usar convenções pt-PT sem alterar o valor.",
+    "O glossário exige termos completos e ignora diferenças de maiúsculas e minúsculas. Basta um dos equivalentes aceites; a flexão morfológica fica fora destes exemplos.",
+    "Casos com o mesmo source_id são variantes do mesmo original e devem permanecer no mesmo conjunto.",
+    "Todos estes exemplos pertencem ao desenvolvimento e não devem integrar o conjunto de teste final.",
+    "Apenas input e os metadados linguísticos pertinentes devem ser fornecidos aos métodos. expected_issues e annotation_note servem exclusivamente para verificação e análise."
+  ],
+  "cases": [
+    {
+      "id": "dev-001",
+      "source_id": "instructions-001",
+      "input": {
+        "source": "Read the instructions before you start.",
+        "target": "Leia as instruções antes de começar.",
+        "context": "Instrução apresentada antes de um exercício educativo.",
+        "glossary": []
+      },
+      "expected_issues": [],
+      "annotation_note": "Caso de controlo: tradução não vazia e sem problemas nas categorias avaliadas."
+    },
+    {
+      "id": "dev-002",
+      "source_id": "instructions-001",
+      "input": {
+        "source": "Read the instructions before you start.",
+        "target": "",
+        "context": "Instrução apresentada antes de um exercício educativo.",
+        "glossary": []
+      },
+      "expected_issues": [
+        {
+          "category": "empty_translation",
+          "source_evidence": "Read the instructions before you start.",
+          "target_evidence": "",
+          "explanation": "O segmento original contém texto, mas não foi introduzida uma tradução."
+        }
+      ],
+      "annotation_note": "Caso de tradução totalmente vazia."
+    },
+    {
+      "id": "dev-003",
+      "source_id": "instructions-001",
+      "input": {
+        "source": "Read the instructions before you start.",
+        "target": "   ",
+        "context": "Instrução apresentada antes de um exercício educativo.",
+        "glossary": []
+      },
+      "expected_issues": [
+        {
+          "category": "empty_translation",
+          "source_evidence": "Read the instructions before you start.",
+          "target_evidence": "   ",
+          "explanation": "A tradução contém apenas três espaços e deve ser tratada como vazia."
+        }
+      ],
+      "annotation_note": "Os três espaços são intencionais: este caso distingue uma cadeia não vazia de uma tradução com conteúdo."
+    },
+    {
+      "id": "dev-004",
+      "source_id": "price-001",
+      "input": {
+        "source": "The total is €1,000.50.",
+        "target": "O total é 1 000,50 €.",
+        "context": "Resumo de uma compra. No original, a vírgula separa milhares e o ponto separa a parte decimal.",
+        "glossary": []
+      },
+      "expected_issues": [],
+      "annotation_note": "O valor monetário foi preservado. A mudança de separadores e da posição do símbolo monetário não deve gerar um alerta numérico."
+    },
+    {
+      "id": "dev-005",
+      "source_id": "price-001",
+      "input": {
+        "source": "The total is €1,000.50.",
+        "target": "O total é 100,50 €.",
+        "context": "Resumo de uma compra. No original, a vírgula separa milhares e o ponto separa a parte decimal.",
+        "glossary": []
+      },
+      "expected_issues": [
+        {
+          "category": "numeric_mismatch",
+          "source_evidence": "1,000.50",
+          "target_evidence": "100,50",
+          "explanation": "O original indica mil euros e cinquenta cêntimos, enquanto a tradução indica cem euros e cinquenta cêntimos."
+        }
+      ],
+      "annotation_note": "Variante de dev-004 com alteração real do valor, para distinguir erro numérico de adaptação do formato."
+    },
+    {
+      "id": "dev-006",
+      "source_id": "discount-001",
+      "input": {
+        "source": "A 15% discount applies.",
+        "target": "Aplica-se um desconto de 50 %.",
+        "context": "Aviso sobre a percentagem de desconto de uma promoção.",
+        "glossary": []
+      },
+      "expected_issues": [
+        {
+          "category": "numeric_mismatch",
+          "source_evidence": "15%",
+          "target_evidence": "50 %",
+          "explanation": "A percentagem passou de 15 para 50. O espaço antes do símbolo não é a causa do alerta."
+        }
+      ],
+      "annotation_note": "Caso de percentagem com mudança de valor e diferença de espaçamento."
+    },
+    {
+      "id": "dev-007",
+      "source_id": "save-file-001",
+      "input": {
+        "source": "Save the file in the folder.",
+        "target": "Guarde o ficheiro no diretório.",
+        "context": "Instrução de uma aplicação de gestão de ficheiros. O glossário admite duas designações para folder neste exercício.",
+        "glossary": [
+          {
+            "source_term": "file",
+            "accepted_targets": ["ficheiro"]
+          },
+          {
+            "source_term": "folder",
+            "accepted_targets": ["pasta", "diretório"]
+          }
+        ]
+      },
+      "expected_issues": [],
+      "annotation_note": "A utilização do segundo equivalente aceite, diretório, deve ser reconhecida como válida."
+    },
+    {
+      "id": "dev-008",
+      "source_id": "save-file-001",
+      "input": {
+        "source": "Save the file in the folder.",
+        "target": "Guarde o ficheiro no arquivo.",
+        "context": "Instrução de uma aplicação de gestão de ficheiros. O glossário admite duas designações para folder neste exercício.",
+        "glossary": [
+          {
+            "source_term": "file",
+            "accepted_targets": ["ficheiro"]
+          },
+          {
+            "source_term": "folder",
+            "accepted_targets": ["pasta", "diretório"]
+          }
+        ]
+      },
+      "expected_issues": [
+        {
+          "category": "terminology",
+          "source_evidence": "folder",
+          "target_evidence": "arquivo",
+          "explanation": "O termo folder está presente no original, mas a tradução não usa pasta nem diretório, os equivalentes aceites neste exercício."
+        }
+      ],
+      "annotation_note": "O alerta é relativo ao glossário prescrito neste contexto; não estabelece uma proibição geral do termo arquivo."
+    },
+    {
+      "id": "dev-009",
+      "source_id": "profile-001",
+      "input": {
+        "source": "Update your profile.",
+        "target": "Atualize o seu perfil.",
+        "context": "Instrução para atualizar o perfil de utilizador. O glossário do projeto também contém termos usados noutros segmentos.",
+        "glossary": [
+          {
+            "source_term": "file",
+            "accepted_targets": ["ficheiro"]
+          }
+        ]
+      },
+      "expected_issues": [],
+      "annotation_note": "A sequência file ocorre dentro de profile, mas não como termo completo. Não se deve exigir ficheiro na tradução."
+    },
+    {
+      "id": "dev-010",
+      "source_id": "open-file-001",
+      "input": {
+        "source": "Open the file.",
+        "target": "Abra o FICHEIRO.",
+        "context": "Instrução de interface em que a palavra FICHEIRO aparece destacada em maiúsculas por opção de apresentação.",
+        "glossary": [
+          {
+            "source_term": "file",
+            "accepted_targets": ["ficheiro"]
+          }
+        ]
+      },
+      "expected_issues": [],
+      "annotation_note": "O equivalente aceite está presente em maiúsculas e seguido de pontuação. Não deve gerar um alerta terminológico."
+    }
+  ]
+}
