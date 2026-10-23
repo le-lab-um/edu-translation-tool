@@ -20,10 +20,23 @@ O repositório contém:
 * [Artigo em desenvolvimento](paper/main.typ), com revisão do estado da arte, comparação documental de seis ferramentas, objetivos, arquitetura proposta e protocolo de avaliação interna. As secções de implementação e resultados ainda estão por desenvolver.
 * [Dez exemplos de desenvolvimento](data/development.json), sintéticos e com anotações propostas ainda sujeitas a revisão pelos autores. Abrangem traduções vazias, diferenças numéricas e cumprimento do glossário, incluindo casos sem erros.
 * [Página de apresentação](docs/index.html), estática; ainda não é o editor de tradução.
+* [Primeira regra determinística](backend/rules.py), que deteta traduções vazias ou compostas apenas por espaços em branco, com [testes automatizados](tests/test_rules.py).
 
 Foi realizada uma experiência preliminar com Ollama e o modelo `qwen3:4b-instruct-2507-q4_K_M`, num MacBook M5 com 16 GB de memória. Foram comparadas duas versões do prompt nos exemplos de desenvolvimento. As respostas revelaram falsos alertas, omissões e explicações incorretas; esta experiência serve para orientar o desenvolvimento e não constitui a avaliação final.
 
-O editor, a API, a persistência e o motor de regras ainda não estão implementados. O protótipo será desenvolvido incrementalmente, com alterações pequenas e verificáveis.
+O editor, a API, a persistência e as regras numéricas e terminológicas ainda não estão implementados. O protótipo será desenvolvido incrementalmente, com alterações pequenas e verificáveis.
+
+## Executar os Testes
+
+Na raiz do repositório, com Python 3.9 ou posterior:
+
+```sh
+python3 -m unittest discover -s tests -v
+```
+
+Estes testes usam apenas a biblioteca padrão e não requerem Ollama. A regra devolve um alerta `empty_translation` quando `str.strip()` remove todo o conteúdo; caso contrário, devolve uma lista vazia. Usa os campos `category`, `explanation` e `hint`, também usados na experiência com o modelo. Texto incorreto, números ou pontuação isolada não são classificados como tradução vazia.
+
+Os testes incluem espaços, tabulações, quebras de linha, espaços Unicode e texto efetivo, incluindo maiúsculas, além dos dez exemplos de desenvolvimento apenas para a categoria `empty_translation`. Esta verificação não avalia as outras categorias nem substitui a avaliação final.
 
 ## Solução Prevista
 

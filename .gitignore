@@ -4,6 +4,10 @@
 .vscode/
 .idea/
 
+# Python
+__pycache__/
+*.py[cod]
+
 # Typst (outputs compilados)
 *.pdf
 paper/*.pdf
