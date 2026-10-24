@@ -8,6 +8,10 @@
 __pycache__/
 *.py[cod]
 
+# Frontend: dependências e resultado da compilação
+frontend/node_modules/
+frontend/dist/
+
 # Typst (outputs compilados)
 *.pdf
 paper/*.pdf

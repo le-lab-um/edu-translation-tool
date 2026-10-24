@@ -21,10 +21,46 @@ O repositório contém:
 * [Dez exemplos de desenvolvimento](data/development.json), sintéticos e com anotações propostas ainda sujeitas a revisão pelos autores. Abrangem traduções vazias, diferenças numéricas e cumprimento do glossário, incluindo casos sem erros.
 * [Página de apresentação](docs/index.html), estática; ainda não é o editor de tradução.
 * [Primeira regra determinística](backend/rules.py), que deteta traduções vazias ou compostas apenas por espaços em branco, com [testes automatizados](tests/test_rules.py).
+* [Editor mínimo](frontend/src/App.tsx) em React e TypeScript, que apresenta um original em inglês, o contexto e um campo para escrever a tradução em português europeu.
 
 Foi realizada uma experiência preliminar com Ollama e o modelo `qwen3:4b-instruct-2507-q4_K_M`, num MacBook M5 com 16 GB de memória. Foram comparadas duas versões do prompt nos exemplos de desenvolvimento. As respostas revelaram falsos alertas, omissões e explicações incorretas; esta experiência serve para orientar o desenvolvimento e não constitui a avaliação final.
 
-O editor, a API, a persistência e as regras numéricas e terminológicas ainda não estão implementados. O protótipo será desenvolvido incrementalmente, com alterações pequenas e verificáveis.
+O editor permite trabalhar num único segmento, mantendo a tradução apenas em memória. Ainda não está ligado à regra Python nem ao modelo. A API, a persistência e as regras numéricas e terminológicas serão implementadas em incrementos seguintes.
+
+## Executar o Editor
+
+Requisitos: Node.js `20.19+` na série 20, ou `22.12+`, e npm. Não é necessário iniciar Python ou Ollama para utilizar este editor.
+
+Na raiz do repositório:
+
+```sh
+cd frontend
+npm ci
+npm run dev
+```
+
+Abrir o endereço local indicado no terminal. Para terminar o servidor, usar `Ctrl+C`. O ficheiro `package-lock.json` fixa as versões instaladas; deve acompanhar o código no Git.
+
+O original e o contexto reproduzem os dados de entrada de `dev-001`. A interface não importa o conjunto anotado nem apresenta a tradução de referência. O campo começa vazio e aceita edição livre. **Ao recarregar ou fechar a página, a tradução perde-se**; esta limitação também está indicada no editor.
+
+A implementação está concentrada em três ficheiros:
+
+* `frontend/src/App.tsx`: exercício e interface, com um único estado para a tradução.
+* `frontend/src/main.tsx`: montagem da aplicação React.
+* `frontend/src/styles.css`: apresentação e adaptação a ecrãs estreitos, usando fontes do sistema.
+
+React e React DOM apresentam a interface; TypeScript verifica os tipos; Vite e o respetivo plugin React permitem desenvolver e compilar. Não são utilizadas bibliotecas adicionais de interface ou de gestão de estado.
+
+Para verificar os tipos e gerar a versão de produção, dentro de `frontend/`:
+
+```sh
+npm run build
+npm run preview
+```
+
+`npm run preview` serve localmente a versão compilada. A pasta gerada `frontend/dist/` e as dependências `frontend/node_modules/` são ignoradas pelo Git.
+
+Verificação manual: confirmar que o original não é editável, aceder ao campo com `Tab`, escrever e colar texto com acentos e quebras de linha, verificar o campo num ecrã estreito e recarregar a página para confirmar que volta a ficar vazio. Ainda não existe verificação automática da tradução na interface.
 
 ## Executar os Testes
 
@@ -54,7 +90,7 @@ Estão também previstos exercícios de comparação justificada entre traduçõ
 | Regras e similaridade textual | Python e RapidFuzz |
 | Execução do modelo local | Ollama |
 
-Estas tecnologias descrevem a arquitetura proposta; ainda não existe uma aplicação integrada para instalar ou executar. A disponibilização como software open source é um objetivo do projeto; a licença do repositório ainda está por definir.
+Estas tecnologias descrevem a arquitetura proposta. O editor e a primeira regra já podem ser executados separadamente; a aplicação integrada será desenvolvida nos próximos incrementos. A disponibilização como software open source é um objetivo do projeto; a licença do repositório ainda está por definir.
 
 ## Avaliação Prevista
 
