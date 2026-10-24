@@ -131,9 +131,56 @@ textarea::placeholder {
   color: #616a61;
 }
 
-textarea:focus-visible {
+textarea:focus-visible,
+button:focus-visible {
   outline: 3px solid #456459;
   outline-offset: 3px;
+}
+
+.verification {
+  margin-top: 28px;
+}
+
+.verification > p {
+  color: #535b53;
+}
+
+button {
+  padding: 10px 24px;
+  border: 1px solid #365348;
+  border-radius: 4px;
+  background: #365348;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: #293f37;
+}
+
+button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.issues {
+  padding-left: 24px;
+}
+
+.issues p {
+  margin: 8px 0;
+}
+
+.check-error {
+  padding: 12px 16px;
+  border-left: 3px solid #8b3131;
+  background: #f9eded;
+}
+
+.verification > .check-error {
+  color: #782727;
 }
 
 .storage-note {

@@ -26,11 +26,11 @@ O repositório contém:
 
 Foi realizada uma experiência preliminar com Ollama e o modelo `qwen3:4b-instruct-2507-q4_K_M`, num MacBook M5 com 16 GB de memória. Foram comparadas duas versões do prompt nos exemplos de desenvolvimento. As respostas revelaram falsos alertas, omissões e explicações incorretas; esta experiência serve para orientar o desenvolvimento e não constitui a avaliação final.
 
-O editor permite trabalhar num único segmento, mantendo a tradução apenas em memória. A API já executa a regra de tradução vazia, mas o editor ainda não faz pedidos à API. A ligação entre os dois, a persistência, as regras numéricas e terminológicas e a integração com o modelo serão desenvolvidas em incrementos seguintes.
+O editor permite trabalhar num único segmento e executar a regra de tradução vazia através do botão **Verificar**, ligado à API local. A tradução mantém-se apenas em memória. A persistência, as regras numéricas e terminológicas e a integração com o modelo serão desenvolvidas em incrementos seguintes.
 
 ## Executar o Editor
 
-Requisitos: Node.js `20.19+` na série 20, ou `22.12+`, e npm. Não é necessário iniciar Python ou Ollama para utilizar este editor.
+Requisitos: Node.js `20.19+` na série 20, ou `22.12+`, e npm. Para usar **Verificar**, iniciar também a API Python conforme a secção seguinte, num terminal separado. Ollama não é necessário.
 
 Na raiz do repositório:
 
@@ -42,13 +42,19 @@ npm run dev
 
 Abrir o endereço local indicado no terminal. Para terminar o servidor, usar `Ctrl+C`. O ficheiro `package-lock.json` fixa as versões instaladas; deve acompanhar o código no Git.
 
-O original e o contexto reproduzem os dados de entrada de `dev-001`. A interface não importa o conjunto anotado nem apresenta a tradução de referência. O campo começa vazio e aceita edição livre. **Ao recarregar ou fechar a página, a tradução perde-se**; esta limitação também está indicada no editor.
+O original e o contexto reproduzem os dados de entrada de `dev-001`. A interface não importa o conjunto anotado nem apresenta a tradução de referência. O campo começa vazio e aceita edição livre. **Ao recarregar ou fechar a página, a tradução perde-se.**
 
-A implementação está concentrada em três ficheiros:
+A implementação está concentrada nos seguintes ficheiros:
 
-* `frontend/src/App.tsx`: exercício e interface, com um único estado para a tradução.
+* `frontend/src/App.tsx`: exercício, tradução e estado da verificação (inicial, em curso, resultado ou erro). Um contador identifica o pedido atual; edições e novos pedidos invalidam respostas anteriores, mesmo que o texto volte ao valor original.
+* `frontend/src/api.ts`: pedido HTTP e validação do formato da resposta, sem replicar a regra Python.
 * `frontend/src/main.tsx`: montagem da aplicação React.
 * `frontend/src/styles.css`: apresentação e adaptação a ecrãs estreitos, usando fontes do sistema.
+* `frontend/vite.config.ts`: encaminhamento de `/api` para `http://127.0.0.1:8000`. Reiniciar o servidor Vite se já estava aberto antes desta configuração.
+
+O botão envia o conteúdo exato do campo, incluindo espaços, para `POST /api/check`. Durante o pedido, mostra **A verificar…** e fica desativado. O campo continua editável: uma alteração remove o resultado e permite uma nova verificação. Respostas de pedidos anteriores são ignoradas.
+
+Um resultado vazio significa apenas que não foi detetada uma tradução vazia. Falhas de rede, respostas HTTP de erro ou respostas num formato inesperado apresentam uma mensagem e permitem tentar novamente, mantendo o texto introduzido.
 
 React e React DOM apresentam a interface; TypeScript verifica os tipos; Vite e o respetivo plugin React permitem desenvolver e compilar. Não são utilizadas bibliotecas adicionais de interface ou de gestão de estado.
 
@@ -59,9 +65,15 @@ npm run build
 npm run preview
 ```
 
-`npm run preview` serve localmente a versão compilada. A pasta gerada `frontend/dist/` e as dependências `frontend/node_modules/` são ignoradas pelo Git.
+`npm run preview` serve localmente a versão compilada e utiliza o mesmo encaminhamento para a API, que também precisa de estar em execução. Este encaminhamento é uma configuração dos servidores locais do Vite; não acompanha os ficheiros estáticos numa publicação. A pasta gerada `frontend/dist/` e as dependências `frontend/node_modules/` são ignoradas pelo Git.
 
-Verificação manual: confirmar que o original não é editável, aceder ao campo com `Tab`, escrever e colar texto com acentos e quebras de linha, verificar o campo num ecrã estreito e recarregar a página para confirmar que volta a ficar vazio. Ainda não existe verificação automática da tradução na interface.
+Verificação manual:
+
+1. Com a API e o editor em execução, verificar o campo vazio ou apenas com espaços: deve aparecer um alerta e uma pista.
+2. Escrever texto: o resultado anterior deve desaparecer. Verificar novamente: deve aparecer a mensagem de ausência de tradução vazia.
+3. Parar a API e verificar: deve surgir uma mensagem de falha, mantendo o texto. Reiniciar a API e repetir o pedido para confirmar a recuperação.
+4. Para testar respostas atrasadas, ativar uma ligação lenta nas ferramentas de desenvolvimento do navegador, verificar e editar o texto antes da resposta: o resultado antigo não deve aparecer.
+5. Confirmar que o original não é editável, usar o campo e o botão com teclado, escrever e colar acentos e quebras de linha e verificar a apresentação num ecrã estreito.
 
 ## Executar a API
 
@@ -133,7 +145,7 @@ Estão também previstos exercícios de comparação justificada entre traduçõ
 | Regras e similaridade textual | Python e RapidFuzz |
 | Execução do modelo local | Ollama |
 
-Estas tecnologias descrevem a arquitetura proposta. O editor e a API que executa a primeira regra já podem ser iniciados separadamente; a ligação entre ambos será desenvolvida no próximo incremento. A disponibilização como software open source é um objetivo do projeto; a licença do repositório ainda está por definir.
+Estas tecnologias descrevem a arquitetura proposta. O editor já comunica com a API para executar a primeira regra. A disponibilização como software open source é um objetivo do projeto; a licença do repositório ainda está por definir.
 
 ## Avaliação Prevista
 
