@@ -23,6 +23,7 @@ O repositório contém:
 * [Primeira regra determinística](backend/rules.py), que deteta traduções vazias ou compostas apenas por espaços em branco, com [testes automatizados](tests/test_rules.py).
 * [Editor mínimo](frontend/src/App.tsx) em React e TypeScript, que apresenta um original em inglês, o contexto e um campo para escrever a tradução em português europeu.
 * [API local](backend/main.py) com um endpoint que recebe a tradução e executa a regra de tradução vazia.
+* [Testes do cliente HTTP](frontend/src/api.test.ts), incluindo cancelamento por tempo limite e recuperação numa nova tentativa.
 
 Foi realizada uma experiência preliminar com Ollama e o modelo `qwen3:4b-instruct-2507-q4_K_M`, num MacBook M5 com 16 GB de memória. Foram comparadas duas versões do prompt nos exemplos de desenvolvimento. As respostas revelaram falsos alertas, omissões e explicações incorretas; esta experiência serve para orientar o desenvolvimento e não constitui a avaliação final.
 
@@ -30,7 +31,7 @@ O editor permite trabalhar num único segmento e executar a regra de tradução 
 
 ## Executar o Editor
 
-Requisitos: Node.js `20.19+` na série 20, ou `22.12+`, e npm. Para usar **Verificar**, iniciar também a API Python conforme a secção seguinte, num terminal separado. Ollama não é necessário.
+Requisitos: Node.js `20.19+` na série 20, `22.12+` na série 22, ou `24+`, e npm. Estas versões satisfazem os requisitos do Vite e do Vitest. Para usar **Verificar**, iniciar também a API Python conforme a secção seguinte, num terminal separado. Ollama não é necessário.
 
 Na raiz do repositório:
 
@@ -46,8 +47,9 @@ O original e o contexto reproduzem os dados de entrada de `dev-001`. A interface
 
 A implementação está concentrada nos seguintes ficheiros:
 
-* `frontend/src/App.tsx`: exercício, tradução e estado da verificação (inicial, em curso, resultado ou erro). Um contador identifica o pedido atual; edições e novos pedidos invalidam respostas anteriores, mesmo que o texto volte ao valor original.
-* `frontend/src/api.ts`: pedido HTTP e validação do formato da resposta, sem replicar a regra Python.
+* `frontend/src/App.tsx`: exercício, tradução e estado da verificação (inicial, em curso, resultado, erro ou tempo limite). Um contador identifica o pedido atual; edições e novos pedidos invalidam respostas anteriores, mesmo que o texto volte ao valor original.
+* `frontend/src/api.ts`: pedido HTTP, cancelamento ao fim de 10 segundos e validação do formato da resposta, sem replicar a regra Python.
+* `frontend/src/api.test.ts`: testes automatizados do pedido HTTP com Vitest, sem contactar a API.
 * `frontend/src/main.tsx`: montagem da aplicação React.
 * `frontend/src/styles.css`: apresentação e adaptação a ecrãs estreitos, usando fontes do sistema.
 * `frontend/vite.config.ts`: encaminhamento de `/api` para `http://127.0.0.1:8000`. Reiniciar o servidor Vite se já estava aberto antes desta configuração.
@@ -56,7 +58,9 @@ O botão envia o conteúdo exato do campo, incluindo espaços, para `POST /api/c
 
 Um resultado vazio significa apenas que não foi detetada uma tradução vazia. Falhas de rede, respostas HTTP de erro ou respostas num formato inesperado apresentam uma mensagem e permitem tentar novamente, mantendo o texto introduzido.
 
-React e React DOM apresentam a interface; TypeScript verifica os tipos; Vite e o respetivo plugin React permitem desenvolver e compilar. Não são utilizadas bibliotecas adicionais de interface ou de gestão de estado.
+Cada verificação tem um **tempo limite de 10 segundos**, que abrange a espera pela resposta e a leitura do JSON. Ao atingir esse prazo, o navegador cancela o pedido através de `AbortController`; o editor apresenta uma mensagem específica e permite tentar novamente, sem apagar a tradução. Não há repetição automática. Tal como os outros resultados, o tempo limite de um pedido anterior é ignorado se o texto tiver sido editado ou uma nova verificação tiver começado.
+
+React e React DOM apresentam a interface; TypeScript verifica os tipos; Vite e o respetivo plugin React permitem desenvolver e compilar. Vitest é uma dependência de desenvolvimento usada apenas nos testes. Não são utilizadas bibliotecas adicionais de interface ou de gestão de estado.
 
 Para verificar os tipos e gerar a versão de produção, dentro de `frontend/`:
 
@@ -72,7 +76,7 @@ Verificação manual:
 1. Com a API e o editor em execução, verificar o campo vazio ou apenas com espaços: deve aparecer um alerta e uma pista.
 2. Escrever texto: o resultado anterior deve desaparecer. Verificar novamente: deve aparecer a mensagem de ausência de tradução vazia.
 3. Parar a API e verificar: deve surgir uma mensagem de falha, mantendo o texto. Reiniciar a API e repetir o pedido para confirmar a recuperação.
-4. Para testar respostas atrasadas, ativar uma ligação lenta nas ferramentas de desenvolvimento do navegador, verificar e editar o texto antes da resposta: o resultado antigo não deve aparecer.
+4. Para testar respostas atrasadas, configurar uma ligação com latência superior a 10 segundos nas ferramentas de desenvolvimento do navegador e verificar: deve aparecer a mensagem de tempo limite, mantendo o texto e permitindo uma nova tentativa. Repor a ligação normal e verificar novamente. Repetir com uma edição durante a espera: o resultado ou erro antigo não deve aparecer.
 5. Confirmar que o original não é editável, usar o campo e o botão com teclado, escrever e colar acentos e quebras de linha e verificar a apresentação num ecrã estreito.
 
 ## Executar a API
@@ -128,6 +132,24 @@ Os testes da regra usam `unittest`, da biblioteca padrão. Os testes da API usam
 A regra devolve um alerta `empty_translation` quando `str.strip()` remove todo o conteúdo; caso contrário, devolve uma lista vazia. Usa os campos `category`, `explanation` e `hint`, também usados na experiência com o modelo. Texto incorreto, números ou pontuação isolada não são classificados como tradução vazia.
 
 Os testes incluem espaços, tabulações, quebras de linha, espaços Unicode e texto efetivo, incluindo maiúsculas, além dos dez exemplos de desenvolvimento apenas para a categoria `empty_translation`. Esta verificação não avalia as outras categorias nem substitui a avaliação final.
+
+Depois de instalar as dependências do editor com `npm ci`, executar dentro de `frontend/`:
+
+```sh
+npm test
+```
+
+Os testes do cliente HTTP usam Vitest com pedidos simulados e relógio controlado: não precisam da API, de Ollama ou de esperar 10 segundos reais. Cobrem pedidos sem resposta, leitura demorada do JSON, respostas válidas, falhas de rede e HTTP, limpeza do temporizador e uma nova tentativa após tempo limite. São testes da função `checkTranslation`; o comportamento visual do editor continua a ter a verificação manual descrita acima.
+
+## Próximos Passos
+
+1. **Guardar e recuperar a tradução de um segmento:** começar pela persistência local na API com SQLite e SQLAlchemy, com testes de gravação e recuperação; ligar depois o editor, num incremento separado. O objetivo é deixar de perder o texto ao recarregar a página.
+2. **Alargar as verificações por regras:** implementar números e terminologia em passos separados, revendo os exemplos e as anotações antes de os usar como referência.
+3. **Integrar o modelo local:** retomar os resultados da experiência preliminar quando o fluxo de edição, persistência e regras estiver estável.
+
+Antes de automatizar novas experiências com Ollama, ajustar o script para terminar com um código de erro quando existirem falhas nos pedidos. Os testes automáticos do fluxo completo no navegador e a execução dos testes em CI podem ser acrescentados em incrementos próprios.
+
+O README acompanha o estado da implementação, as instruções de execução e os próximos passos. O artigo será atualizado em momentos de consolidação da arquitetura, da implementação ou da avaliação, sem exigir uma alteração por cada incremento de código.
 
 ## Solução Prevista
 

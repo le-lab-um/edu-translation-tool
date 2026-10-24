@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { checkTranslation } from './api';
+import { checkTranslation, CheckTimeoutError } from './api';
 import type { Issue } from './api';
 
 // Original e contexto de dev-001 em data/development.json.
@@ -10,7 +10,7 @@ const exercise = {
 };
 
 type CheckState =
-  | { status: 'idle' | 'loading' | 'error' }
+  | { status: 'idle' | 'loading' | 'error' | 'timeout' }
   | { status: 'success'; issues: Issue[] };
 
 /** Editor de um segmento. A tradução existe apenas no estado desta página. */
@@ -36,9 +36,9 @@ export default function App() {
       if (version === requestVersion.current) {
         setCheck({ status: 'success', issues });
       }
-    } catch {
+    } catch (error) {
       if (version === requestVersion.current) {
-        setCheck({ status: 'error' });
+        setCheck({ status: error instanceof CheckTimeoutError ? 'timeout' : 'error' });
       }
     }
   }
@@ -112,10 +112,12 @@ export default function App() {
             )}
           </div>
 
-          {check.status === 'error' && (
+          {(check.status === 'error' || check.status === 'timeout') && (
             <p className="check-error" role="alert">
-              Não foi possível obter a verificação. Confirme que a API está em
-              execução e tente novamente. A sua tradução foi mantida.
+              {check.status === 'timeout'
+                ? 'A verificação excedeu o tempo limite de 10 segundos. Tente novamente.'
+                : 'Não foi possível obter a verificação. Confirme que a API está em execução e tente novamente.'}
+              {' '}A sua tradução foi mantida.
             </p>
           )}
         </section>
