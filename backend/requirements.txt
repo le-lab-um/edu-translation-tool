@@ -1,8 +1,6 @@
-# API e validação
-fastapi==0.162.0
-pydantic==2.14.1
-# Servidor HTTP local
-uvicorn==0.54.0
-# Base do FastAPI e cliente usado nos testes (versões compatíveis)
-starlette==1.10.0
-httpx2==2.16.0
+fastapi>=0.110.0
+pydantic>=2.6.0
+uvicorn>=0.28.0
+starlette>=0.36.0
+httpx>=0.27.0
+sqlalchemy>=2.0.0

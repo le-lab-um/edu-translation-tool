@@ -1,3 +1,8 @@
+"""
+Testes da API FastAPI.
+Garante que o endpoint de verificação responde bem e rejeita pedidos mal formados.
+"""
+
 import unittest
 
 from fastapi.testclient import TestClient
@@ -7,8 +12,7 @@ from backend.main import app
 
 class TranslationApiTests(unittest.TestCase):
     def setUp(self):
-        # Os pedidos são executados em memória, sem abrir um servidor HTTP.
-        self.client = self.enterContext(TestClient(app))
+        self.client = TestClient(app)
 
     def test_empty_translation_returns_alert(self):
         for target in ("", " \t\r\n\u00a0"):

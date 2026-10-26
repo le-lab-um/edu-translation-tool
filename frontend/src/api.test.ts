@@ -1,3 +1,8 @@
+/**
+ * Testes unitários do cliente da API no frontend.
+ * Testa os tempos limite de 10s, erros de rede e se os dados são enviados como esperado.
+ */
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { checkTranslation, CheckTimeoutError } from './api';
 
@@ -64,11 +69,15 @@ describe('checkTranslation', () => {
   it('mantém o texto enviado e remove o temporizador após uma resposta válida', async () => {
     fetchMock.mockResolvedValue(Response.json({ issues: [] }));
 
-    await expect(checkTranslation('  Tradução com acentos.\n')).resolves.toEqual([]);
+    await expect(checkTranslation(' Tradução com acentos.\n')).resolves.toEqual([]);
     expect(fetchMock).toHaveBeenCalledWith('/api/check', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ target: '  Tradução com acentos.\n' }),
+      body: JSON.stringify({
+        target: ' Tradução com acentos.\n',
+        source: '',
+        glossary: {},
+      }),
       signal: expect.any(AbortSignal),
     });
     expect(vi.getTimerCount()).toBe(0);

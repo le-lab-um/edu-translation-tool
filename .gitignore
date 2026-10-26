@@ -22,3 +22,6 @@ paper/*.pdf
 *.log
 *.tmp
 *~
+
+data/*.db
+data/*.sqlite3

@@ -1,29 +1,81 @@
-import { useRef, useState } from 'react';
-import { checkTranslation, CheckTimeoutError } from './api';
+/**
+ * Componente principal do editor de tradução.
+ * Mostra o original em inglês, o contexto e o campo de texto.
+ * Permite guardar o trabalho na base de dados e verificar as regras.
+ */
+
+import { useEffect, useRef, useState } from 'react';
+import { checkTranslation, CheckTimeoutError, getSegment, saveSegment } from './api';
 import type { Issue } from './api';
 
-// Original e contexto de dev-001 em data/development.json.
-// Não importamos o conjunto anotado nem a tradução de referência para a interface.
+// Identificador do segmento e dados de dev-001
+const SEGMENT_ID = 'dev-001';
 const exercise = {
   source: 'Read the instructions before you start.',
   context: 'Instrução apresentada antes de um exercício educativo.',
+  glossary: {
+    'instructions': { target: 'instruções' },
+    'start': { target: 'começar' }
+  }
 };
 
 type CheckState =
   | { status: 'idle' | 'loading' | 'error' | 'timeout' }
   | { status: 'success'; issues: Issue[] };
 
-/** Editor de um segmento. A tradução existe apenas no estado desta página. */
+type SaveState =
+  | { status: 'idle' | 'saving' | 'success' | 'error' };
+
+/** Editor de um segmento com verificação e persistência local. */
 export default function App() {
   const [translation, setTranslation] = useState('');
   const [check, setCheck] = useState<CheckState>({ status: 'idle' });
+  const [saveState, setSaveState] = useState<SaveState>({ status: 'idle' });
   const requestVersion = useRef(0);
+  const saveVersion = useRef(0);
+
+  // Carrega o texto persistido na base de dados ao abrir o ecrã
+  useEffect(() => {
+    let isMounted = true;
+    getSegment(SEGMENT_ID)
+      .then((savedText) => {
+        if (isMounted && savedText) {
+          setTranslation(savedText);
+        }
+      })
+      .catch(() => {
+        // Falhas silenciosas no carregamento inicial mantêm o campo editável
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   function updateTranslation(value: string) {
-    // Uma edição invalida o resultado e qualquer pedido ainda em curso.
+    // Uma edição invalida o resultado e qualquer pedido de verificação ou estado de gravação
     requestVersion.current += 1;
     setTranslation(value);
     setCheck({ status: 'idle' });
+    if (saveState.status !== 'idle') {
+      setSaveState({ status: 'idle' });
+    }
+  }
+
+  async function handleSave() {
+    const currentSaveVersion = ++saveVersion.current;
+    setSaveState({ status: 'saving' });
+
+    try {
+      await saveSegment(SEGMENT_ID, translation);
+      if (currentSaveVersion === saveVersion.current) {
+        setSaveState({ status: 'success' });
+      }
+    } catch {
+      if (currentSaveVersion === saveVersion.current) {
+        setSaveState({ status: 'error' });
+      }
+    }
   }
 
   async function verifyTranslation() {
@@ -31,8 +83,8 @@ export default function App() {
     setCheck({ status: 'loading' });
 
     try {
-      const issues = await checkTranslation(translation);
-      // Só o pedido mais recente, sem edições posteriores, pode atualizar o ecrã.
+      const issues = await checkTranslation(translation, exercise.source, exercise.glossary);
+      // Só o pedido mais recente, sem edições posteriores, pode atualizar o ecrã
       if (version === requestVersion.current) {
         setCheck({ status: 'success', issues });
       }
@@ -85,26 +137,46 @@ export default function App() {
           </section>
         </div>
 
-        <section className="verification" aria-labelledby="verification-heading">
-          <h2 id="verification-heading">Verificação</h2>
-          <p id="verification-note">Nesta versão, verifica-se apenas se a tradução está vazia.</p>
-          <button
-            type="button"
-            onClick={verifyTranslation}
-            disabled={check.status === 'loading'}
-          >
-            {check.status === 'loading' ? 'A verificar…' : 'Verificar'}
-          </button>
+        <section className="verification" aria-labelledby="actions-heading">
+          <h2 id="actions-heading">Ações e Verificação</h2>
+          <p id="verification-note">Pode guardar a sua tradução ou verificar se o segmento está vazio.</p>
+
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '1rem' }}>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saveState.status === 'saving'}
+            >
+              {saveState.status === 'saving' ? 'A guardar…' : 'Guardar'}
+            </button>
+
+            <button
+              type="button"
+              onClick={verifyTranslation}
+              disabled={check.status === 'loading'}
+            >
+              {check.status === 'loading' ? 'A verificar…' : 'Verificar'}
+            </button>
+
+            <div role="status" aria-live="polite">
+              {saveState.status === 'success' && (
+                <span style={{ color: '#2e7d32', fontSize: '0.9rem' }}>Tradução guardada.</span>
+              )}
+              {saveState.status === 'error' && (
+                <span style={{ color: '#c62828', fontSize: '0.9rem' }}>Falha ao guardar. Tente novamente.</span>
+              )}
+            </div>
+          </div>
 
           <div role="status" aria-live="polite">
             {check.status === 'loading' && <p>A aguardar o resultado da verificação.</p>}
             {check.status === 'success' && (
               check.issues.length === 0
-                ? <p>Não foi detetada uma tradução vazia. Isto não avalia a qualidade da tradução.</p>
+                ? <p>Nenhum problema detetado pelas regras de verificação (texto presente, números e glossário em conformidade).</p>
                 : <ul className="issues">
                     {check.issues.map((issue, index) => (
                       <li key={index}>
-                        <p>{issue.explanation}</p>
+                        <p><strong>[{issue.category}]</strong> {issue.explanation}</p>
                         <p><strong>Pista:</strong> {issue.hint}</p>
                       </li>
                     ))}
@@ -121,7 +193,6 @@ export default function App() {
             </p>
           )}
         </section>
-
       </main>
 
       <footer>Projeto académico · Mestrado em Engenharia Informática · Universidade do Minho</footer>

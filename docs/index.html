@@ -1,49 +1,135 @@
+```html
 <!DOCTYPE html>
-<html lang="pt">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Educational Translation Tool | Ferramenta Educativa de Tradução</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-</head>
-<body>
-    <header>
-        <div class="container header-content">
-            <span class="badge">Projeto MEI • Universidade do Minho</span>
-            <h1>Educational Translation Tool</h1>
-            <p class="subtitle">Development of an open-source educational translation tool to support practical workflows, reflective learning, and pedagogical feedback.</p>
+<html lang="pt-PT">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Educational Translation Tool — Apresentação do projeto</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="shell">
+        <p class="eyebrow">Projeto de Engenharia Informática · Universidade do Minho</p>
+        <h1>Educational Translation Tool</h1>
+        <p class="lead">
+          Ferramenta aberta de apoio à aprendizagem de tradução com segmentação, persistência
+          local, verificação determinística de qualidade e pistas pedagógicas geradas localmente.
+        </p>
+        <div class="meta-links">
+          <a class="button primary" href="https://github.com/wendy077/edu-translation-tool">Repositório GitHub</a>
+          <a class="button secondary" href="#arquitetura">Arquitetura da solução</a>
         </div>
+      </div>
     </header>
 
-    <main class="container">
-        <section class="card">
-            <h2>Sobre o Projeto</h2>
-            <p>
-                A <strong>Educational Translation Tool</strong> é uma aplicação web de código aberto orientada ao ensino da prática de tradução. 
-            </p>
-            <p style="margin-top: 14px;">
-                O objetivo central consiste em criar uma ferramenta de apoio orientada a estudantes que articule recursos CAT fundamentais, verificações de qualidade e feedback pedagógico, incentivando a reflexão crítica, a justificação de decisões e a autonomia no processo de revisão.
-            </p>
-        </section>
+    <main class="shell">
+      <section class="panel intro-grid">
+        <div>
+          <h2>O que resolve esta ferramenta?</h2>
+          <p>
+            No ensino de tradução, o objetivo central não é apenas acelerar a entrega, mas
+            desenvolver autonomia crítica. A entrega direta de soluções prontas por modelos
+            generativos pode reduzir a reflexão do estudante.
+          </p>
+          <p>
+            Esta ferramenta apoia a prática em segmentos curtos (EN → PT-PT), permitindo
+            guardar o trabalho, validar restrições formais e obter explicações graduais
+            (<em>scaffolding</em>) sem revelar de imediato a resposta final.
+          </p>
+        </div>
+        <div class="callout">
+          <h3>Estado atual: Níveis 1 & 2 Concluídos</h3>
+          <p>
+            Editor segmentado com persistência SQLite/SQLAlchemy e motor determinístico de QA
+            (verificação de texto vazio, integridade de números e glossário prescrito).
+          </p>
+          <p class="tag-status">Em desenvolvimento ativo · Entrega: 30 nov. 2026</p>
+        </div>
+      </section>
 
-        <section class="card">
-            <h2>Estado do Desenvolvimento</h2>
+      <section class="panel exercise-preview">
+        <h2>Demonstração conceptual do editor</h2>
+        <p class="section-note">
+          Simulação da interface do protótipo com suporte a gravação de estado e motor de QA alargado.
+        </p>
+        <div class="editor-mock">
+          <div class="mock-pane">
+            <span class="mock-label">Original (EN)</span>
+            <p class="source-text">Read the instructions before you start.</p>
+            <span class="mock-label">Contexto pedagógico</span>
+            <p class="context-text">Instrução apresentada antes de um exercício educativo.</p>
+          </div>
+          <div class="mock-pane">
+            <span class="mock-label">Área de tradução (PT-PT)</span>
+            <div class="mock-textarea">Leia as instruções antes de começar.</div>
+            <div class="mock-actions">
+              <span class="mock-btn secondary">Guardar</span>
+              <span class="mock-btn primary">Verificar</span>
+              <span class="mock-save-status">Tradução guardada.</span>
+            </div>
+            <div class="mock-feedback">
+              <p><strong>Verificação:</strong> Ausência de tradução vazia, números e termos de glossário em conformidade.</p>
+              <p class="hint">Regras determinísticas ativas; próximo incremento focado na assistência pedagógica por LLM local.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="arquitetura" class="panel architecture-preview">
+        <h2>Arquitetura em três níveis</h2>
+        <div class="levels-grid">
+          <article class="level-card">
+            <span class="level-badge">Nível 1</span>
+            <h3>CAT Básico & Persistência</h3>
             <p>
-                O projeto encontra-se atualmente na fase inicial de <strong>levantamento de requisitos, revisão do estado da arte e definição da arquitetura concetual</strong>.
+              Editor segmentado reativo em React 19, persistência relacional SQLite via SQLAlchemy 2.0
+              e controlo de concorrência por versões.
             </p>
-            <p style="margin-top: 14px;">
-                A documentação técnica, especificações dos módulos e protótipos de demonstração serão adicionados progressivamente a este espaço.
+          </article>
+          <article class="level-card">
+            <span class="level-badge">Nível 2</span>
+            <h3>QA Determinístico</h3>
+            <p>
+              Motor de regras reproduzíveis: validação de tradução vazia, conformidade de termos de glossário
+              com variantes e validação de valores numéricos.
             </p>
-        </section>
+          </article>
+          <article class="level-card">
+            <span class="level-badge">Nível 3</span>
+            <h3>Assistência por LLM Local</h3>
+            <p>
+              Orquestração de modelos abertos (Qwen via Ollama) para produzir pistas didáticas e fundamentações
+              sem recurso a serviços cloud pagos.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel workflow-preview">
+        <h2>Execução local rápida</h2>
+        <div class="code-columns">
+          <div class="code-box">
+            <h3>Backend (API FastAPI & SQLite)</h3>
+            <pre><code>python3 -m venv .venv
+.venv/bin/python -m pip install -r backend/requirements.txt
+.venv/bin/python -m uvicorn backend.main:app --port 8000</code></pre>
+          </div>
+          <div class="code-box">
+            <h3>Frontend (Editor React Vite)</h3>
+            <pre><code>cd frontend
+npm ci
+npm run dev</code></pre>
+          </div>
+        </div>
+      </section>
     </main>
 
-    <footer>
-        <div class="container">
-            <p>Desenvolvido por <strong>Diogo Pinto</strong> e <strong>Mariana Pinto</strong> • MEI / UMinho</p>
-        </div>
+    <footer class="footer">
+      <div class="shell">
+        <p>Educational Translation Tool · Diogo Pinto (PG61515) & Mariana Pinto (PG61534)</p>
+        <p class="affiliation">Mestrado em Engenharia Informática · Universidade do Minho · 2026</p>
+      </div>
     </footer>
-</body>
+  </body>
 </html>

@@ -1,13 +1,25 @@
-/** Formato devolvido pela única regra atualmente disponível na API. */
+/**
+ * Funções para comunicar com o backend via fetch.
+ * Trata da verificação de tradução com limite de 10 segundos
+ * e das chamadas para ler e guardar segmentos na base de dados.
+ */
+
+/** Categorias suportadas pelo motor de QA determinístico e LLM */
+export type IssueCategory = 'empty_translation' | 'numeric_mismatch' | 'terminology';
+
 export type Issue = {
-  category: 'empty_translation';
+  category: IssueCategory;
   explanation: string;
   hint: string;
 };
 
+export type SegmentResponse = {
+  id: string;
+  target: string;
+};
+
 const CHECK_TIMEOUT_MS = 10_000;
 
-/** Permite à interface distinguir o tempo limite das restantes falhas. */
 export class CheckTimeoutError extends Error {
   constructor() {
     super('A verificação excedeu o tempo limite.');
@@ -16,23 +28,31 @@ export class CheckTimeoutError extends Error {
 }
 
 function isIssue(value: unknown): value is Issue {
-  return typeof value === 'object' && value !== null
-    && 'category' in value && value.category === 'empty_translation'
-    && 'explanation' in value && typeof value.explanation === 'string'
-    && 'hint' in value && typeof value.hint === 'string';
+  if (typeof value !== 'object' || value === null) return false;
+  const v = value as Record<string, unknown>;
+  const validCategories: IssueCategory[] = ['empty_translation', 'numeric_mismatch', 'terminology'];
+  return (
+    typeof v.category === 'string' &&
+    validCategories.includes(v.category as IssueCategory) &&
+    typeof v.explanation === 'string' &&
+    typeof v.hint === 'string'
+  );
 }
 
-/** Envia o texto sem alterações. A deteção continua exclusivamente no backend. */
-export async function checkTranslation(target: string): Promise<Issue[]> {
+/** Envia o texto a verificar juntamente com o original e o glossário do exercício. */
+export async function checkTranslation(
+  target: string,
+  source: string = '',
+  glossary: Record<string, unknown> = {}
+): Promise<Issue[]> {
   const controller = new AbortController();
-  // O mesmo prazo cobre a ligação e a leitura completa da resposta.
   const timeout = setTimeout(() => controller.abort(), CHECK_TIMEOUT_MS);
 
   try {
     const response = await fetch('/api/check', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ target }),
+      body: JSON.stringify({ target, source, glossary }),
       signal: controller.signal,
     });
 
@@ -40,15 +60,18 @@ export async function checkTranslation(target: string): Promise<Issue[]> {
       throw new Error(`A verificação falhou: HTTP ${response.status}.`);
     }
 
-    // Os tipos TypeScript não validam JSON recebido pela rede.
     const data: unknown = await response.json();
-    if (typeof data !== 'object' || data === null
-      || !('issues' in data) || !Array.isArray(data.issues)
-      || !data.issues.every(isIssue)) {
+    if (
+      typeof data !== 'object' ||
+      data === null ||
+      !('issues' in data) ||
+      !Array.isArray((data as any).issues) ||
+      !(data as any).issues.every(isIssue)
+    ) {
       throw new Error('A API devolveu uma resposta inválida.');
     }
 
-    return data.issues;
+    return (data as { issues: Issue[] }).issues;
   } catch (error) {
     if (controller.signal.aborted) {
       throw new CheckTimeoutError();
@@ -56,5 +79,25 @@ export async function checkTranslation(target: string): Promise<Issue[]> {
     throw error;
   } finally {
     clearTimeout(timeout);
+  }
+}
+
+export async function getSegment(id: string): Promise<string> {
+  const response = await fetch(`/api/segments/${encodeURIComponent(id)}`);
+  if (!response.ok) {
+    throw new Error(`Falha ao obter segmento: HTTP ${response.status}.`);
+  }
+  const data: SegmentResponse = await response.json();
+  return data.target;
+}
+
+export async function saveSegment(id: string, target: string): Promise<void> {
+  const response = await fetch(`/api/segments/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ target }),
+  });
+  if (!response.ok) {
+    throw new Error(`Falha ao guardar segmento: HTTP ${response.status}.`);
   }
 }

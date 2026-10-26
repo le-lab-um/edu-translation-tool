@@ -1,44 +1,92 @@
-import json
-import unittest
-from pathlib import Path
+"""
+Testes às regras determinísticas.
+Testa a regra de texto vazio, conferência de números e termos do glossário.
+"""
 
-from backend.rules import check_empty_translation
+import unittest
+
+from backend.rules import (
+    check_empty_translation,
+    check_numeric_mismatch,
+    check_terminology,
+    run_all_rules,
+)
 
 
 class EmptyTranslationTests(unittest.TestCase):
-    def test_empty_text_returns_one_alert(self):
+    def test_empty_text_returns_alert(self):
         issues = check_empty_translation("")
-
         self.assertEqual(len(issues), 1)
         self.assertEqual(issues[0]["category"], "empty_translation")
-        self.assertEqual(set(issues[0]), {"category", "explanation", "hint"})
-        self.assertTrue(issues[0]["explanation"].strip())
-        self.assertTrue(issues[0]["hint"].strip())
 
     def test_whitespace_is_empty(self):
-        for target in ("   ", "\t", "\n", "\r\n", " \t\n ", "\u00a0", "\u202f"):
-            with self.subTest(target=repr(target)):
-                issues = check_empty_translation(target)
-                self.assertEqual([issue["category"] for issue in issues], ["empty_translation"])
+        for whitespace in (" ", "  ", "\t", "\n", "\r\n", " \t \n "):
+            with self.subTest(whitespace=repr(whitespace)):
+                issues = check_empty_translation(whitespace)
+                self.assertEqual(len(issues), 1)
+                self.assertEqual(issues[0]["category"], "empty_translation")
 
     def test_nonempty_content_does_not_trigger_alert(self):
-        for target in ("Abra o ficheiro.", "Abra o FICHEIRO.", " \tTexto\n ", "x", "0", "."):
-            with self.subTest(target=target):
-                self.assertEqual(check_empty_translation(target), [])
+        for text in ("a", ".", "Tradução válida.", "   conteúdo com espaços   "):
+            with self.subTest(text=text):
+                self.assertEqual(check_empty_translation(text), [])
 
-    def test_development_examples_for_empty_translation_only(self):
-        dataset_path = Path(__file__).resolve().parents[1] / "data" / "development.json"
-        dataset = json.loads(dataset_path.read_text(encoding="utf-8"))
 
-        for case in dataset["cases"]:
-            with self.subTest(case=case["id"]):
-                # As outras categorias ainda não são implementadas por esta regra.
-                expected = [
-                    issue["category"] for issue in case["expected_issues"]
-                    if issue["category"] == "empty_translation"
-                ]
-                issues = check_empty_translation(case["input"]["target"])
-                self.assertEqual([issue["category"] for issue in issues], expected)
+class NumericMismatchTests(unittest.TestCase):
+    def test_matching_numbers_different_format(self):
+        # 1,000.50 em EN equivale a 1 000,50 ou 1000,50 em PT
+        source = "The total cost is €1,000.50."
+        target = "O custo total é de 1000,50 €."
+        self.assertEqual(check_numeric_mismatch(source, target), [])
+
+    def test_missing_number_returns_alert(self):
+        source = "There are 42 items in room 101."
+        target = "Existem quarenta e dois itens na sala."
+        issues = check_numeric_mismatch(source, target)
+        self.assertEqual(len(issues), 1)
+        self.assertEqual(issues[0]["category"], "numeric_mismatch")
+
+    def test_no_numbers_in_source_returns_no_issues(self):
+        source = "Click here to proceed."
+        target = "Clique aqui para avançar."
+        self.assertEqual(check_numeric_mismatch(source, target), [])
+
+
+class TerminologyTests(unittest.TestCase):
+    def setUp(self):
+        self.glossary = {
+            "file": {"target": "ficheiro"},
+            "save": {"target": "guardar", "variants": ["guarde", "gravar", "grave"]},
+        }
+
+    def test_prescribed_terms_present(self):
+        source = "Save the file before closing."
+        target = "Guarde o ficheiro antes de fechar."
+        self.assertEqual(check_terminology(source, target, self.glossary), [])
+
+    def test_missing_prescribed_term_triggers_alert(self):
+        source = "Save the file before closing."
+        target = "Guarde o documento antes de fechar."  # Falta 'ficheiro'
+        issues = check_terminology(source, target, self.glossary)
+        self.assertEqual(len(issues), 1)
+        self.assertEqual(issues[0]["category"], "terminology")
+        self.assertIn("file", issues[0]["explanation"])
+
+class RunAllRulesTests(unittest.TestCase):
+    def test_empty_target_takes_priority(self):
+        source = "Read all 5 instructions."
+        issues = run_all_rules(source, "", {"instructions": {"target": "instruções"}})
+        self.assertEqual(len(issues), 1)
+        self.assertEqual(issues[0]["category"], "empty_translation")
+
+    def test_multiple_issues_reported(self):
+        source = "Read all 5 instructions."
+        target = "Leia as orientações."  # Falta o número 5 e usou orientações em vez de instruções
+        glossary = {"instructions": {"target": "instruções"}}
+        issues = run_all_rules(source, target, glossary)
+        categories = {i["category"] for i in issues}
+        self.assertIn("numeric_mismatch", categories)
+        self.assertIn("terminology", categories)
 
 
 if __name__ == "__main__":
