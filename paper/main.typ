@@ -192,6 +192,13 @@
   note = {Descreve uma versão de desenvolvimento de 31 de agosto de 2026. Consultado em 28 de outubro de 2026}
 }
 
+@misc{loopcat-repo,
+  author = {Doğru, Gokhan},
+  title = {{LoopCAT: repositório e documentação}},
+  url = {https://github.com/gokhandogru/LoopCAT},
+  note = {Repositório público e README consultados em 29 de outubro de 2026; revisão documental, sem execução independente}
+}
+
 @inproceedings{carl2012,
   author = {Carl, Michael},
   title = {{Translog-II: a Program for Recording User Activity Data for Empirical Reading and Writing Research}},
@@ -235,8 +242,8 @@ table(
 
   table.header([*Termo*], [*Significado neste trabalho*]),
 
-  [Segmento], [Unidade de trabalho do editor: uma frase ou parágrafo curto do original com a respetiva tradução.],
-  [Scaffolding], [Apoio temporário e graduado que orienta o aprendente sem resolver a tarefa por ele #cite("wood1976"). Aqui, concretiza-se em pistas a pedido que não revelam a tradução.],
+  [Segmento], [Unidade de trabalho do editor; no protótipo atual, corresponde a uma linha não vazia do original e à respetiva tradução.],
+  [Scaffolding], [Apoio temporário e graduado que orienta o aprendente sem resolver a tarefa por ele #cite("wood1976"). Neste projeto, pretende-se concretizá-lo em pistas a pedido que orientem a revisão sem apresentar uma tradução corrigida.],
   [Pista pedagógica], [Mensagem que indica onde e porquê pode existir um problema, sem apresentar a correção.],
   [Regras determinísticas], [Verificações escritas explicitamente em código (expressões regulares e comparações), sem aprendizagem automática: a mesma entrada produz sempre o mesmo alerta e cada alerta é explicável pela regra que o gerou.],
   [QA (garantia de qualidade)], [Verificações automáticas de aspetos formais, como números e terminologia, distintas da avaliação linguística feita por pessoas (LQA) #cite("memoq-qa", "memoq-lqa").],
@@ -336,7 +343,7 @@ postedit.me: Plataforma educativa orientada à pós-edição de tradução autom
 
 MATEO: Interface web aberta (GPLv3) com métricas de avaliação automática (BLEU, chrF, TER, COMET) #cite("vanroy2023"). Fomenta a literacia em tradução automática, embora métricas globais não indiquem diretamente pistas didáticas para correção no segmento.
 
-LoopCAT: Ambiente CAT _local-first_ sob licença Apache-2.0, concebido para o ensino de tecnologias de tradução #cite("loopcat2026"). Oferece edição bilingue, memórias, terminologia, verificações de QA, revisão e exportação XLIFF, com projetos guardados no browser (IndexedDB); modelos de linguagem locais (por exemplo, via Ollama) são opcionais. Organiza as atividades didáticas em quatro formas de participação (operar, avaliar, inspecionar e configurar, intervir) e mantém um histórico de versões por segmento. É o trabalho mais próximo do nosso, mas a pré-publicação não descreve pistas graduais que evitem revelar a solução nem reporta evidência de aprendizagem, e indicava, à data de 31 de agosto de 2026, que o repositório ainda não era público; a comparação baseia-se, por isso, apenas nessa descrição.
+LoopCAT: Ambiente CAT _local-first_ sob licença Apache-2.0, apresentado para o ensino de tecnologias de tradução #cite("loopcat2026"). A pré-publicação descreve edição bilingue, memórias, terminologia, QA, histórico por segmento e atividades de operação, avaliação e intervenção na ferramenta, sem reportar novos resultados de aprendizagem. Em 29 de outubro de 2026, foi confirmado um repositório público #cite("loopcat-repo"), cuja documentação inclui revisão por IA e ligações opcionais a modelos locais ou alojados externamente. É uma referência próxima; nas fontes consultadas não foi identificado um percurso explicitamente graduado de pistas sem solução. Esta comparação é documental e não resulta de testes independentes ao sistema.
 
 #figure(
 caption: [Comparação documental das plataformas analisadas (ND: Não Documentado nas fontes consultadas).],
@@ -366,6 +373,7 @@ table(
   [Open TLC], [Gratuito; MPL-2.0], [CAT web; memórias e terminologia], [Orientado a estudantes e docentes], [Projetos locais; decisões: ND],
   [postedit.me], [Gratuito sob licença académica], [Anotação e avaliação de pós-edição], [Tarefas, feedback docente e métricas], [Diferenças, anotações e estatísticas],
   [MATEO], [Código aberto; GPLv3], [Métricas de avaliação de tradução], [Literacia avaliativa em TA], [Comparação de pontuações e exportação],
+  [LoopCAT], [Código aberto; Apache-2.0], [CAT, QA e revisão por IA opcional], [Ensino de tecnologias de tradução], [Histórico por segmento],
 )
 }
 )
@@ -390,13 +398,13 @@ table(
 
   table.header([*Ferramenta*], [*Código aberto*], [*QA por regras*], [*Feedback por LLM*], [*Pistas sem solução*], [*Registo do processo*], [*Foco educativo*]),
 
-  [Trados], [Não], [Sim], [Sim (Smart Review)], [Não (sugere correções)], [ND], [Não],
-  [memoQ], [Não], [Sim (QA e LQA)], [ND], [ND], [Sim (histórico)], [Parcial (programa universitário)],
+  [Trados], [Não], [Sim], [Sim (Smart Review)], [ND], [ND], [Orientação profissional],
+  [memoQ], [Não], [Sim (QA)], [ND], [ND], [Sim (histórico)], [Parcial (programa universitário)],
   [OmegaT], [Sim], [Sim], [ND], [ND], [ND], [ND],
-  [Open TLC], [Sim], [ND], [Não], [Não], [ND], [Sim (estudantes)],
-  [postedit.me], [ND], [ND], [ND], [Não (feedback docente)], [Sim], [Sim],
-  [MATEO], [Sim], [Não (métricas)], [Não], [Não], [Parcial], [Parcial (literacia avaliativa)],
-  [LoopCAT], [Sim], [Sim], [Opcional (local)], [ND], [Parcial (histórico)], [Sim],
+  [Open TLC], [Sim], [ND], [ND], [ND], [ND], [Sim (estudantes)],
+  [postedit.me], [ND], [ND], [ND], [ND], [Sim], [Sim],
+  [MATEO], [Sim], [ND], [ND], [ND], [Parcial], [Parcial (literacia avaliativa)],
+  [LoopCAT], [Sim], [Sim], [Opcional (local ou externo)], [ND], [Parcial (histórico)], [Sim],
 )
 }
 )
@@ -407,7 +415,9 @@ O conceito de scaffolding #cite("wood1976") sustenta a opção por pistas gradua
 
 A tipologia MQM (Multidimensional Quality Metrics) oferece uma classificação padronizada de falhas (exatidão, terminologia, convenções linguísticas e estilo) #cite("mqm"), servindo de base taxonómica para categorizar alertas no projeto.
 
-Na avaliação com LLMs, o trabalho de Kocmi e Federmann #cite("kocmi2023") apresenta o GEMBA-MQM, que utiliza GPT-4 para identificar trechos com possíveis erros sem exigir uma tradução humana de referência, e assinala limitações associadas à dependência de um modelo proprietário. O estudo de Qian e Yang #cite("qian2026") analisa GPT5 como parceiro de revisão, salientando a necessidade de apreciação humana perante juízos incorretos. // TODO verificar esta descrição no texto do artigo (não foi possível abrir a página na revisão automática). Estes resultados não estabelecem o desempenho do modelo local a selecionar neste projeto. O estudo de caso exploratório de Doğru #cite("dogru2026") analisa as justificações dos estudantes em tarefas de comparação e pós-edição, fornecendo evidência sobre a manifestação do julgamento avaliativo nesse contexto, sem demonstrar, por si só, um aumento causal da autonomia.
+Na avaliação com LLMs, o trabalho de Kocmi e Federmann #cite("kocmi2023") apresenta o GEMBA-MQM, que utiliza GPT-4 para identificar trechos com possíveis erros sem exigir uma tradução humana de referência, e assinala limitações associadas à dependência de um modelo proprietário. Qian e Yang #cite("qian2026") comparam feedback de GPT5, orientado por prompts inspirados em MQM, com avaliações humanas, propondo-o como parceiro complementar de revisão e assinalando juízos incorretos. Estes resultados não estabelecem o desempenho do modelo local deste projeto.
+
+O estudo de caso exploratório de Doğru #cite("dogru2026") analisa justificações em tarefas de comparação e pós-edição, fornecendo evidência sobre a manifestação do julgamento avaliativo nesse contexto, sem demonstrar, por si só, um aumento causal da autonomia.
 
 = Arquitetura da Solução
 
@@ -434,32 +444,32 @@ caption: [Organização dos componentes e níveis funcionais da plataforma.],
 
 *Backend & API:* Python com FastAPI e Pydantic para validação de esquemas de dados e orquestração de rotinas linguísticas.
 
-*Persistência:* SQLite via SQLAlchemy para armazenamento local de projetos, segmentos e revisões. A associação dos dados às respetivas sessões será assegurada pela lógica da aplicação.
+*Persistência:* SQLite via SQLAlchemy para armazenamento da tradução atual de cada identificador de segmento. Projetos, sessões separadas e histórico de revisões ainda não são persistidos.
 
-*Processamento e LLM:* Regras em Python nativo e RapidFuzz; execução de um modelo de linguagem local através de Ollama, acedido por um adaptador no backend, sem recurso a APIs pagas. O modelo e a quantização serão selecionados após uma experiência de viabilidade num Mac com chip Apple M5 e 16 GB de memória unificada.
+*Processamento e LLM:* Regras em Python nativo; RapidFuzz previsto para a memória de tradução; execução de um modelo de linguagem local através de Ollama, acedido por um adaptador no backend, sem recurso a APIs pagas. Foi experimentado o modelo qwen3:4b-instruct-2507-q4_K_M num Mac com chip Apple M5 e 16 GB de memória unificada; a configuração da avaliação final ainda será fixada.
 
 = Implementação do Protótipo
 
 
 
-A implementação do protótipo concretizou os dois primeiros níveis da arquitetura através de uma aplicação web desacoplada (frontend e API).
+A implementação concretizou o editor com persistência do Nível 1 e as três regras iniciais do Nível 2 numa aplicação web desacoplada. A memória de tradução prevista no Nível 1 ainda não foi implementada.
 
 == Editor Segmentado e Persistência (Nível 1)
 
-O frontend foi desenvolvido em React 19 com TypeScript e Vite. O aluno cola ou escreve o texto original em inglês, carrega um ficheiro de texto (até 200 KB) ou parte de um exemplo; cada linha ou parágrafo torna-se um segmento, com navegação entre segmentos. A interface apresenta o original, o contexto e o glossário opcional do exercício, e um campo de edição para português europeu. A tradução é guardada através dos endpoints `GET` e `PUT /api/segments/{id}`; o identificador de cada segmento deriva de um resumo (hash) do seu texto, pelo que voltar a carregar o mesmo texto recupera a tradução já guardada. A camada de armazenamento usa SQLAlchemy 2.0 sobre SQLite, preservando o texto exato (quebras de linha e Unicode) com comportamento idempotente. Ao mudar de segmento, a tradução ainda não guardada é gravada automaticamente.
+O frontend foi desenvolvido em React 19 com TypeScript e Vite. O aluno cola ou escreve o texto original em inglês, carrega um ficheiro de texto (até 200 KB) ou parte de um exemplo; cada linha não vazia torna-se um segmento (até 200 por exercício), com navegação entre segmentos. A interface apresenta o original, o contexto e o glossário opcional do exercício, e um campo de edição para português europeu. A tradução é guardada através dos endpoints `GET` e `PUT /api/segments/{id}`; o identificador deriva de um hash FNV-1a de 32 bits do texto original normalizado nas extremidades. O mesmo texto partilha a tradução guardada, mesmo em exercícios distintos; este mecanismo não oferece isolamento por contexto ou utilizador e admite colisões. A camada de armazenamento usa SQLAlchemy 2.0 sobre SQLite, preservando o texto exato (quebras de linha e Unicode) com comportamento idempotente. Ao mudar de segmento, a tradução ainda não guardada é gravada automaticamente.
 
 Dois mecanismos protegem o trabalho do aluno face à latência da rede:
-- *Controlo de concorrência e versões:* referências atómicas (`requestVersion` e `saveVersion`) impedem que respostas desfasadas sobreponham revisões mais recentes.
-- *Gestão de tempo limite:* o cliente HTTP aplica um limite de 10 segundos com `AbortController`, cancelando pedidos pendentes e mostrando mensagens de erro que não apagam o texto.
+- *Controlo de operações:* a edição aguarda a recuperação da tradução e fica temporariamente bloqueada durante a gravação. A navegação só prossegue após confirmação da gravação; falhas de leitura são apresentadas com possibilidade de nova tentativa. Um contador invalida resultados de verificação associados a edições anteriores. Estes mecanismos aplicam-se a uma instância do editor, sem controlo de concorrência entre separadores.
+- *Gestão de tempo limite:* o cliente HTTP aplica um limite de 10 segundos com `AbortController`, na verificação, leitura e gravação. Uma falha de gravação mantém o texto no ecrã; cancelar a espera do cliente não garante que o servidor tenha cancelado a escrita.
 
 == Motor de Verificação Determinística (Nível 2)
 
 No backend (FastAPI, com validação de tipos via Pydantic v2), o ficheiro `backend/rules.py` implementa três regras determinísticas independentes, executadas por ordem de prioridade:
 1. *Tradução vazia (`empty_translation`):* verifica se existe texto depois de remover espaços; se estiver vazia, não são avaliadas as restantes regras.
-2. *Discrepâncias numéricas (`numeric_mismatch`):* extrai os números do original e da tradução com expressões regulares e normaliza separadores de milhares e decimais, para comparar o valor e não a sua representação (por exemplo, `1,000.50` e `1 000,50` são equivalentes). Um espaço só é tratado como separador de milhares quando é seguido de três dígitos.
-3. *Conformidade terminológica (`terminology`):* para cada termo do glossário que ocorra no original como palavra completa, exige que a tradução contenha o equivalente prescrito ou uma variante aceite, sem distinguir maiúsculas de minúsculas. A correspondência começa numa fronteira de palavra e aceita formas que comecem pelo equivalente, o que permite algumas flexões.
+2. *Discrepâncias numéricas (`numeric_mismatch`):* extrai os números do original e da tradução com expressões regulares e normaliza separadores de milhares e decimais, para comparar o valor e não a sua representação (por exemplo, `1,000.50` e `1 000,50` são equivalentes). São assumidas convenções EN no original e PT-PT na tradução, usando aritmética decimal exata e contando sinais e ocorrências repetidas. Um espaço só é tratado como separador de milhares em grupos de três dígitos. O alerta não apresenta o valor a inserir.
+3. *Conformidade terminológica (`terminology`):* para cada termo do glossário que ocorra no original como palavra completa, exige que a tradução contenha o equivalente prescrito ou uma variante aceite, sem distinguir maiúsculas de minúsculas. A correspondência exige termos completos em ambos os lados; flexões só são aceites quando explicitamente indicadas como variantes. O glossário recebido pela API é validado antes da execução das regras.
 
-O sistema é coberto por 35 testes automáticos: 22 no backend (com SQLite em memória) e 13 no frontend (Vitest), que verificam os limites de tempo, a gestão de erros, a segmentação do texto e a leitura do glossário.
+A suite contém 56 testes automáticos: 35 no backend (incluindo persistência com SQLite em memória) e 21 no frontend (Vitest). Abrange regras, validação da API, persistência, limites de tempo, respostas inválidas, segmentação e leitura do glossário; esta contagem não representa cobertura exaustiva nem avaliação pedagógica.
 
 == Experiência Preliminar com o Modelo Local (Nível 3)
 
@@ -498,7 +508,7 @@ Para responder à RQ2, os dois autores apreciarão independentemente uma amostra
 
 = Ameaças à Validade e Limitações
 
-As regras têm limites conhecidos. A verificação numérica só deteta números do original que faltam na tradução, não números acrescentados, e é ambígua perante sequências como "5 100". A terminologia só é verificada quando o termo do glossário surge no original como palavra completa, pelo que variações do original (como o plural) não são cobertas, e a correspondência por prefixo pode aceitar palavras que apenas começam pelo equivalente. O conjunto de desenvolvimento é pequeno (10 casos) e sintético.
+As regras têm limites conhecidos. A verificação numérica só deteta números do original que faltam na tradução, não números acrescentados, e é ambígua perante sequências como "5 100". A terminologia só é verificada quando o termo do glossário surge no original como palavra completa, pelo que variações do original (como o plural) não são cobertas, e flexões na tradução exigem variantes explícitas. A regra numérica não interpreta unidades, números por extenso, datas ou intervalos; a preservação do valor não prova a adequação da tradução. O conjunto de desenvolvimento é pequeno (10 casos) e sintético.
 
 Os autores participarão no desenvolvimento, na preparação dos dados e na avaliação, o que introduz risco de enviesamento. A anotação independente de parte dos exemplos e o registo de divergências ajudam a explicitar esse risco, mas não substituem validação externa especializada. Serão descritas as competências linguísticas dos avaliadores e as limitações daí decorrentes.
 
