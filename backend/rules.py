@@ -23,12 +23,16 @@ def check_empty_translation(target: str) -> List[Dict[str, str]]:
 
 def _extract_numbers(text: str) -> List[str]:
     """Extrai números inteiros e decimais, ignorando pontuação adjacente."""
-    # Apanha sequências numéricas que podem ter separadores de milhar/decimais (, ou .)
-    raw_numbers = re.findall(r"\b\d+(?:[\.,\s]\d+)*\b", text)
+    # Apanha sequências numéricas com separadores de milhar/decimais (, ou .).
+    # Um espaço só conta como separador de milhares se for seguido de exatamente
+    # três dígitos (1 000,50); assim "Chapter 5 10 pages" continua a ter dois números.
+    raw_numbers = re.findall(
+        r"\b\d{1,3}(?:[ \u00a0\u202f]\d{3})+(?:[.,]\d+)?\b|\b\d+(?:[.,]\d+)*\b", text
+    )
     normalized = []
     for n in raw_numbers:
         # Remove espaços interiores se for separador de milhar (ex: '1 000')
-        clean = n.replace(" ", "")
+        clean = n.replace(" ", "").replace("\u00a0", "").replace("\u202f", "")
         normalized.append(clean)
     return normalized
 

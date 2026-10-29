@@ -39,6 +39,18 @@ class NumericMismatchTests(unittest.TestCase):
         target = "O custo total é de 1000,50 €."
         self.assertEqual(check_numeric_mismatch(source, target), [])
 
+    def test_adjacent_numbers_separated_by_space_stay_separate(self):
+        # "5 10" são dois números; só "1 000" (grupos de três dígitos) é um milhar
+        source = "Chapter 5 10 pages"
+        self.assertEqual(check_numeric_mismatch(source, "Capítulo 5, 10 páginas"), [])
+        self.assertEqual(len(check_numeric_mismatch(source, "Capítulo 5 páginas")), 1)
+
+    def test_thousands_with_space_and_nbsp(self):
+        source = "The total is 1,000.50."
+        for target in ("O total é 1 000,50.", "O total é 1\u00a0000,50."):
+            with self.subTest(target=target):
+                self.assertEqual(check_numeric_mismatch(source, target), [])
+
     def test_missing_number_returns_alert(self):
         source = "There are 42 items in room 101."
         target = "Existem quarenta e dois itens na sala."

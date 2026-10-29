@@ -11,7 +11,9 @@ Este projeto culmina num protótipo funcional e num artigo científico para subm
 O sistema concluiu o percurso funcional do **Nível 1 (CAT Básico com Persistência)** e as três regras determinísticas centrais do **Nível 2 (QA Determinístico)**:
 
 1. **Editor Segmentado React (Frontend):**
-   - Apresentação do segmento original em inglês (`dev-001`), contexto pedagógico, glossário ativo e campo de edição em português europeu.
+   - **Entrada do texto original:** o aluno cola ou escreve um texto em inglês, carrega um ficheiro `.txt` (até 200 KB) ou parte de um exemplo; cada linha/parágrafo torna-se um segmento, com navegação Anterior/Seguinte e gravação automática ao mudar de segmento.
+   - Contexto e glossário opcionais (formato `termo = equivalente | variante`), apresentados ao aluno junto do original, e campo de edição em português europeu.
+   - O exercício atual é mantido no browser (`localStorage`) para não se perder ao recarregar a página.
    - **Persistência Integrada:** Carregamento automático da tradução guardada ao iniciar e botão dedicado **Guardar** com feedback visual (`A guardar...`, `Tradução guardada.`, `Falha ao guardar.`).
    - **Prevenção de Condições de Corrida:** Controlo por identificadores de versão (`requestVersion` e `saveVersion`), assegurando que respostas assíncronas antigas da rede nunca sobrepõem edições mais recentes.
    - **Resiliência de Rede:** Cliente HTTP com temporizador estrito de 10 segundos (`CheckTimeoutError`) suportado por `AbortController`.
@@ -28,8 +30,8 @@ O sistema concluiu o percurso funcional do **Nível 1 (CAT Básico com Persistê
    - **Endpoint de Verificação (`POST /api/check`):** Recebe `{ target, source, glossary }` e orquestra a execução das regras determinísticas por ordem de prioridade.
 
 3. **Verificação e Testes:**
-   - **20 testes de backend** (`unittest`): Cobertura exaustiva de texto vazio, equivalências numéricas entre convenções EN/PT, termos de glossário com variantes, orquestração de regras múltiplas, esquemas Pydantic e persistência isolada com base de dados SQLite em memória (`:memory:`).
-   - **6 testes de frontend** (`Vitest`): Validação de timeouts, leitura do corpo JSON com payload alargado, tratamento de erros de rede e nova tentativa.
+   - **22 testes de backend** (`unittest`): Cobertura exaustiva de texto vazio, equivalências numéricas entre convenções EN/PT, termos de glossário com variantes, orquestração de regras múltiplas, esquemas Pydantic e persistência isolada com base de dados SQLite em memória (`:memory:`).
+   - **13 testes de frontend** (`Vitest`): timeouts, leitura do corpo JSON, erros de rede e nova tentativa (6) e lógica do exercício — segmentação, identificadores estáveis e leitura do glossário (7).
 
 ---
 
