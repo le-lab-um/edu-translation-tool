@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="pt-PT">
   <head>
@@ -14,7 +13,7 @@
         <h1>Educational Translation Tool</h1>
         <p class="lead">
           Ferramenta aberta de apoio à aprendizagem de tradução com segmentação, persistência
-          local, verificação determinística de qualidade e pistas pedagógicas geradas localmente.
+          local e verificações determinísticas. As pistas geradas por um modelo local estão previstas.
         </p>
         <div class="meta-links">
           <a class="button primary" href="https://github.com/wendy077/edu-translation-tool">Repositório GitHub</a>
@@ -34,12 +33,12 @@
           </p>
           <p>
             Esta ferramenta apoia a prática em segmentos curtos (EN → PT-PT), permitindo
-            guardar o trabalho, validar restrições formais e obter explicações graduais
+            guardar o trabalho e verificar algumas restrições formais. Prevê-se acrescentar pistas graduais
             (<em>scaffolding</em>) sem revelar de imediato a resposta final.
           </p>
         </div>
         <div class="callout">
-          <h3>Estado atual: Níveis 1 & 2 Concluídos</h3>
+          <h3>Estado atual: editor, persistência e três regras</h3>
           <p>
             Editor segmentado com persistência SQLite/SQLAlchemy e motor determinístico de QA
             (verificação de texto vazio, integridade de números e glossário prescrito).
@@ -69,7 +68,7 @@
               <span class="mock-save-status">Tradução guardada.</span>
             </div>
             <div class="mock-feedback">
-              <p><strong>Verificação:</strong> Ausência de tradução vazia, números e termos de glossário em conformidade.</p>
+              <p><strong>Verificação:</strong> Nenhum problema detetado pelas regras aplicadas; a qualidade global requer revisão.</p>
               <p class="hint">Regras determinísticas ativas; próximo incremento focado na assistência pedagógica por LLM local.</p>
             </div>
           </div>
@@ -84,7 +83,7 @@
             <h3>CAT Básico & Persistência</h3>
             <p>
               Editor segmentado reativo em React 19, persistência relacional SQLite via SQLAlchemy 2.0
-              e controlo de concorrência por versões.
+              e gravação ao mudar de segmento. Memória de tradução ainda prevista.
             </p>
           </article>
           <article class="level-card">
@@ -99,7 +98,7 @@
             <span class="level-badge">Nível 3</span>
             <h3>Assistência por LLM Local</h3>
             <p>
-              Orquestração de modelos abertos (Qwen via Ollama) para produzir pistas didáticas e fundamentações
+              Integração prevista de um modelo local (Qwen via Ollama) para produzir pistas didáticas e fundamentações
               sem recurso a serviços cloud pagos.
             </p>
           </article>

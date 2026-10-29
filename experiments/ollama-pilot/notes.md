@@ -50,6 +50,8 @@ Os tempos médios observados por caso foram aproximadamente 2,43 s, 2,37 s e 1,4
 
 A segunda versão não demonstrou uma melhoria global: eliminou um falso alerta, mas introduziu uma omissão. Estes exemplos já foram usados para ajustar o prompt e não podem integrar o teste final. Ainda não foram avaliadas regras nem a abordagem híbrida.
 
-## Próximo incremento
+## Próximo incremento previsto na data da experiência
+
+Nota de manutenção (29/10/2026): este incremento já foi realizado. O estado atual e a sequência de trabalho estão no README principal; os resultados históricos abaixo não foram alterados.
 
 Implementar isoladamente a regra de tradução vazia, com testes para texto vazio, espaços, tabulações, quebras de linha e texto efetivo, incluindo maiúsculas. Depois iniciar um editor mínimo para introduzir e rever uma tradução por segmento. A comparação com regras e a avaliação do feedback serão desenvolvidas gradualmente.
