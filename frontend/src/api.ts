@@ -1,10 +1,11 @@
 /**
  * Funções para comunicar com o backend via fetch.
- * Trata da verificação de tradução com limite de 10 segundos
- * e das chamadas para ler e guardar segmentos na base de dados.
+ * Aplica um limite de 10 segundos à verificação, leitura e gravação de segmentos.
  */
 
-/** Categorias suportadas pelo motor de QA determinístico e LLM */
+import type { Glossary } from './exercise';
+
+/** Categorias atualmente suportadas pelo motor determinístico. */
 export type IssueCategory = 'empty_translation' | 'numeric_mismatch' | 'terminology';
 
 export type Issue = {
@@ -18,7 +19,7 @@ export type SegmentResponse = {
   target: string;
 };
 
-const CHECK_TIMEOUT_MS = 10_000;
+const REQUEST_TIMEOUT_MS = 10_000;
 
 export class CheckTimeoutError extends Error {
   constructor() {
@@ -39,65 +40,73 @@ function isIssue(value: unknown): value is Issue {
   );
 }
 
-/** Envia o texto a verificar juntamente com o original e o glossário do exercício. */
-export async function checkTranslation(
-  target: string,
-  source: string = '',
-  glossary: Record<string, unknown> = {}
-): Promise<Issue[]> {
+/** O prazo inclui os cabeçalhos e a leitura do corpo, em todas as operações. */
+async function requestJson(url: string, options: RequestInit = {}): Promise<unknown> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), CHECK_TIMEOUT_MS);
-
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
-    const response = await fetch('/api/check', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ target, source, glossary }),
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      throw new Error(`A verificação falhou: HTTP ${response.status}.`);
-    }
-
-    const data: unknown = await response.json();
-    if (
-      typeof data !== 'object' ||
-      data === null ||
-      !('issues' in data) ||
-      !Array.isArray((data as any).issues) ||
-      !(data as any).issues.every(isIssue)
-    ) {
-      throw new Error('A API devolveu uma resposta inválida.');
-    }
-
-    return (data as { issues: Issue[] }).issues;
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    if (!response.ok) throw new Error(`O pedido falhou: HTTP ${response.status}.`);
+    return await response.json();
   } catch (error) {
-    if (controller.signal.aborted) {
-      throw new CheckTimeoutError();
-    }
+    if (controller.signal.aborted) throw new RequestTimeoutError();
     throw error;
   } finally {
     clearTimeout(timeout);
   }
 }
 
-export async function getSegment(id: string): Promise<string> {
-  const response = await fetch(`/api/segments/${encodeURIComponent(id)}`);
-  if (!response.ok) {
-    throw new Error(`Falha ao obter segmento: HTTP ${response.status}.`);
+export class RequestTimeoutError extends Error {
+  constructor() {
+    super('O pedido excedeu o tempo limite de 10 segundos.');
+    this.name = 'RequestTimeoutError';
   }
-  const data: SegmentResponse = await response.json();
-  return data.target;
+}
+
+/** Envia apenas os dados do exercício, sem anotações ou resultados esperados. */
+export async function checkTranslation(
+  target: string,
+  source: string = '',
+  glossary: Glossary = {}
+): Promise<Issue[]> {
+  try {
+    const data = await requestJson('/api/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ target, source, glossary }),
+    });
+    if (typeof data !== 'object' || data === null || !('issues' in data) ||
+        !Array.isArray(data.issues) || !data.issues.every(isIssue)) {
+      throw new Error('A API devolveu uma resposta inválida.');
+    }
+    return data.issues;
+  } catch (error) {
+    if (error instanceof RequestTimeoutError) throw new CheckTimeoutError();
+    throw error;
+  }
+}
+
+/** Rejeita respostas inesperadas para não substituir uma tradução por dados inválidos. */
+function readSegment(data: unknown, id: string): SegmentResponse {
+  if (typeof data !== 'object' || data === null ||
+      !('id' in data) || data.id !== id || !('target' in data) || typeof data.target !== 'string') {
+    throw new Error('A API devolveu um segmento inválido.');
+  }
+  return { id, target: data.target };
+}
+
+export async function getSegment(id: string): Promise<string> {
+  const data = await requestJson(`/api/segments/${encodeURIComponent(id)}`);
+  return readSegment(data, id).target;
 }
 
 export async function saveSegment(id: string, target: string): Promise<void> {
-  const response = await fetch(`/api/segments/${encodeURIComponent(id)}`, {
+  const data = await requestJson(`/api/segments/${encodeURIComponent(id)}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ target }),
   });
-  if (!response.ok) {
-    throw new Error(`Falha ao guardar segmento: HTTP ${response.status}.`);
+  if (readSegment(data, id).target !== target) {
+    throw new Error('A API não confirmou o texto enviado.');
   }
 }

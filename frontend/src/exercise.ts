@@ -16,7 +16,8 @@ export type Segment = { id: string; source: string };
 
 /**
  * Identificador estável de um segmento, derivado do próprio texto (hash FNV-1a de 32 bits).
- * Assim, voltar a colar o mesmo texto recupera a tradução já guardada na base de dados.
+ * Permite recuperar a tradução por texto; não distingue exercícios ou utilizadores.
+ * Este hash curto pode ter colisões: não constitui uma identidade única garantida.
  * Duas linhas idênticas partilham o mesmo identificador (e, por isso, a mesma tradução).
  */
 export function segmentId(source: string): string {
@@ -31,7 +32,7 @@ export function segmentId(source: string): string {
 /** Divide o texto em segmentos: uma linha (ou parágrafo) não vazia por segmento. */
 export function buildSegments(text: string): Segment[] {
   return text
-    .split(/\r?\n/)
+    .split(/\r\n|\r|\n/)
     .map((line) => line.trim())
     .filter((line) => line.length > 0)
     .map((source) => ({ id: segmentId(source), source }));
@@ -43,10 +44,11 @@ export function buildSegments(text: string): Segment[] {
  * são variantes aceites, tal como o motor de regras do backend espera.
  */
 export function parseGlossary(text: string): { glossary: Glossary; invalidLines: string[] } {
-  const glossary: Glossary = {};
+  const glossary: Glossary = Object.create(null);
+  const seenTerms = new Set<string>();
   const invalidLines: string[] = [];
 
-  for (const rawLine of text.split(/\r?\n/)) {
+  for (const rawLine of text.split(/\r\n|\r|\n/)) {
     const line = rawLine.trim();
     if (!line) continue;
 
@@ -61,11 +63,12 @@ export function parseGlossary(text: string): { glossary: Glossary; invalidLines:
             .filter((part) => part.length > 0)
         : [];
 
-    if (!term || targets.length === 0) {
+    if (!term || targets.length === 0 || seenTerms.has(term.toLowerCase())) {
       invalidLines.push(line);
       continue;
     }
 
+    seenTerms.add(term.toLowerCase());
     const [target, ...variants] = targets;
     glossary[term] = variants.length > 0 ? { target, variants } : { target };
   }

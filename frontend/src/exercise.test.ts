@@ -16,6 +16,10 @@ describe('buildSegments', () => {
     expect(buildSegments('')).toEqual([]);
     expect(buildSegments('  \n \t \n')).toEqual([]);
   });
+
+  it('também reconhece quebras de linha CR isoladas', () => {
+    expect(buildSegments('One\rTwo').map((s) => s.source)).toEqual(['One', 'Two']);
+  });
 });
 
 describe('segmentId', () => {
@@ -30,6 +34,17 @@ describe('segmentId', () => {
 });
 
 describe('parseGlossary', () => {
+  it('assinala duplicados sem substituir silenciosamente o primeiro equivalente', () => {
+    const { glossary, invalidLines } = parseGlossary('file = ficheiro\nFILE = arquivo');
+    expect(glossary.file.target).toBe('ficheiro');
+    expect(invalidLines).toEqual(['FILE = arquivo']);
+  });
+
+  it('aceita nomes de propriedades especiais como termos normais', () => {
+    const { glossary } = parseGlossary('__proto__ = protótipo\nconstructor = construtor');
+    expect(Object.keys(glossary)).toEqual(['__proto__', 'constructor']);
+    expect(JSON.parse(JSON.stringify(glossary)).__proto__.target).toBe('protótipo');
+  });
   it('lê o termo prescrito e as variantes aceites', () => {
     const { glossary, invalidLines } = parseGlossary('file = ficheiro\nfolder = pasta | diretório');
     expect(glossary).toEqual({

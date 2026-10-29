@@ -4,7 +4,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { checkTranslation, CheckTimeoutError } from './api';
+import { checkTranslation, CheckTimeoutError, getSegment, saveSegment, RequestTimeoutError } from './api';
 
 // Simula uma operação de rede que só termina quando o pedido é cancelado.
 function waitForAbort(signal: AbortSignal): Promise<never> {
@@ -117,5 +117,35 @@ describe('checkTranslation', () => {
     expect(secondSignal).not.toBe(firstSignal);
     expect(secondSignal.aborted).toBe(false);
     expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it.each(['get', 'save'])('limita também a operação %s a 10 segundos', async (operation) => {
+    fetchMock.mockImplementation((_url, options) => waitForAbort(options!.signal!));
+    const result = operation === 'get' ? getSegment('one') : saveSegment('one', 'Texto');
+    const rejection = expect(result).rejects.toBeInstanceOf(RequestTimeoutError);
+    await vi.advanceTimersByTimeAsync(10_000);
+    await rejection;
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('valida a identidade e o texto do segmento recebido', async () => {
+    for (const data of [{ id: 'outro', target: '' }, { id: 'one', target: null }, {}]) {
+      fetchMock.mockResolvedValueOnce(Response.json(data));
+      await expect(getSegment('one')).rejects.toThrow('segmento inválido');
+    }
+  });
+
+  it('preserva o texto e só aceita confirmação da mesma tradução', async () => {
+    const target = ' Tradução\ncom acentos.\t';
+    fetchMock.mockResolvedValueOnce(Response.json({ id: 'one', target }));
+    await expect(saveSegment('one', target)).resolves.toBeUndefined();
+    expect(JSON.parse(fetchMock.mock.calls[0][1]!.body as string)).toEqual({ target });
+    fetchMock.mockResolvedValueOnce(Response.json({ id: 'one', target: 'Outra' }));
+    await expect(saveSegment('one', target)).rejects.toThrow('não confirmou');
+  });
+
+  it('não aceita alertas com categoria ou estrutura desconhecida', async () => {
+    fetchMock.mockResolvedValueOnce(Response.json({ issues: [{ category: 'unknown' }] }));
+    await expect(checkTranslation('Texto')).rejects.toThrow('resposta inválida');
   });
 });
