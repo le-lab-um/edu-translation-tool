@@ -71,6 +71,31 @@ class TranslationApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 422)
 
+    def test_invalid_glossary_is_rejected_without_server_error(self):
+        for glossary in (
+            {"file": {"target": 123}}, {"file": {"target": " "}},
+            {"file": {"target": "ficheiro", "variants": [None]}},
+            {"file": {"target": "ficheiro", "typo": []}},
+            {"file": ["ficheiro"]}, {" ": {"target": "ficheiro"}},
+        ):
+            with self.subTest(glossary=glossary):
+                response = self.client.post("/api/check", json={
+                    "source": "Open the file", "target": "Abra o documento", "glossary": glossary,
+                })
+                self.assertEqual(response.status_code, 422)
+
+    def test_valid_glossary_reaches_rules(self):
+        response = self.client.post("/api/check", json={
+            "source": "Open the folder", "target": "Abra o diretório",
+            "glossary": {"folder": {"target": " pasta ", "variants": [" diretório "]}},
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"issues": []})
+
+    def test_non_string_source_is_rejected(self):
+        response = self.client.post("/api/check", json={"source": 123, "target": "Texto"})
+        self.assertEqual(response.status_code, 422)
+
 
 if __name__ == "__main__":
     unittest.main()

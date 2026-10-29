@@ -5,7 +5,16 @@ e se os termos obrigatórios do glossário foram respeitados.
 """
 
 import re
-from typing import Any, Dict, List
+from collections import Counter
+from decimal import Decimal
+from typing import Dict, List, Optional, TypedDict, Union
+
+
+class GlossaryEntry(TypedDict, total=False):
+    """Formato interno: equivalente prescrito e variantes explicitamente aceites."""
+
+    target: str
+    variants: List[str]
 
 
 def check_empty_translation(target: str) -> List[Dict[str, str]]:
@@ -27,7 +36,7 @@ def _extract_numbers(text: str) -> List[str]:
     # Um espaço só conta como separador de milhares se for seguido de exatamente
     # três dígitos (1 000,50); assim "Chapter 5 10 pages" continua a ter dois números.
     raw_numbers = re.findall(
-        r"\b\d{1,3}(?:[ \u00a0\u202f]\d{3})+(?:[.,]\d+)?\b|\b\d+(?:[.,]\d+)*\b", text
+        r"(?<!\w)[+\-−]?(?:\d{1,3}(?:[ \u00a0\u202f]\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)*)(?!\w)", text
     )
     normalized = []
     for n in raw_numbers:
@@ -37,37 +46,19 @@ def _extract_numbers(text: str) -> List[str]:
     return normalized
 
 
-def _normalize_num_value(num_str: str) -> str:
-    """Normaliza um número para formato padrão float string para comparação de valor."""
-    s = num_str.strip()
-    # Se tiver vírgula e ponto, ex: 1,000.50 ou 1.000,50
-    if "," in s and "." in s:
-        if s.rfind(".") > s.rfind(","):
-            # Formato EN: 1,000.50 -> 1000.50
-            s = s.replace(",", "")
-        else:
-            # Formato PT: 1.000,50 -> 1000.50
-            s = s.replace(".", "").replace(",", ".")
-    elif "," in s:
-        # Se tem só vírgula: pode ser decimal PT (10,5) ou milhar EN (1,000)
-        parts = s.split(",")
-        if len(parts) == 2 and len(parts[1]) != 3:
-            s = s.replace(",", ".")
-        else:
-            s = s.replace(",", "")
-    elif "." in s:
-        # Se tem só ponto: pode ser decimal EN (10.5) ou milhar PT (1.000)
-        parts = s.split(".")
-        if len(parts) == 2 and len(parts[1]) != 3:
-            pass
-        else:
-            s = s.replace(".", "")
-    try:
-        val = float(s)
-        # Devolve inteiro se não tiver decimais reais para simplificar comparação
-        return str(int(val)) if val.is_integer() else str(val)
-    except ValueError:
-        return num_str
+def _normalize_num_value(num_str: str, *, english: bool) -> Union[Decimal, str]:
+    """Interpreta EN no original e PT-PT na tradução, sem arredondar via float.
+
+    Aceita agrupamentos de milhares com três dígitos. Uma sequência mal
+    formatada conserva a sua representação, sem tentar adivinhar o valor.
+    Datas, intervalos e unidades não são interpretados por esta regra.
+    """
+    s = num_str.replace("−", "-")
+    grouping, decimal = (",", ".") if english else (".", ",")
+    pattern = rf"[+-]?(?:\d+|\d{{1,3}}(?:{re.escape(grouping)}\d{{3}})+)(?:{re.escape(decimal)}\d+)?"
+    if not re.fullmatch(pattern, s):
+        return s
+    return Decimal(s.replace(grouping, "").replace(decimal, "."))
 
 
 def check_numeric_mismatch(source: str, target: str) -> List[Dict[str, str]]:
@@ -80,20 +71,14 @@ def check_numeric_mismatch(source: str, target: str) -> List[Dict[str, str]]:
         return []
 
     target_nums = _extract_numbers(target)
-    target_values = {_normalize_num_value(n) for n in target_nums}
-
-    missing_nums = []
-    for s_num in source_nums:
-        norm_val = _normalize_num_value(s_num)
-        if norm_val not in target_values:
-            missing_nums.append(s_num)
-
-    if missing_nums:
-        nums_str = ", ".join(missing_nums)
+    # Contar ocorrências evita aceitar apenas um número quando o original o repete.
+    source_values = Counter(_normalize_num_value(n, english=True) for n in source_nums)
+    target_values = Counter(_normalize_num_value(n, english=False) for n in target_nums)
+    if source_values - target_values:
         return [
             {
                 "category": "numeric_mismatch",
-                "explanation": f"O valor numérico ({nums_str}) presente no original não foi identificado na tradução.",
+                "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
                 "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português.",
             }
         ]
@@ -101,42 +86,23 @@ def check_numeric_mismatch(source: str, target: str) -> List[Dict[str, str]]:
 
 
 def check_terminology(
-    source: str, target: str, glossary: Dict[str, Any]
+    source: str, target: str, glossary: Dict[str, GlossaryEntry]
 ) -> List[Dict[str, str]]:
     """Verifica se os termos do glossário presentes no original são respeitados na tradução."""
     if not target.strip() or not source.strip() or not glossary:
         return []
 
     issues = []
-    target_lower = target.lower()
-
     for term, entry in glossary.items():
-        # Verifica se o termo está no original (com fronteira de palavra)
-        pattern = r"\b" + re.escape(term.lower()) + r"\b"
-        if re.search(pattern, source.lower()):
-            # Extrai os equivalentes e variantes aceites
-            accepted = []
-            if isinstance(entry, dict):
-                if "target" in entry:
-                    accepted.append(entry["target"])
-                if "variants" in entry and isinstance(entry["variants"], list):
-                    accepted.extend(entry["variants"])
-            elif isinstance(entry, list):
-                accepted = entry
-            elif isinstance(entry, str):
-                accepted = [entry]
-
-            # Verifica se pelo menos um equivalente ou variante está no target
-            found = False
-            for cand in accepted:
-                # Permite correspondência exata de palavra ou início da forma verbal (stem)
-                cand_lower = cand.lower().strip()
-                cand_pattern = r"\b" + re.escape(cand_lower)
-                if re.search(cand_pattern, target_lower):
-                    found = True
-                    break
-
-            if not found and accepted:
+        pattern = r"(?<!\w)" + re.escape(term) + r"(?!\w)"
+        if re.search(pattern, source, re.IGNORECASE):
+            accepted = [entry["target"], *entry.get("variants", [])]
+            # A flexão deve constar das variantes; um prefixo não prova equivalência.
+            found = any(
+                re.search(r"(?<!\w)" + re.escape(candidate) + r"(?!\w)", target, re.IGNORECASE)
+                for candidate in accepted
+            )
+            if not found:
                 issues.append(
                     {
                         "category": "terminology",
@@ -149,7 +115,7 @@ def check_terminology(
 
 
 def run_all_rules(
-    source: str, target: str, glossary: Dict[str, Any] = None
+    source: str, target: str, glossary: Optional[Dict[str, GlossaryEntry]] = None
 ) -> List[Dict[str, str]]:
     """Executa todas as verificações determinísticas por ordem de prioridade."""
     # 1. Se estiver vazio, não avalia outras regras

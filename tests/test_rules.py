@@ -33,6 +33,25 @@ class EmptyTranslationTests(unittest.TestCase):
 
 
 class NumericMismatchTests(unittest.TestCase):
+    def test_three_decimal_places_are_not_thousands(self):
+        self.assertEqual(check_numeric_mismatch("Value: 0.125", "Valor: 0,125"), [])
+        self.assertEqual(len(check_numeric_mismatch("Value: 0.125", "Valor: 125")), 1)
+
+    def test_sign_is_preserved(self):
+        self.assertEqual(check_numeric_mismatch("Temperature: -5", "Temperatura: −5"), [])
+        self.assertEqual(len(check_numeric_mismatch("Temperature: -5", "Temperatura: 5")), 1)
+
+    def test_repeated_numbers_require_repeated_occurrences(self):
+        self.assertEqual(len(check_numeric_mismatch("5 boxes and 5 bags", "5 caixas e sacos")), 1)
+        self.assertEqual(check_numeric_mismatch("5 boxes and 5 bags", "5 caixas e 5 sacos"), [])
+
+    def test_large_integers_do_not_lose_precision(self):
+        self.assertEqual(len(check_numeric_mismatch("9007199254740992", "9007199254740993")), 1)
+
+    def test_alert_does_not_supply_missing_value(self):
+        issue = check_numeric_mismatch("Discount: 15%", "Desconto: 50 %")[0]
+        self.assertNotIn("15", issue["explanation"] + issue["hint"])
+
     def test_matching_numbers_different_format(self):
         # 1,000.50 em EN equivale a 1 000,50 ou 1000,50 em PT
         source = "The total cost is €1,000.50."
@@ -83,6 +102,21 @@ class TerminologyTests(unittest.TestCase):
         self.assertEqual(len(issues), 1)
         self.assertEqual(issues[0]["category"], "terminology")
         self.assertIn("file", issues[0]["explanation"])
+
+    def test_prefix_is_not_an_accepted_term(self):
+        self.assertEqual(len(check_terminology("The file", "O ficheiroXYZ", self.glossary)), 1)
+
+    def test_case_and_punctuation_do_not_trigger_alert(self):
+        self.assertEqual(check_terminology("Open the file.", "Abra o FICHEIRO!", self.glossary), [])
+
+    def test_source_substring_does_not_require_term(self):
+        self.assertEqual(check_terminology("Update profile.", "Atualize o perfil.", self.glossary), [])
+
+    def test_explicit_variant_is_accepted(self):
+        self.assertEqual(check_terminology("Save", "Grave.", self.glossary), [])
+
+    def test_terms_with_punctuation_are_literal(self):
+        self.assertEqual(check_terminology("Use C++.", "Use C++.", {"C++": {"target": "C++"}}), [])
 
 class RunAllRulesTests(unittest.TestCase):
     def test_empty_target_takes_priority(self):

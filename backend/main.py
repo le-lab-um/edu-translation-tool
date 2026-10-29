@@ -4,11 +4,11 @@ Liga os endpoints para guardar e ler segmentos da base de dados local
 e corre as regras de verificação de tradução (vazio, números e glossário).
 """
 
-from typing import Any, Dict, Literal
+from typing import Annotated, Dict, Literal
 
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictStr, StringConstraints
 from sqlalchemy.orm import Session
 
 from backend.database import Base, engine, get_db
@@ -28,14 +28,25 @@ app.add_middleware(
 )
 
 
+GlossaryText = Annotated[str, StringConstraints(strict=True, strip_whitespace=True, min_length=1)]
+
+
+class GlossaryEntry(BaseModel):
+    """Contrato único, usado pelo formulário e pelas regras; rejeita valores inválidos."""
+
+    model_config = ConfigDict(extra="forbid")
+    target: GlossaryText
+    variants: list[GlossaryText] = Field(default_factory=list)
+
+
 class CheckRequest(BaseModel):
     """Tradução obrigatória; original e glossário opcionais para suporte de QA alargado."""
 
     model_config = ConfigDict(extra="forbid")
 
     target: StrictStr = Field(description="Tradução a verificar, sem normalização.")
-    source: str = Field(default="", description="Texto do segmento original em inglês.")
-    glossary: Dict[str, Any] = Field(
+    source: StrictStr = Field(default="", description="Texto do segmento original em inglês.")
+    glossary: Dict[GlossaryText, GlossaryEntry] = Field(
         default_factory=dict, description="Glossário de termos prescritos para o exercício."
     )
 
@@ -73,7 +84,7 @@ def check_translation(request: CheckRequest) -> CheckResponse:
     issues = run_all_rules(
         source=request.source,
         target=request.target,
-        glossary=request.glossary,
+        glossary={term: entry.model_dump() for term, entry in request.glossary.items()},
     )
     return CheckResponse(issues=[Issue(**issue) for issue in issues])
 

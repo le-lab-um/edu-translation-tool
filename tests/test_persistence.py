@@ -31,15 +31,15 @@ def override_get_db():
         db.close()
 
 
-app.dependency_overrides[get_db] = override_get_db
-
-
 class TestPersistence(unittest.TestCase):
     def setUp(self):
+        app.dependency_overrides[get_db] = override_get_db
         Base.metadata.create_all(bind=engine)
         self.client = TestClient(app)
 
     def tearDown(self):
+        self.client.close()
+        app.dependency_overrides.pop(get_db, None)
         Base.metadata.drop_all(bind=engine)
 
     def test_get_nonexistent_segment_returns_empty(self):
