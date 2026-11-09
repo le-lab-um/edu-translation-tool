@@ -120,7 +120,7 @@ class TerminologyTests(unittest.TestCase):
 
 class RunAllRulesTests(unittest.TestCase):
     def test_empty_target_takes_priority(self):
-        source = "Read all 5 instructions."
+        source = "Read all 5 <b>instructions</b>, {name}."
         issues = run_all_rules(source, "", {"instructions": {"target": "instruções"}})
         self.assertEqual(len(issues), 1)
         self.assertEqual(issues[0]["category"], "empty_translation")
@@ -133,6 +133,35 @@ class RunAllRulesTests(unittest.TestCase):
         categories = {i["category"] for i in issues}
         self.assertIn("numeric_mismatch", categories)
         self.assertIn("terminology", categories)
+
+    def test_named_placeholders_detect_missing_changed_extra_and_repeated_markers(self):
+        source = "Send {file_name} to {user} and notify {user}."
+        for target in (
+            "Envie {file_name} a {user} e avise.",
+            "Envie {file_name} a {User} e avise {user}.",
+            "Envie {file_name} a {user}, avise {user} e copie {extra}.",
+        ):
+            with self.subTest(target=target):
+                issues = run_all_rules(source, target)
+                self.assertEqual([issue["category"] for issue in issues], ["placeholder_mismatch"])
+                self.assertNotIn("{user}", issues[0]["hint"])
+
+    def test_inline_tags_detect_missing_changed_and_extra_tags(self):
+        source = "Select <b>Save</b>."
+        for target in ("Selecione <b>Guardar.", "Selecione <i>Guardar</i>.", "Selecione <b>Guardar</b><u>já</u>."):
+            with self.subTest(target=target):
+                issues = run_all_rules(source, target)
+                self.assertEqual([issue["category"] for issue in issues], ["inline_tag_mismatch"])
+                self.assertNotIn("</b>", issues[0]["hint"])
+
+    def test_technical_tokens_allow_reordering_and_tag_case_changes(self):
+        source = "<b>{name}</b>, open <i>{file}</i> and notify {name}."
+        target = "Abra <I>{file}</I>, <B>{name}</B>, e avise {name}."
+        self.assertEqual(run_all_rules(source, target), [])
+
+    def test_technical_checks_skip_missing_source_and_ignore_unsupported_syntax(self):
+        self.assertEqual(run_all_rules("", "<b>{name}</b>"), [])
+        self.assertEqual(run_all_rules("Use {{name}} and <span>text</span>.", "Use texto."), [])
 
 
 if __name__ == "__main__":

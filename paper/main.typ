@@ -56,7 +56,7 @@
 @misc{memoq-qa,
   author = {{memoQ}},
   title = {{Quality Assurance (QA) warnings}},
-  url = {https://docs.memoq.com/current/en/Concepts/concepts-quality-assurance-qa-warnings.html},
+  url = {https://docs.memoq.com/12-5/en/Concepts/concepts-quality-assurance-qa-warnings.html},
   note = {Manual em linha, versão 12.5. Consultado em 12 de outubro de 2026}
 }
 
@@ -277,7 +277,7 @@ Com vista a responder aos desafios identificados, o projeto estabelece objetivos
 
 - OE1 (Plataforma CAT Web Modular): Desenvolver uma aplicação web de código aberto com editor segmentado, memória de tradução leve e glossário interativo.
 
-- OE2 (Verificações por regras): Implementar verificações de segmentos sem tradução, inconsistências numéricas e incumprimento de equivalentes definidos no glossário.
+- OE2 (Verificações por regras): Implementar verificações de segmentos sem tradução, inconsistências numéricas, incumprimento de equivalentes definidos no glossário e preservação de marcadores nomeados e etiquetas de formatação simples.
 
 - OE3 (Assistência por modelo local): Integrar e avaliar um modelo de linguagem executado localmente para identificar possíveis problemas e produzir pistas e explicações a pedido, processando os textos localmente e sem recorrer a APIs pagas.
 
@@ -428,10 +428,10 @@ rect(width: 100%, inset: 10pt, stroke: 0.4pt + gray)[
 #set text(size: 8.5pt)
 #align(center)[#underline[Arquitetura Conceptual em 3 Níveis]]
 
-- Nível 1 (CAT Básico): Editor por segmentos com entrada de texto ou ficheiro, persistência e glossário (implementado); memória de tradução leve, com similaridade via RapidFuzz (prevista).
-- Nível 2 (QA Determinístico): Motor de regras locais para deteção de segmentos sem tradução, inconsistências numéricas e incumprimento da terminologia prescrita (implementado).
-- Nível 3 (Assistência Inteligente): LLM local acedido pelo backend para geração de explicações pedagógicas e pistas a pedido (previsto; experiência preliminar realizada).
-- Camada de Instrumentação: Módulo de captura de eventos, versões de segmentos e justificações para exportação, e módulo de comparação crítica entre versões (previstos).
+- Nível 1 (CAT Básico): Editor por segmentos com entrada de texto ou ficheiro, persistência e glossário (implementado); memória de tradução leve, com correspondência difusa via RapidFuzz (implementada numa primeira versão).
+- Nível 2 (QA Determinístico): Motor de regras locais para tradução vazia, números, glossário, marcadores nomeados e etiquetas de formatação simples (implementado).
+- Nível 3 (Assistência Inteligente): LLM local acedido pelo backend para geração de explicações pedagógicas e pistas a pedido (adaptador e fusão com as regras implementados numa primeira versão, ainda por avaliar).
+- Camada de Instrumentação: registo de eventos de utilização com exportação em JSON e CSV (implementado numa primeira versão); versões de segmentos, justificações e módulo de comparação crítica entre versões (previstos).
 ],
 caption: [Organização dos componentes e níveis funcionais da plataforma.],
 )
@@ -444,15 +444,15 @@ caption: [Organização dos componentes e níveis funcionais da plataforma.],
 
 *Backend & API:* Python com FastAPI e Pydantic para validação de esquemas de dados e orquestração de rotinas linguísticas.
 
-*Persistência:* SQLite via SQLAlchemy para armazenamento da tradução atual de cada identificador de segmento. Projetos, sessões separadas e histórico de revisões ainda não são persistidos.
+*Persistência:* SQLite via SQLAlchemy para armazenamento da tradução atual de cada identificador de segmento, dos pares da memória de tradução e dos eventos de utilização. Projetos separados e histórico de revisões ainda não são persistidos.
 
-*Processamento e LLM:* Regras em Python nativo; RapidFuzz previsto para a memória de tradução; execução de um modelo de linguagem local através de Ollama, acedido por um adaptador no backend, sem recurso a APIs pagas. Foi experimentado o modelo qwen3:4b-instruct-2507-q4_K_M num Mac com chip Apple M5 e 16 GB de memória unificada; a configuração da avaliação final ainda será fixada.
+*Processamento e LLM:* Regras em Python nativo; RapidFuzz para a memória de tradução; execução de um modelo de linguagem local através de Ollama, acedido por um adaptador no backend, sem recurso a APIs pagas. Foi experimentado o modelo qwen3:4b-instruct-2507-q4_K_M num Mac com chip Apple M5 e 16 GB de memória unificada; a configuração da avaliação final ainda será fixada.
 
 = Implementação do Protótipo
 
 
 
-A implementação concretizou o editor com persistência do Nível 1 e as três regras iniciais do Nível 2 numa aplicação web desacoplada. A memória de tradução prevista no Nível 1 ainda não foi implementada.
+A implementação concretizou o editor com persistência e uma memória de tradução simples (Nível 1), cinco regras de QA (Nível 2), uma primeira integração do modelo local com fusão de alertas (Nível 3) e um registo de eventos exportável, numa aplicação web desacoplada. O nível 3 foi ensaiado manualmente com o modelo local. A avaliação comparativa e a apreciação sistemática das pistas estão previstas.
 
 == Editor Segmentado e Persistência (Nível 1)
 
@@ -464,18 +464,34 @@ Dois mecanismos protegem o trabalho do aluno face à latência da rede:
 
 == Motor de Verificação Determinística (Nível 2)
 
-No backend (FastAPI, com validação de tipos via Pydantic v2), o ficheiro `backend/rules.py` implementa três regras determinísticas independentes, executadas por ordem de prioridade:
+O backend executa as regras definidas em `backend/rules.py`. As primeiras três estavam presentes no ensaio manual de 9 de novembro. As duas verificações técnicas foram acrescentadas depois desse ensaio:
 1. *Tradução vazia (`empty_translation`):* verifica se existe texto depois de remover espaços; se estiver vazia, não são avaliadas as restantes regras.
 2. *Discrepâncias numéricas (`numeric_mismatch`):* extrai os números do original e da tradução com expressões regulares e normaliza separadores de milhares e decimais, para comparar o valor e não a sua representação (por exemplo, `1,000.50` e `1 000,50` são equivalentes). São assumidas convenções EN no original e PT-PT na tradução, usando aritmética decimal exata e contando sinais e ocorrências repetidas. Um espaço só é tratado como separador de milhares em grupos de três dígitos. O alerta não apresenta o valor a inserir.
 3. *Conformidade terminológica (`terminology`):* para cada termo do glossário que ocorra no original como palavra completa, exige que a tradução contenha o equivalente prescrito ou uma variante aceite, sem distinguir maiúsculas de minúsculas. A correspondência exige termos completos em ambos os lados; flexões só são aceites quando explicitamente indicadas como variantes. O glossário recebido pela API é validado antes da execução das regras.
+4. *Marcadores nomeados (`placeholder_mismatch`):* compara o nome e a contagem de ocorrências de marcadores simples entre chavetas, como `{name}` e `{file_name}`. Estes marcadores reservam um lugar para um valor inserido pelo software. O tradutor pode mudar a sua posição, preservando a grafia e as repetições. Formatos como `{{name}}`, `{0}` e `%s` ficam fora desta regra.
+5. *Etiquetas de formatação (`inline_tag_mismatch`):* compara, sem distinguir maiúsculas, as ocorrências de etiquetas simples de abertura e fecho, como `<b>` e `</b>`. São reconhecidas `b`, `i`, `em`, `strong` e `u`, sem atributos. A ordem, o aninhamento e os formatos de marcação mais ricos ficam fora desta verificação.
 
-A suite contém 56 testes automáticos: 35 no backend (incluindo persistência com SQLite em memória) e 21 no frontend (Vitest). Abrange regras, validação da API, persistência, limites de tempo, respostas inválidas, segmentação e leitura do glossário; esta contagem não representa cobertura exaustiva nem avaliação pedagógica.
+As verificações de etiquetas e elementos a preservar seguem o princípio do QA formal descrito na documentação de ferramentas CAT como o memoQ #cite("memoq-qa"). Nesta versão, o backend identifica os padrões suportados nos dois textos e compara contagens por token. Os alertas orientam a revisão sem fornecer os tokens em falta. Ambos os botões partilham o mesmo motor de regras. Em «Pedir pista», os alertas técnicos aparecem com origem «Regra».
+
+A suite contém 93 testes automáticos, dos quais 67 são de backend, incluindo persistência com SQLite em memória e respostas Ollama simuladas com `httpx.MockTransport`, e 26 são de frontend (Vitest). Abrange as regras, a API, persistência, tempos limite, segmentação, memória, registos e fusão. Os testes da extensão verificam padrões preservados e alterados e a aceitação das duas categorias pela API e pelo cliente.
+
+== Memória de Tradução e Registo de Eventos (Nível 1 e Instrumentação)
+
+Após uma gravação confirmada de uma tradução não vazia, o editor tenta acrescentar o par original/tradução à memória. Uma tabela própria impede duplicados de pares idênticos. Ao abrir um segmento, o frontend consulta `POST /api/memory/search`, que compara o original com os pares guardados através da razão de similaridade da biblioteca RapidFuzz, sobre texto em minúsculas e com espaços normalizados, e devolve até três correspondências com pontuação igual ou superior a 70 %. As sugestões só preenchem o campo de edição quando o aluno carrega em «Usar». A memória é partilhada pela instância local. A similaridade de caracteres pode atribuir pontuações elevadas a textos com valores numéricos diferentes. O limiar de 70 % ainda não foi calibrado.
+
+A camada de instrumentação recebe eventos de início de exercício, gravação, verificação por regras, pedido e apresentação de pistas e uso de sugestões da memória. A interface envia um identificador persistente do browser, o identificador do segmento quando aplicável e metadados como número de alertas, origem, latência e estado do modelo. A interface omite o texto das traduções destes eventos, embora o contrato da API aceite dados adicionais no `payload`. Os eventos podem ser exportados em JSON ou CSV (`/api/events/export`) e `/api/events/summary` devolve contagens. A exportação está disponível sem autenticação na instância local. Uma falha no envio de eventos permite continuar o exercício, pelo que os registos podem ficar incompletos. O histórico de versões e as justificações estão previstos.
 
 == Experiência Preliminar com o Modelo Local (Nível 3)
 
 Antes de integrar o modelo, foi feita uma experiência exploratória de viabilidade com o modelo qwen3 de 4 mil milhões de parâmetros (quantização Q4_K_M), servido por Ollama, sobre 10 exemplos de desenvolvimento, sintéticos, preparados com assistência de uma ferramenta de IA generativa e com anotações ainda por rever pelos autores. Com um primeiro prompt, o modelo obteve precisão de 71,4 %, recall de 100 % e F1 de 83,3 %; com um segundo prompt, 80 %, 80 % e 80 %, respetivamente, contando pares segmento–categoria. O tempo médio foi de cerca de 1,5 a 2,4 segundos por caso num MacBook com chip M5 e 16 GB. Observaram-se falsos alertas (a adaptação de `€1,000.50` para `1 000,50 €` foi assinalada como alteração de valor), revelação dos equivalentes aceites e explicações incorretas. Como estes exemplos já serviram para ajustar os prompts, não integram o conjunto de teste final e os valores não constituem resultados da avaliação.
 
-// TODO: Descrever a integração do adaptador local para LLM no backend e o pipeline de fusão entre regras e modelo.
+== Integração do Modelo Local e Fusão Híbrida (Nível 3)
+
+O endpoint `POST /api/hint` combina as regras com o modelo local a pedido do aluno através do botão «Pedir pista». Um adaptador (`backend/llm.py`) envia ao Ollama o original, a tradução, o contexto e o glossário, com o prompt da segunda versão do piloto, temperatura 0, semente fixa, janela de contexto de 4096 e um esquema JSON para a saída. O adaptador valida a estrutura dos alertas, as categorias e o conteúdo dos campos. Para traduções vazias aplica-se apenas a regra correspondente. Perante falhas reconhecidas do Ollama, como indisponibilidade, timeout de rede ou conteúdo da resposta ilegível, o endpoint devolve as regras e indica o estado do modelo. O HTTPX tem um limite predefinido de 30 segundos por operação de rede. No browser o prazo é de 40 segundos para pistas e de 10 segundos para os restantes pedidos JSON.
+
+A fusão dá prioridade às regras. Se uma categoria já foi detetada por regra, a sugestão do modelo nessa categoria é descartada. Conserva-se no máximo uma sugestão do modelo por categoria. Cada alerta final indica a origem («Regra» ou «Sugestão do modelo local»). Um filtro heurístico inspeciona a explicação e a pista dos alertas do modelo retidos. Quando encontra padrões suspeitos, como equivalentes do glossário, certas aspas ou dígitos do original em alertas numéricos, substitui ambos os campos por mensagens genéricas da categoria. Pode deixar passar uma correção escrita por extenso ou generalizar uma pista que não revela a solução. Os testes automáticos da integração usam respostas Ollama simuladas.
+
+Num ensaio manual no browser em 9 de novembro, anterior à extensão do nível 2, a tradução de `5 kg` por `5 lb` passou nas regras, pois o valor numérico foi preservado. Em duas chamadas a «Pedir pista», a aplicação aceitou a resposta do modelo local, mostrou um alerta com origem no modelo e generalizou a explicação e a pista. O ensaio demonstra o percurso integrado neste exemplo. Os eventos registam a intervenção do filtro, sem conservar a resposta bruta do modelo. A avaliação sistemática da deteção e das pistas será feita no conjunto de teste.
 
 = Protocolo de Avaliação Experimental
 
@@ -489,15 +505,15 @@ Os conjuntos de desenvolvimento e teste serão separados por documento ou origin
 
 == Desenho dos Testes Técnicos
 
-Para responder à RQ1, os três métodos receberão os mesmos segmentos, contexto e glossário. A abordagem híbrida combinará os alertas das regras e do modelo, preservando a origem e eliminando duplicados segundo critérios previamente definidos. A comparação direta abrangerá apenas as categorias suportadas pelos três métodos; eventuais categorias adicionais serão analisadas separadamente.
+Para responder à RQ1, os três métodos usarão os mesmos segmentos e glossário e o modelo receberá o contexto correspondente. A abordagem híbrida combinará os alertas das regras e do modelo, preservando a origem e eliminando duplicados segundo critérios previamente definidos. A comparação direta abrange as três categorias iniciais do prompt e das regras, tradução vazia, números e terminologia, com os critérios de anotação fixados antes do ensaio. As verificações de marcadores e etiquetas são exclusivas do motor de regras e ficam fora das métricas da RQ1. A verificação das unidades exige delimitação explícita, pois o prompt as menciona e a regra numérica compara valores.
 
 A unidade de avaliação será o par segmento–categoria, contado uma única vez por método. Serão reportados verdadeiros positivos, falsos positivos, falsos negativos, precisão, recall e F1 por categoria, bem como falsos alertas em traduções aceitáveis. Métricas com denominador nulo serão identificadas como indefinidas. Serão também registadas a latência, as falhas de execução e as respostas que não cumpram o esquema esperado.
 
-Os testes funcionais verificarão a gravação e recuperação de traduções, a coerência das revisões e exportações e o comportamento perante indisponibilidade do modelo ou respostas associadas a uma revisão anterior. Modelo, quantização, versões das ferramentas, prompt, parâmetros de geração e equipamento serão registados para permitir a reprodução das experiências.
+Os testes funcionais verificarão a gravação e recuperação de traduções, a coerência das exportações e o comportamento perante indisponibilidade do modelo ou respostas associadas a uma revisão anterior; o protótipo já inclui testes automáticos para falhas, tempos limite e respostas inválidas do modelo simulado. Modelo, quantização, versões das ferramentas, prompt, parâmetros de geração e equipamento serão registados para permitir a reprodução das experiências.
 
 == Apreciação Interna das Pistas
 
-Para responder à RQ2, os dois autores apreciarão independentemente uma amostra de pistas segundo uma grelha com critérios de correção, fundamentação no texto, clareza, utilidade para orientar a revisão e revelação da solução. A grelha e o critério de seleção da amostra serão definidos antes da avaliação. Serão registadas concordâncias, divergências e exemplos de explicações incorretas ou não sustentadas pelo texto. Esta apreciação não mede a utilidade percebida por estudantes nem ganhos de aprendizagem.
+Para responder à RQ2, os dois autores apreciarão independentemente uma amostra de explicações e pistas segundo uma grelha com critérios de correção, fundamentação no texto, clareza, utilidade para orientar a revisão e revelação da solução. A frequência de revelação será calculada a partir da anotação humana dos textos avaliados. O contador de generalizações indica quantas vezes o filtro interveio. A grelha e o critério de seleção da amostra serão definidos antes da avaliação. Serão registadas concordâncias, divergências e exemplos de explicações incorretas ou não sustentadas pelo texto. Esta apreciação não mede a utilidade percebida por estudantes nem ganhos de aprendizagem.
 
 = Resultados e Discussão
 

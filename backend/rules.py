@@ -1,13 +1,16 @@
 """
 Regras de verificação de qualidade da tradução.
-Aqui verificamos se o texto está vazio, se faltam números do original
-e se os termos obrigatórios do glossário foram respeitados.
+Verifica traduções vazias, números, glossário, marcadores e etiquetas inline.
 """
 
 import re
 from collections import Counter
 from decimal import Decimal
 from typing import Dict, List, Optional, TypedDict, Union
+
+
+NAMED_PLACEHOLDER = re.compile(r"(?<!\{)\{[A-Za-z_][A-Za-z0-9_]*\}(?!\})")
+INLINE_TAG = re.compile(r"</?(?:b|i|em|strong|u)>", re.IGNORECASE | re.ASCII)
 
 
 class GlossaryEntry(TypedDict, total=False):
@@ -114,6 +117,32 @@ def check_terminology(
     return issues
 
 
+def check_placeholders(source: str, target: str) -> List[Dict[str, str]]:
+    """Compara os marcadores nomeados e o número de ocorrências de cada um."""
+    if Counter(NAMED_PLACEHOLDER.findall(source)) == Counter(NAMED_PLACEHOLDER.findall(target)):
+        return []
+    return [
+        {
+            "category": "placeholder_mismatch",
+            "explanation": "Há marcadores entre chavetas em falta, alterados ou a mais na tradução.",
+            "hint": "Os marcadores entre chavetas mantêm o nome e o número de ocorrências do original?",
+        }
+    ]
+
+
+def check_inline_tags(source: str, target: str) -> List[Dict[str, str]]:
+    """Compara as contagens de etiquetas de abertura e fecho suportadas."""
+    if Counter(INLINE_TAG.findall(source.lower())) == Counter(INLINE_TAG.findall(target.lower())):
+        return []
+    return [
+        {
+            "category": "inline_tag_mismatch",
+            "explanation": "Há etiquetas de formatação em falta, alteradas ou a mais na tradução.",
+            "hint": "Que etiquetas de abertura ou de fecho precisa de rever ao comparar com o original?",
+        }
+    ]
+
+
 def run_all_rules(
     source: str, target: str, glossary: Optional[Dict[str, GlossaryEntry]] = None
 ) -> List[Dict[str, str]]:
@@ -122,6 +151,8 @@ def run_all_rules(
     empty_issues = check_empty_translation(target)
     if empty_issues:
         return empty_issues
+    if not source.strip():
+        return []
 
     issues = []
     # 2. Números
@@ -129,5 +160,7 @@ def run_all_rules(
     # 3. Terminologia
     if glossary:
         issues.extend(check_terminology(source, target, glossary))
+    issues.extend(check_placeholders(source, target))
+    issues.extend(check_inline_tags(source, target))
 
     return issues

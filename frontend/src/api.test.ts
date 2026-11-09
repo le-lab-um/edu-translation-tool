@@ -4,7 +4,10 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { checkTranslation, CheckTimeoutError, getSegment, saveSegment, RequestTimeoutError } from './api';
+import {
+  checkTranslation, CheckTimeoutError, getSegment, saveSegment, RequestTimeoutError,
+  requestHint, searchMemory, logEvent,
+} from './api';
 
 // Simula uma operação de rede que só termina quando o pedido é cancelado.
 function waitForAbort(signal: AbortSignal): Promise<never> {
@@ -147,5 +150,66 @@ describe('checkTranslation', () => {
   it('não aceita alertas com categoria ou estrutura desconhecida', async () => {
     fetchMock.mockResolvedValueOnce(Response.json({ issues: [{ category: 'unknown' }] }));
     await expect(checkTranslation('Texto')).rejects.toThrow('resposta inválida');
+  });
+});
+
+describe('pistas híbridas, memória e registos', () => {
+  const fetchMock = vi.fn<typeof fetch>();
+  const json = (body: unknown) => Promise.resolve(new Response(JSON.stringify(body), { status: 200 }));
+
+  beforeEach(() => {
+    fetchMock.mockReset();
+    vi.stubGlobal('fetch', fetchMock);
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('requestHint envia o contexto e devolve a origem de cada alerta', async () => {
+    fetchMock.mockImplementation(() => json({
+      issues: [{ category: 'terminology', explanation: 'e', hint: 'h', source: 'llm' }],
+      llm_status: 'ok', sanitized: 1, elapsed_ms: 1500,
+    }));
+    const result = await requestHint('Abra.', 'Open.', { file: { target: 'ficheiro' } }, 'Manual');
+    expect(result).toMatchObject({ llmStatus: 'ok', sanitized: 1, elapsedMs: 1500 });
+    expect(result.issues[0].source).toBe('llm');
+    const body = JSON.parse(fetchMock.mock.calls[0][1]!.body as string);
+    expect(body).toEqual({ target: 'Abra.', source: 'Open.', glossary: { file: { target: 'ficheiro' } }, context: 'Manual' });
+  });
+
+  it('requestHint rejeita respostas sem origem ou com estado desconhecido', async () => {
+    fetchMock.mockImplementation(() => json({
+      issues: [{ category: 'terminology', explanation: 'e', hint: 'h' }], llm_status: 'ok',
+    }));
+    await expect(requestHint('a', 'b', {}, '')).rejects.toThrow('inválida');
+    fetchMock.mockImplementation(() => json({ issues: [], llm_status: 'estranho' }));
+    await expect(requestHint('a', 'b', {}, '')).rejects.toThrow('inválida');
+  });
+
+  it('aceita as categorias de marcadores e etiquetas nos dois percursos', async () => {
+    const issues = [
+      { category: 'placeholder_mismatch', explanation: 'Marcador em falta.', hint: 'Revê os marcadores.' },
+      { category: 'inline_tag_mismatch', explanation: 'Etiqueta em falta.', hint: 'Revê as etiquetas.' },
+    ];
+    const hybridIssues = issues.map((issue) => ({ ...issue, source: 'rules' }));
+    fetchMock.mockImplementationOnce(() => json({ issues }));
+    fetchMock.mockImplementationOnce(() => json({ issues: hybridIssues, llm_status: 'ok' }));
+    await expect(checkTranslation('Olá.')).resolves.toEqual(issues);
+    await expect(requestHint('Olá.', '<b>Hello</b> {name}.', {}, '')).resolves.toMatchObject({ issues: hybridIssues });
+  });
+
+  it('searchMemory valida as correspondências', async () => {
+    fetchMock.mockImplementation(() => json({ matches: [{ source: 'a', target: 'b', score: 90 }] }));
+    expect(await searchMemory('a')).toEqual([{ source: 'a', target: 'b', score: 90 }]);
+    fetchMock.mockImplementation(() => json({ matches: [{ source: 'a' }] }));
+    await expect(searchMemory('a')).rejects.toThrow('inválida');
+  });
+
+  it('logEvent usa o id de sessão e nunca lança erro', async () => {
+    fetchMock.mockImplementation(() => json({ id: 1 }));
+    await logEvent('check_run', 'custom-1', { issues: 2 });
+    const body = JSON.parse(fetchMock.mock.calls[0][1]!.body as string);
+    expect(body).toMatchObject({ type: 'check_run', segment_id: 'custom-1', payload: { issues: 2 } });
+    expect(typeof body.session_id).toBe('string');
+    fetchMock.mockRejectedValue(new Error('offline'));
+    await expect(logEvent('check_run')).resolves.toBeUndefined();
   });
 });

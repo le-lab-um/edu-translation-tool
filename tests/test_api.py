@@ -37,6 +37,17 @@ class TranslationApiTests(unittest.TestCase):
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(response.json(), {"issues": []})
 
+    def test_check_returns_both_technical_alert_categories(self):
+        response = self.client.post("/api/check", json={
+            "source": "Hello {name}, select <b>Save</b>.",
+            "target": "Olá, selecione Guardar.",
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [issue["category"] for issue in response.json()["issues"]],
+            ["placeholder_mismatch", "inline_tag_mismatch"],
+        )
+
     def test_missing_target_is_rejected(self):
         response = self.client.post("/api/check", json={})
 

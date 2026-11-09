@@ -33,15 +33,15 @@
           </p>
           <p>
             Esta ferramenta apoia a prática em segmentos curtos (EN → PT-PT), permitindo
-            guardar o trabalho e verificar algumas restrições formais. Prevê-se acrescentar pistas graduais
-            (<em>scaffolding</em>) sem revelar de imediato a resposta final.
+            guardar o trabalho e verificar algumas restrições formais. O protótipo inclui uma primeira versão de pistas
+            a pedido, concebidas para orientar a revisão sem revelar de imediato a resposta final.
           </p>
         </div>
         <div class="callout">
-          <h3>Estado atual: editor, persistência e três regras</h3>
+          <h3>Estado atual: editor, memória e cinco regras</h3>
           <p>
             Editor segmentado com persistência SQLite/SQLAlchemy e motor determinístico de QA
-            (verificação de texto vazio, integridade de números e glossário prescrito).
+            (texto vazio, números, glossário, marcadores nomeados e etiquetas de formatação simples).
           </p>
           <p class="tag-status">Em desenvolvimento ativo · Entrega: 30 nov. 2026</p>
         </div>
@@ -69,7 +69,7 @@
             </div>
             <div class="mock-feedback">
               <p><strong>Verificação:</strong> Nenhum problema detetado pelas regras aplicadas; a qualidade global requer revisão.</p>
-              <p class="hint">Regras determinísticas ativas; próximo incremento focado na assistência pedagógica por LLM local.</p>
+              <p class="hint">O protótipo também permite pedir pistas ao modelo local.</p>
             </div>
           </div>
         </div>
@@ -83,7 +83,7 @@
             <h3>CAT Básico & Persistência</h3>
             <p>
               Editor segmentado reativo em React 19, persistência relacional SQLite via SQLAlchemy 2.0
-              e gravação ao mudar de segmento. Memória de tradução ainda prevista.
+              e gravação ao mudar de segmento. Memória de tradução com pesquisa de originais semelhantes.
             </p>
           </article>
           <article class="level-card">
@@ -91,15 +91,14 @@
             <h3>QA Determinístico</h3>
             <p>
               Motor de regras reproduzíveis: validação de tradução vazia, conformidade de termos de glossário
-              com variantes e validação de valores numéricos.
+              com variantes, valores numéricos, marcadores e etiquetas simples.
             </p>
           </article>
           <article class="level-card">
             <span class="level-badge">Nível 3</span>
             <h3>Assistência por LLM Local</h3>
             <p>
-              Integração prevista de um modelo local (Qwen via Ollama) para produzir pistas didáticas e fundamentações
-              sem recurso a serviços cloud pagos.
+              Primeira integração de um modelo local (Qwen via Ollama) para produzir pistas e explicações a pedido.
             </p>
           </article>
         </div>

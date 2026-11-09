@@ -7,8 +7,11 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
-import { checkTranslation, CheckTimeoutError, getSegment, saveSegment } from './api';
-import type { Issue, IssueCategory } from './api';
+import {
+  checkTranslation, CheckTimeoutError, EVENTS_EXPORT_URL, getSegment, logEvent,
+  requestHint, saveMemory, saveSegment, searchMemory,
+} from './api';
+import type { HintResult, Issue, IssueCategory, LlmStatus, MemoryMatch } from './api';
 import { EXAMPLES, MAX_SEGMENTS, MAX_UPLOAD_BYTES, buildSegments, parseGlossary } from './exercise';
 
 const STORAGE_KEY = 'ett.exercise.v1';
@@ -18,6 +21,8 @@ const CATEGORY_LABELS: Record<IssueCategory, string> = {
   empty_translation: 'Tradução vazia',
   numeric_mismatch: 'Números',
   terminology: 'Terminologia',
+  placeholder_mismatch: 'Marcadores',
+  inline_tag_mismatch: 'Etiquetas de formatação',
 };
 
 type Draft = { sourceText: string; context: string; glossaryText: string };
@@ -26,6 +31,20 @@ type StoredExercise = Draft & { started: boolean; index: number };
 type CheckState =
   | { status: 'idle' | 'loading' | 'error' | 'timeout' }
   | { status: 'success'; issues: Issue[] };
+
+type HintState =
+  | { status: 'idle' | 'loading' | 'error' }
+  | { status: 'success'; result: HintResult };
+
+/** Mensagem sobre o estado do modelo local, para o aluno saber o que foi usado. */
+const LLM_NOTES: Record<LlmStatus, string> = {
+  ok: '',
+  skipped: '',
+  disabled: 'O modelo local está desativado; só foram aplicadas as regras.',
+  unavailable: 'O modelo local não está disponível (Ollama desligado?); só foram aplicadas as regras.',
+  timeout: 'O modelo local demorou demasiado; só foram aplicadas as regras.',
+  invalid: 'O modelo local devolveu uma resposta inutilizável; só foram aplicadas as regras.',
+};
 
 type SaveState =
   | { status: 'idle' | 'saving' | 'success' | 'error' };
@@ -87,6 +106,8 @@ export default function App() {
   const [translation, setTranslation] = useState('');
   const [check, setCheck] = useState<CheckState>({ status: 'idle' });
   const [saveState, setSaveState] = useState<SaveState>({ status: 'idle' });
+  const [hint, setHint] = useState<HintState>({ status: 'idle' });
+  const [memoryMatches, setMemoryMatches] = useState<MemoryMatch[]>([]);
   const requestVersion = useRef(0);
   const [lastSaved, setLastSaved] = useState('');
   const [loadState, setLoadState] = useState<LoadState>({ status: 'loading' });
@@ -120,8 +141,14 @@ export default function App() {
     setTranslation('');
     setLastSaved('');
     setCheck({ status: 'idle' });
+    setHint({ status: 'idle' });
+    setMemoryMatches([]);
     setSaveState({ status: 'idle' });
     setSaveUnconfirmed(false);
+    // A memória é uma ajuda opcional: se falhar, o exercício continua sem sugestões.
+    searchMemory(segment.source)
+      .then((matches) => { if (active) setMemoryMatches(matches); })
+      .catch(() => {});
     getSegment(segmentId)
       .then((text) => {
         if (!active) return;
@@ -158,6 +185,7 @@ export default function App() {
     requestVersion.current += 1;
     setTranslation(value);
     setCheck({ status: 'idle' });
+    setHint({ status: 'idle' });
     if (saveState.status !== 'idle') {
       setSaveState({ status: 'idle' });
     }
@@ -205,6 +233,7 @@ export default function App() {
     setNavError('');
     setIndex(0);
     setStarted(true);
+    void logEvent('session_started', undefined, { segments: total });
   }
 
   /** Uma única gravação de cada vez. Enquanto decorre, a edição fica bloqueada. */
@@ -219,6 +248,8 @@ export default function App() {
       setLastSaved(translation);
       setSaveUnconfirmed(false);
       setSaveState({ status: 'success' });
+      void logEvent('segment_saved', segment.id, { chars: translation.length });
+      if (translation.trim()) void saveMemory(segment.source, translation).catch(() => {});
       return true;
     } catch {
       // Mesmo que o aluno volte ao texto anterior, é preciso confirmar a escrita:
@@ -259,12 +290,40 @@ export default function App() {
       // Só o pedido mais recente, sem edições posteriores, pode atualizar o ecrã
       if (version === requestVersion.current) {
         setCheck({ status: 'success', issues });
+        void logEvent('check_run', segment.id, { issues: issues.length });
       }
     } catch (error) {
       if (version === requestVersion.current) {
         setCheck({ status: error instanceof CheckTimeoutError ? 'timeout' : 'error' });
       }
     }
+  }
+
+  async function askHint() {
+    if (!segment || !ready || saving.current) return;
+    const version = ++requestVersion.current;
+    setHint({ status: 'loading' });
+    void logEvent('hint_requested', segment.id);
+    try {
+      const result = await requestHint(translation, segment.source, glossary, draft.context);
+      if (version === requestVersion.current) {
+        setHint({ status: 'success', result });
+        void logEvent('hint_shown', segment.id, {
+          llm_status: result.llmStatus,
+          rules: result.issues.filter((i) => i.source === 'rules').length,
+          llm: result.issues.filter((i) => i.source === 'llm').length,
+          sanitized: result.sanitized,
+          elapsed_ms: result.elapsedMs,
+        });
+      }
+    } catch {
+      if (version === requestVersion.current) setHint({ status: 'error' });
+    }
+  }
+
+  function useMemorySuggestion(match: MemoryMatch) {
+    updateTranslation(match.target);
+    void logEvent('memory_suggestion_used', segmentId, { score: match.score });
   }
 
   const glossaryEntries = Object.entries(glossary);
@@ -447,10 +506,29 @@ export default function App() {
               </section>
             </div>
 
+            {memoryMatches.length > 0 && (
+              <section className="memory" aria-labelledby="memory-heading">
+                <h2 id="memory-heading">Memória de tradução</h2>
+                <p>Estas sugestões vêm de traduções guardadas nesta instância. Reveja-as antes de as usar.</p>
+                <ul>
+                  {memoryMatches.map((match) => (
+                    <li key={`${match.source}|${match.target}`}>
+                      <span className="badge">{match.score}%</span>
+                      <span lang="en">{match.source}</span> → <span lang="pt-PT">{match.target}</span>{' '}
+                      <button type="button" className="secondary" onClick={() => useMemorySuggestion(match)}
+                        disabled={!ready || busy}>
+                        Usar
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
             <section className="verification" aria-labelledby="actions-heading">
               <h2 id="actions-heading">Ações e Verificação</h2>
               <p id="verification-note">
-                Pode guardar a sua tradução ou verificá-la com as regras (texto presente, números e glossário).
+                Pode guardar a sua tradução ou verificar texto presente, números, glossário, marcadores e etiquetas.
               </p>
 
               {!ready && loadState.status !== 'error' && <p role="status">A recuperar a tradução guardada…</p>}
@@ -476,6 +554,15 @@ export default function App() {
                   disabled={!ready || busy || check.status === 'loading'}
                 >
                   {check.status === 'loading' ? 'A verificar…' : 'Verificar'}
+                </button>
+
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={askHint}
+                  disabled={!ready || busy || hint.status === 'loading'}
+                >
+                  {hint.status === 'loading' ? 'A pedir pista…' : 'Pedir pista'}
                 </button>
 
                 <div role="status" aria-live="polite">
@@ -504,6 +591,36 @@ export default function App() {
                 )}
               </div>
 
+              <div role="status" aria-live="polite">
+                {hint.status === 'loading' && <p>A consultar as regras e o modelo local…</p>}
+                {hint.status === 'success' && (
+                  <div className="hints">
+                    {hint.result.issues.length === 0
+                      ? <p>Sem pistas: nem as regras nem o modelo local encontraram problemas. Isto não garante que a tradução esteja correta.</p>
+                      : <ul className="issues">
+                          {hint.result.issues.map((issue, i) => (
+                            <li key={i}>
+                              <p>
+                                <span className={`badge ${issue.source}`}>
+                                  {issue.source === 'rules' ? 'Regra' : 'Sugestão do modelo local'}
+                                </span>{' '}
+                                <strong>{CATEGORY_LABELS[issue.category]}:</strong> {issue.explanation}
+                              </p>
+                              <p><strong>Pista:</strong> {issue.hint}</p>
+                            </li>
+                          ))}
+                        </ul>}
+                    {LLM_NOTES[hint.result.llmStatus] && <p className="hint">{LLM_NOTES[hint.result.llmStatus]}</p>}
+                    {hint.result.sanitized > 0 && (
+                      <p className="hint">{hint.result.sanitized} sugestão(ões) do modelo foram generalizadas para não revelarem a solução.</p>
+                    )}
+                  </div>
+                )}
+                {hint.status === 'error' && (
+                  <p className="check-error" role="alert">Não foi possível obter pistas. A sua tradução foi mantida.</p>
+                )}
+              </div>
+
               {(check.status === 'error' || check.status === 'timeout') && (
                 <p className="check-error" role="alert">
                   {check.status === 'timeout'
@@ -517,7 +634,12 @@ export default function App() {
         )}
       </main>
 
-      <footer>Projeto académico · Mestrado em Engenharia Informática · Universidade do Minho</footer>
+      <footer>
+        Projeto académico · Mestrado em Engenharia Informática · Universidade do Minho
+        {' · '}Registos de utilização:{' '}
+        <a href={EVENTS_EXPORT_URL('json')} download>JSON</a>{' / '}
+        <a href={EVENTS_EXPORT_URL('csv')} download>CSV</a>
+      </footer>
     </div>
   );
 }
