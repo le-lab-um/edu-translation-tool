@@ -33,6 +33,11 @@ def answer(*issues):
 
 
 ISSUE = {"category": "terminology", "explanation": "Termo em falta.", "hint": "Consulta o glossário."}
+MEANING_ISSUE = {
+    "category": "meaning_context",
+    "explanation": "A tradução apresenta a ação como uma opção.",
+    "hint": "A frase em português mantém a força da recomendação do original?",
+}
 
 
 class ValidateTests(unittest.TestCase):
@@ -118,7 +123,7 @@ class HintEndpointTests(unittest.TestCase):
         self.assertEqual(user["glossary"][1],
                          {"source_term": "folder", "accepted_targets": ["pasta", "diretório"]})
 
-    def test_hybrid_returns_technical_alerts_as_rules_without_expanding_model_schema(self):
+    def test_hybrid_returns_technical_alerts_as_rules(self):
         captured = []
         response = self.post(
             fake_ollama(answer(), capture=captured),
@@ -131,8 +136,29 @@ class HintEndpointTests(unittest.TestCase):
         )
         self.assertEqual(
             captured[0]["format"]["properties"]["issues"]["items"]["properties"]["category"]["enum"],
-            ["empty_translation", "numeric_mismatch", "terminology"],
+            ["empty_translation", "numeric_mismatch", "terminology", "meaning_context"],
         )
+
+    def test_meaning_alert_is_added_only_to_hybrid_review(self):
+        payload = {
+            "source": "You should restart your computer.",
+            "target": "Podes reiniciar o computador.",
+            "glossary": {},
+        }
+        self.assertEqual(TestClient(app).post("/api/check", json=payload).json(), {"issues": []})
+        result = self.post(fake_ollama(answer(MEANING_ISSUE)), **payload).json()
+        self.assertEqual(result["issues"], [{**MEANING_ISSUE, "source": "llm"}])
+        self.assertEqual(result["sanitized"], 0)
+
+    def test_meaning_alert_with_quoted_correction_is_generalized(self):
+        for quote in ("«Deves reiniciar o computador»", "'Deves reiniciar o computador'", "‘Deves reiniciar o computador’"):
+            with self.subTest(quote=quote):
+                leak = {**MEANING_ISSUE, "hint": f"Escreve {quote}."}
+                result = self.post(fake_ollama(answer(leak)), glossary={}).json()
+                self.assertEqual(result["sanitized"], 1)
+                self.assertEqual(result["issues"][0]["category"], "meaning_context")
+                self.assertEqual(result["issues"][0]["source"], "llm")
+                self.assertNotIn("Deves reiniciar", result["issues"][0]["hint"])
 
     def test_falls_back_to_rules_when_ollama_is_down(self):
         down = fake_ollama(httpx.ConnectError("recusada"))
@@ -155,6 +181,15 @@ class HintEndpointTests(unittest.TestCase):
     def test_incomplete_generation_is_invalid(self):
         data = self.post(fake_ollama(answer(), done_reason="length")).json()
         self.assertEqual(data["llm_status"], "invalid")
+
+    def test_non_object_ollama_response_falls_back_to_rules(self):
+        for body in ("[]", "null"):
+            with self.subTest(body=body):
+                transport = httpx.MockTransport(lambda _: httpx.Response(200, text=body))
+                response = self.post(OllamaClient(transport=transport, enabled=True))
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.json()["llm_status"], "invalid")
+                self.assertEqual([i["source"] for i in response.json()["issues"]], ["rules"])
 
     def test_disabled_llm_returns_rules_only(self):
         client = OllamaClient(enabled=False)

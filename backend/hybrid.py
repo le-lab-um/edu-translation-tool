@@ -1,15 +1,12 @@
 """
 Fusão das pistas determinísticas com as do LLM local.
 - As regras têm prioridade: se uma categoria já foi detetada por regra, a do LLM é descartada.
-- Um alerta do LLM nunca é mostrado se o texto revelar a solução (filtro anti-solução);
-  nesse caso é substituído por uma pista genérica da categoria.
+- Sinais de uma possível solução fazem o filtro substituir o texto por uma pista genérica.
 - Cada alerta indica a origem ("rules" ou "llm"), para o aluno saber o que é verificação
   exata e o que é sugestão do modelo.
 """
 
 import re
-
-from backend.rules import _extract_numbers
 
 GENERIC = {
     "empty_translation": ("A tradução está vazia.", "O que falta escrever neste segmento?"),
@@ -20,6 +17,10 @@ GENERIC = {
     "terminology": (
         "Um termo do glossário pode não estar a ser usado.",
         "Consulta o glossário da tarefa: algum termo do original ficou por traduzir como indicado?",
+    ),
+    "meaning_context": (
+        "A tradução pode alterar o sentido ou a intenção do original.",
+        "Que diferença encontras entre o que o original comunica neste contexto e o que se entende na tua tradução?",
     ),
 }
 
@@ -33,6 +34,8 @@ def reveals_solution(issue: dict, source: str, glossary: dict[str, dict]) -> boo
     text = f"{issue['explanation']} {issue['hint']}"
     # Texto entre aspas ou «» costuma ser uma tradução proposta: tratado como possível solução.
     if re.search(r"«[^»]+»|\"[^\"]+\"|“[^”]+”", text):
+        return True
+    if issue["category"] == "meaning_context" and re.search(r"(?<!\w)'[^'\n]+'(?!\w)|‘[^’]+’", text):
         return True
     for entry in glossary.values():
         if any(_contains_word(text, option) for option in [entry["target"], *entry.get("variants", [])]):

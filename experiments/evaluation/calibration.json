@@ -1,0 +1,104 @@
+{
+  "split": "calibration",
+  "annotation_status": "pending_author_review",
+  "source_language": "en",
+  "target_language": "pt-PT",
+  "cases": [
+    {
+      "id": "cal-01",
+      "source_id": "safety-bypass",
+      "input": {
+        "source": "Do not bypass the safety check.",
+        "target": "Podes ignorar a verificação de segurança.",
+        "context": "Instruções de utilização de um simulador. Estas instruções são obrigatórias.",
+        "glossary": []
+      },
+      "expected_categories": ["meaning_context"],
+      "annotation_note": "A proibição passa a permissão."
+    },
+    {
+      "id": "cal-02",
+      "source_id": "safety-bypass",
+      "input": {
+        "source": "Do not bypass the safety check.",
+        "target": "Não saltes a verificação de segurança.",
+        "context": "Instruções de utilização de um simulador. Estas instruções são obrigatórias.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "A paráfrase conserva a proibição."
+    },
+    {
+      "id": "cal-03",
+      "source_id": "agenda-ice",
+      "input": {
+        "source": "The opening activity broke the ice.",
+        "target": "A atividade de abertura partiu o gelo.",
+        "context": "Uma sessão de apresentação com participantes que ainda não se conheciam.",
+        "glossary": []
+      },
+      "expected_categories": ["meaning_context"],
+      "annotation_note": "A expressão descreve o efeito social da atividade. A escolha de «partiu» favorece uma leitura literal neste contexto."
+    },
+    {
+      "id": "cal-04",
+      "source_id": "results-lecture",
+      "input": {
+        "source": "She gave a lecture on the results.",
+        "target": "Deu uma leitura sobre os resultados.",
+        "context": "Sessão oral apresentada por uma investigadora num seminário.",
+        "glossary": []
+      },
+      "expected_categories": ["meaning_context"],
+      "annotation_note": "A escolha de «leitura» altera o tipo de intervenção. Há várias traduções aceitáveis conforme o tipo de sessão."
+    },
+    {
+      "id": "cal-05",
+      "source_id": "tax",
+      "input": {
+        "source": "The tax rate is 12.5%.",
+        "target": "A taxa de imposto é de 12,5 %.",
+        "context": "Exemplo de um documento informativo sobre impostos.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "O valor mantém-se com separador decimal e espaçamento diferentes."
+    },
+    {
+      "id": "cal-06",
+      "source_id": "tax",
+      "input": {
+        "source": "The tax rate is 12.5%.",
+        "target": "A taxa de imposto é de 15,2 %.",
+        "context": "Exemplo de um documento informativo sobre impostos.",
+        "glossary": []
+      },
+      "expected_categories": ["numeric_mismatch"],
+      "annotation_note": "O valor mudou. No híbrido, a regra tem prioridade se o modelo também assinalar números."
+    },
+    {
+      "id": "cal-07",
+      "source_id": "tool-temperature",
+      "input": {
+        "source": "Preheat the tool to 80 °C.",
+        "target": "Pré-aqueça a ferramenta a 80 °F.",
+        "context": "Instrução de um manual técnico. A unidade do original deve ser preservada.",
+        "glossary": []
+      },
+      "expected_categories": ["numeric_mismatch"],
+      "annotation_note": "O número mantém-se, mas a unidade mudou. Caso de calibração com âmbito desigual entre os métodos."
+    },
+    {
+      "id": "cal-08",
+      "source_id": "dashboard",
+      "input": {
+        "source": "Open the dashboard.",
+        "target": "Abra o quadro.",
+        "context": "Interface de monitorização de um serviço.",
+        "glossary": [{"source_term": "dashboard", "accepted_targets": ["painel", "painel de controlo"]}]
+      },
+      "expected_categories": ["terminology"],
+      "annotation_note": "O exercício prescreve «painel» ou «painel de controlo»."
+    }
+  ]
+}

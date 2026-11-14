@@ -4,7 +4,7 @@ Protótipo académico para apoiar a prática reflexiva de tradução de inglês 
 
 O objetivo é disponibilizar a ferramenta como open source. A licença do repositório ainda está por escolher pelos autores.
 
-## Estado para a reunião de 10 de novembro de 2026
+## Estado para a reunião de 17 de novembro de 2026
 
 - **Editor React:** permite escrever/colar texto, carregar `.txt` até 200 KiB (204 800 bytes) ou escolher um exemplo. Cada linha não vazia constitui um segmento, até 200 por exercício; não há segmentação automática por frases.
 - **Contexto e glossário:** o contexto é apresentado ao aluno. O glossário usa uma entrada por linha: `folder = pasta | diretório`. Entradas inválidas ou repetidas impedem o início até serem corrigidas.
@@ -12,10 +12,11 @@ O objetivo é disponibilizar a ferramenta como open source. A licença do reposi
 - **Proteção durante pedidos:** a edição aguarda a recuperação do segmento e fica bloqueada durante a gravação. Uma gravação não confirmada impede a navegação e mantém o texto no ecrã. Há mensagens de erro e nova tentativa de leitura. O cliente dá 40 segundos a «Pedir pista» e 10 segundos aos restantes pedidos JSON. Verificações antigas não substituem resultados associados a uma edição posterior.
 - **Aviso de alterações por guardar:** o navegador pode pedir confirmação ao fechar ou recarregar. Para recuperar o exercício, o `localStorage` guarda o original, o contexto, o glossário, o estado de arranque e a posição. A tradução é persistida pela API nas operações de gravação.
 - **Cinco regras determinísticas:** tradução vazia, números do original em falta ou alterados, termos prescritos ausentes, marcadores nomeados e etiquetas de formatação. As duas últimas foram acrescentadas depois do ensaio de 9 de novembro. **Verificar** corre as regras e devolve mensagens definidas em código.
-- **Pistas híbridas (nível 3, versão inicial):** o botão **Pedir pista** chama `POST /api/hint`, que combina as regras com o modelo local servido pelo Ollama. Cada alerta mostra a origem («Regra» ou «Sugestão do modelo local»). As regras têm prioridade e o modelo só acrescenta categorias que as regras não detetaram. Um filtro heurístico pode generalizar a explicação e a pista quando encontra padrões suspeitos, como equivalentes do glossário, certas aspas ou, nos alertas numéricos, dígitos do original. Para as falhas do Ollama que o adaptador reconhece, o endpoint devolve só as regras e indica o estado do modelo.
+- **Pistas híbridas (nível 3):** o botão **Pedir pista** chama `POST /api/hint`, que combina as regras com o modelo local servido pelo Ollama. A categoria **Significado e contexto** permite ao Qwen sinalizar alterações de sentido, como uma obrigação que passa a opção. O prompt pede uma explicação breve e uma pergunta de revisão em português europeu. Cada alerta mostra a origem («Regra» ou «Sugestão do modelo local»). As regras têm prioridade em categorias repetidas. Um filtro heurístico pode generalizar a explicação e a pista quando encontra padrões suspeitos. Para as falhas do Ollama que o adaptador reconhece, o endpoint devolve as regras e indica o estado do modelo.
 - **Memória de tradução (nível 1):** após confirmar uma tradução não vazia, o editor tenta guardar o par original/tradução. A memória é partilhada pela instância local. Ao abrir um segmento, aparecem sugestões de segmentos parecidos (RapidFuzz, limiar 70 %) com o botão **Usar**.
 - **Registos e exportação:** a interface envia eventos de início de exercício, gravação, verificação, pistas e uso da memória, com um ID persistente do browser e metadados, sem texto da tradução. A API aceita dados adicionais no `payload` e permite exportar sem autenticação. O rodapé dá acesso ao JSON e ao CSV. O resumo devolve o total de eventos, o total de identificadores distintos e contagens por tipo.
-- **Piloto Ollama preservado:** duas versões do prompt e três execuções sobre dez exemplos de desenvolvimento (`experiments/ollama-pilot`). O prompt v2 foi copiado para `backend/prompts/hint-v2.txt`. Não constitui avaliação final.
+- **Prompts:** o editor usa [`hint-v3.txt`](backend/prompts/hint-v3.txt). Os prompts v1 e v2 e as três execuções originais estão na [pasta do piloto](experiments/ollama-pilot/notes.md).
+- **Calibração das pistas:** oito casos sintéticos com respostas do Qwen real antes da fusão e feedback apresentado ao aluno. A [grelha preliminar](experiments/evaluation/README.md) está pronta para revisão pelos dois autores. A avaliação no conjunto de teste fica para depois de fechar a grelha.
 
 Ainda por implementar: histórico de versões, justificações do aluno, comparação crítica, avaliação comparativa regras/LLM/híbrido e identidade de exercício (ver limitação abaixo).
 
@@ -32,7 +33,7 @@ Ainda por implementar: histórico de versões, justificações do aluno, compara
 | `frontend/tsconfig.json`, `vite.config.ts` | TypeScript e servidor de desenvolvimento; `/api` é encaminhado para a porta 8000. |
 | `backend/main.py` | API FastAPI, validação Pydantic e endpoints. |
 | `backend/rules.py` | Regras em Python, independentes da interface e do LLM. |
-| `backend/llm.py`, `backend/prompts/hint-v2.txt` | Adaptador Ollama: pedido com esquema JSON, validação da resposta, erros tipificados. |
+| `backend/llm.py`, `backend/prompts/hint-v3.txt` | Adaptador Ollama, instruções de revisão, esquema JSON e validação da resposta. |
 | `backend/hybrid.py` | Fusão regras + LLM, deduplicação por categoria e filtro anti-solução. |
 | `backend/translation_memory.py` | Pesquisa difusa de segmentos parecidos (RapidFuzz). |
 | `backend/database.py`, `models.py`, `__init__.py` | Ligação SQLite, tabelas (segmentos, memória, eventos) e pacote Python. |
@@ -40,6 +41,7 @@ Ainda por implementar: histórico de versões, justificações do aluno, compara
 | `tests/` | Testes das regras, API e persistência; esta última usa SQLite em memória. |
 | `data/development.json` | Dez exemplos sintéticos, com anotações pendentes de revisão pelos autores. |
 | `experiments/ollama-pilot/` | Script, prompts, notas e relatórios históricos do piloto. |
+| `experiments/evaluation/` | Casos de calibração, recolha com o prompt da aplicação, relatório e grelha de apreciação. |
 | `paper/main.typ` | Artigo Typst: enquadramento, proposta, implementação e protocolo previsto. |
 | `docs/` | Página estática de apresentação no GitHub Pages; não executa o editor nem a API. |
 | `.gitignore` | Exclui ambientes, dependências, builds e base de dados local. |
@@ -67,7 +69,7 @@ A resposta contém `issues`, com `category`, `explanation` e `hint`. O glossári
 - **`placeholder_mismatch`:** compara nomes e contagens dos marcadores simples entre chavetas, como `{name}` e `{file_name}`. A ordem pode mudar. Chavetas duplas, índices como `{0}` e formatos como `%s` ficam fora desta regra.
 - **`inline_tag_mismatch`:** compara o número de ocorrências de cada etiqueta simples de abertura e fecho (`b`, `i`, `em`, `strong`, `u`, sem atributos), ignorando maiúsculas e ordem. A regra cobre a preservação desses tokens, deixando a posição, o aninhamento e os restantes formatos de marcação fora do âmbito.
 
-Ausência de alertas **não certifica a qualidade da tradução**. Os dois alertas técnicos aparecem em **Verificar** e em **Pedir pista** com origem «Regra» neste último. O prompt do modelo e a comparação RQ1 mantêm as três categorias iniciais em comum.
+Ausência de alertas **não certifica a qualidade da tradução**. Os dois alertas técnicos aparecem em **Verificar** e em **Pedir pista** com origem «Regra» neste último. **Significado e contexto** aparece em **Pedir pista** com origem no modelo. A RQ1 continua a comparar os métodos nas categorias em comum. As pistas de significado e contexto podem integrar a apreciação da RQ2.
 
 ### Novos endpoints (8 nov.)
 
@@ -132,7 +134,7 @@ npm test
 npm run build
 ```
 
-Estado verificado para a reunião: **67 testes backend + 26 frontend = 93**, e build de produção concluído. Os testes do adaptador simulam respostas do Ollama com `httpx.MockTransport`. No ensaio manual de 9 de novembro, anterior às duas regras técnicas, o Qwen real respondeu pelo editor. No exemplo `5 kg` → `5 lb`, o botão «Verificar» não gerou alertas e «Pedir pista» apresentou uma sugestão generalizada. Este ensaio verifica o percurso integrado num caso de demonstração. A avaliação comparativa e a apreciação sistemática das pistas estão por fazer. Os checks do Pages referem-se à página estática.
+Estado verificado para a reunião: **70 testes backend + 26 frontend = 96**, com build de produção. Os testes do adaptador simulam respostas do Ollama com `httpx.MockTransport`. No ensaio manual de 9 de novembro, anterior às duas regras técnicas, o Qwen real respondeu pelo editor. No exemplo `5 kg` → `5 lb`, o botão «Verificar» não gerou alertas e «Pedir pista» apresentou uma sugestão generalizada. A recolha de calibração de 14 de novembro usou o Qwen real com o prompt v3. A avaliação comparativa e a anotação independente das pistas estão por fazer. Os checks do Pages referem-se à página estática.
 
 Percurso de verificação no navegador:
 
@@ -143,13 +145,14 @@ Percurso de verificação no navegador:
 5. Com a API desligada, tentar guardar: manter o texto e impedir a navegação. Voltar a ligar a API e repetir. Falhar a recuperação inicial deve mostrar erro e botão de nova tentativa, sem permitir sobrescrever uma tradução desconhecida.
 6. Confirmar rejeição de `.txt` acima de 200 KiB, mais de 200 segmentos e glossário inválido/repetido.
 7. Num exercício sem glossário, usar o original `Hello {name}, select <b>Save</b>.` e a tradução `Olá, selecione Guardar.`. «Verificar» deve apresentar Marcadores e Etiquetas de formatação. Com `Olá {name}, selecione <b>Guardar</b>.`, ambos os alertas devem desaparecer.
+8. Com o Qwen ativo, usar `You must restart your computer.` e `Podes reiniciar o computador.` com o contexto «Instruções de instalação. O reinício é obrigatório para completar a atualização.» e glossário vazio. «Verificar» deixa passar a tradução. Em «Pedir pista», procurar uma sugestão de Significado e contexto sobre a força da instrução. Repetir com «Tens de reiniciar o computador.» como controlo. O modelo pode errar em ambos os sentidos.
 
 ## Próximos passos, por incrementos
 
-1. **Alargar a verificação com o modelo real:** após o ensaio manual do editor, correr os exemplos de `data/development.json`, medir latência e anotar falsos alertas e pistas que revelem a solução.
-2. **Corrigir a identidade dos exercícios:** separar segmentos iguais em contextos diferentes, com testes de reabertura e preservação dos registos existentes.
-3. **Fixar dados e contrato experimental:** rever anotações, harmonizar o glossário do conjunto com o da API, reservar originais distintos para teste e alinhar o âmbito de unidades entre piloto e regra numérica.
-4. **Executar a avaliação interna** (regras / LLM / híbrido) e apreciar independentemente os textos das explicações e pistas. Calcular a taxa de revelação (RQ2) a partir dessa anotação humana. Os contadores de generalização descrevem intervenções do filtro.
-5. **Histórico de versões, justificações e comparação crítica**, e consolidar o artigo (prazo: 30 de novembro).
+1. **Ensaiar a demonstração e calibrar a grelha:** cada autor aprecia as respostas já recolhidas, compara os seus juízos com os do outro autor e regista divergências.
+2. **Preparar o teste e fechar o protocolo:** reservar originais distintos dos exemplos de desenvolvimento, calibração, demonstração e prompt. Fixar categorias e anotações de referência antes da recolha.
+3. **Executar a avaliação interna** (regras / LLM / híbrido) e apreciar independentemente as explicações e pistas. Calcular a taxa de revelação (RQ2) a partir da anotação humana. Os contadores de generalização descrevem intervenções do filtro.
+4. **Corrigir a identidade dos exercícios:** separar segmentos iguais em contextos diferentes, com testes de reabertura e preservação dos registos existentes.
+5. **Consolidar o artigo até 30 de novembro** e definir com o professor o âmbito do histórico de versões, das justificações e da comparação crítica.
 
 O README acompanha a implementação. O artigo é consolidado em marcos de revisão; os relatórios do piloto permanecem históricos.

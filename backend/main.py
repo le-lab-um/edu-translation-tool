@@ -59,14 +59,18 @@ class CheckRequest(BaseModel):
     )
 
 
-class Issue(BaseModel):
-    """Formato do alerta partilhado entre motor determinístico e LLM."""
+RuleCategory = Literal[
+    "empty_translation", "numeric_mismatch", "terminology", "placeholder_mismatch", "inline_tag_mismatch"
+]
 
-    category: Literal[
-        "empty_translation", "numeric_mismatch", "terminology", "placeholder_mismatch", "inline_tag_mismatch"
-    ]
+
+class IssueText(BaseModel):
     explanation: str
     hint: str
+
+
+class Issue(IssueText):
+    category: RuleCategory
 
 
 class CheckResponse(BaseModel):
@@ -143,7 +147,8 @@ class HintRequest(CheckRequest):
     context: StrictStr = Field(default="", description="Contexto opcional do exercício.")
 
 
-class HintIssue(Issue):
+class HintIssue(IssueText):
+    category: RuleCategory | Literal["meaning_context"]
     source: Literal["rules", "llm"]
 
 

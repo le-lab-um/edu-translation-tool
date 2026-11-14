@@ -16,13 +16,14 @@ import { EXAMPLES, MAX_SEGMENTS, MAX_UPLOAD_BYTES, buildSegments, parseGlossary 
 
 const STORAGE_KEY = 'ett.exercise.v1';
 
-/** Nomes legíveis das categorias de alerta devolvidas pelo motor de regras. */
+/** Nomes legíveis das categorias de alerta. */
 const CATEGORY_LABELS: Record<IssueCategory, string> = {
   empty_translation: 'Tradução vazia',
   numeric_mismatch: 'Números',
   terminology: 'Terminologia',
   placeholder_mismatch: 'Marcadores',
   inline_tag_mismatch: 'Etiquetas de formatação',
+  meaning_context: 'Significado e contexto',
 };
 
 type Draft = { sourceText: string; context: string; glossaryText: string };
@@ -528,7 +529,8 @@ export default function App() {
             <section className="verification" aria-labelledby="actions-heading">
               <h2 id="actions-heading">Ações e Verificação</h2>
               <p id="verification-note">
-                Pode guardar a sua tradução ou verificar texto presente, números, glossário, marcadores e etiquetas.
+                «Verificar» aplica as regras de texto presente, números, glossário, marcadores e etiquetas.
+                «Pedir pista» pode acrescentar uma sugestão sobre o significado e o contexto.
               </p>
 
               {!ready && loadState.status !== 'error' && <p role="status">A recuperar a tradução guardada…</p>}
@@ -596,7 +598,9 @@ export default function App() {
                 {hint.status === 'success' && (
                   <div className="hints">
                     {hint.result.issues.length === 0
-                      ? <p>Sem pistas: nem as regras nem o modelo local encontraram problemas. Isto não garante que a tradução esteja correta.</p>
+                      ? <p>{hint.result.llmStatus === 'ok'
+                        ? 'As regras e o modelo local não sinalizaram problemas neste segmento.'
+                        : 'As regras não sinalizaram problemas neste segmento.'} Isto não garante que a tradução esteja correta.</p>
                       : <ul className="issues">
                           {hint.result.issues.map((issue, i) => (
                             <li key={i}>
@@ -612,7 +616,7 @@ export default function App() {
                         </ul>}
                     {LLM_NOTES[hint.result.llmStatus] && <p className="hint">{LLM_NOTES[hint.result.llmStatus]}</p>}
                     {hint.result.sanitized > 0 && (
-                      <p className="hint">{hint.result.sanitized} sugestão(ões) do modelo foram generalizadas para não revelarem a solução.</p>
+                      <p className="hint">Sugestões generalizadas por possível revelação da solução: {hint.result.sanitized}.</p>
                     )}
                   </div>
                 )}

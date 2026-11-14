@@ -5,13 +5,14 @@
 
 import type { Glossary } from './exercise';
 
-/** Categorias atualmente suportadas pelo motor determinístico. */
+/** Categorias das regras e da revisão de significado pelo modelo local. */
 const ISSUE_CATEGORIES = [
   'empty_translation',
   'numeric_mismatch',
   'terminology',
   'placeholder_mismatch',
   'inline_tag_mismatch',
+  'meaning_context',
 ] as const;
 
 export type IssueCategory = (typeof ISSUE_CATEGORIES)[number];

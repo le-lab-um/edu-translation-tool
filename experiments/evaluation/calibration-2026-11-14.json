@@ -1,0 +1,269 @@
+{
+  "split": "calibration",
+  "annotation_status": "pending_author_review",
+  "started_at": "2026-11-14T00:59:00.741261+00:00",
+  "prompt": "hint-v3.txt",
+  "prompt_sha256": "a068f761fdf156fe4d16fdb3e7136a6f6c471828c60fa444dae2b0518290dd07",
+  "dataset_sha256": "d7d73aaad415397de4426d0662025044e23f54b3e7df6c67a3fc109d99340146",
+  "ollama_version": "0.14.3",
+  "model": "qwen3:4b-instruct-2507-q4_K_M",
+  "model_digest": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
+  "generation_options": {
+    "temperature": 0,
+    "seed": 42,
+    "num_ctx": 4096,
+    "num_predict": 768
+  },
+  "timeout_seconds": 30.0,
+  "platform": "macOS-15.5-arm64-arm-64bit-Mach-O",
+  "results": [
+    {
+      "id": "cal-01",
+      "source_id": "safety-bypass",
+      "input": {
+        "source": "Do not bypass the safety check.",
+        "target": "Podes ignorar a verificação de segurança.",
+        "context": "Instruções de utilização de um simulador. Estas instruções são obrigatórias.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "A proibição passa a permissão.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução contradiz a obrigação expressa no original.",
+          "hint": "A instrução é uma proibição ou uma recomendação?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução contradiz a obrigação expressa no original.",
+          "hint": "A instrução é uma proibição ou uma recomendação?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_elapsed_ms": 6677,
+      "sanitized": 0
+    },
+    {
+      "id": "cal-02",
+      "source_id": "safety-bypass",
+      "input": {
+        "source": "Do not bypass the safety check.",
+        "target": "Não saltes a verificação de segurança.",
+        "context": "Instruções de utilização de um simulador. Estas instruções são obrigatórias.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "A paráfrase conserva a proibição.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução interpreta 'bypass' como 'saltar', o que altera o sentido de uma ação obrigatória.",
+          "hint": "O original fala de uma verificação de segurança que não deve ser ignorada ou contornada — a ação é proibida, não é uma recomendação de pular."
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução pode alterar o sentido ou a intenção do original.",
+          "hint": "Que diferença encontras entre o que o original comunica neste contexto e o que se entende na tua tradução?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_elapsed_ms": 2981,
+      "sanitized": 1
+    },
+    {
+      "id": "cal-03",
+      "source_id": "agenda-ice",
+      "input": {
+        "source": "The opening activity broke the ice.",
+        "target": "A atividade de abertura partiu o gelo.",
+        "context": "Uma sessão de apresentação com participantes que ainda não se conheciam.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "A expressão descreve o efeito social da atividade. A escolha de «partiu» favorece uma leitura literal neste contexto.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_elapsed_ms": 451,
+      "sanitized": 0
+    },
+    {
+      "id": "cal-04",
+      "source_id": "results-lecture",
+      "input": {
+        "source": "She gave a lecture on the results.",
+        "target": "Deu uma leitura sobre os resultados.",
+        "context": "Sessão oral apresentada por uma investigadora num seminário.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "A escolha de «leitura» altera o tipo de intervenção. Há várias traduções aceitáveis conforme o tipo de sessão.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "terminology",
+          "explanation": "A palavra 'lecture' é traduzida por 'leitura', o que é um falso cognato e altera o sentido original.",
+          "hint": "No contexto de uma sessão oral em seminário, 'lecture' refere-se a uma apresentação, não a uma leitura."
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "terminology",
+          "explanation": "A palavra 'lecture' é traduzida por 'leitura', o que é um falso cognato e altera o sentido original.",
+          "hint": "No contexto de uma sessão oral em seminário, 'lecture' refere-se a uma apresentação, não a uma leitura.",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_elapsed_ms": 2577,
+      "sanitized": 0
+    },
+    {
+      "id": "cal-05",
+      "source_id": "tax",
+      "input": {
+        "source": "The tax rate is 12.5%.",
+        "target": "A taxa de imposto é de 12,5 %.",
+        "context": "Exemplo de um documento informativo sobre impostos.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "O valor mantém-se com separador decimal e espaçamento diferentes.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_elapsed_ms": 444,
+      "sanitized": 0
+    },
+    {
+      "id": "cal-06",
+      "source_id": "tax",
+      "input": {
+        "source": "The tax rate is 12.5%.",
+        "target": "A taxa de imposto é de 15,2 %.",
+        "context": "Exemplo de um documento informativo sobre impostos.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "numeric_mismatch"
+      ],
+      "annotation_note": "O valor mudou. No híbrido, a regra tem prioridade se o modelo também assinalar números.",
+      "rule_issues": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português."
+        }
+      ],
+      "llm_issues_before_fusion": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "O valor da taxa de imposto é diferente no original e na tradução.",
+          "hint": "Os dois valores apresentam a mesma unidade, mas o valor numérico é diferente: 12,5% versus 15,2%."
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português.",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_elapsed_ms": 2261,
+      "sanitized": 0
+    },
+    {
+      "id": "cal-07",
+      "source_id": "tool-temperature",
+      "input": {
+        "source": "Preheat the tool to 80 °C.",
+        "target": "Pré-aqueça a ferramenta a 80 °F.",
+        "context": "Instrução de um manual técnico. A unidade do original deve ser preservada.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "numeric_mismatch"
+      ],
+      "annotation_note": "O número mantém-se, mas a unidade mudou. Caso de calibração com âmbito desigual entre os métodos.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "A unidade de temperatura foi alterada de °C para °F, o que muda o valor do ponto de referência.",
+          "hint": "O original especifica 80 °C, mas a tradução indica 80 °F — qual é a unidade correta no contexto técnico?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Os números ou unidades podem não corresponder ao original.",
+          "hint": "Compara, um a um, os valores do original com os da tua tradução.",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_elapsed_ms": 2741,
+      "sanitized": 1
+    },
+    {
+      "id": "cal-08",
+      "source_id": "dashboard",
+      "input": {
+        "source": "Open the dashboard.",
+        "target": "Abra o quadro.",
+        "context": "Interface de monitorização de um serviço.",
+        "glossary": [
+          {
+            "source_term": "dashboard",
+            "accepted_targets": [
+              "painel",
+              "painel de controlo"
+            ]
+          }
+        ]
+      },
+      "expected_categories": [
+        "terminology"
+      ],
+      "annotation_note": "O exercício prescreve «painel» ou «painel de controlo».",
+      "rule_issues": [
+        {
+          "category": "terminology",
+          "explanation": "O termo prescrito para 'dashboard' não foi identificado na tradução.",
+          "hint": "Consulte o glossário da tarefa para verificar a tradução recomendada de 'dashboard'."
+        }
+      ],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [
+        {
+          "category": "terminology",
+          "explanation": "O termo prescrito para 'dashboard' não foi identificado na tradução.",
+          "hint": "Consulte o glossário da tarefa para verificar a tradução recomendada de 'dashboard'.",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_elapsed_ms": 444,
+      "sanitized": 0
+    }
+  ]
+}

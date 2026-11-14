@@ -12,13 +12,14 @@ from typing import Any
 
 import httpx
 
-CATEGORIES = ("empty_translation", "numeric_mismatch", "terminology")
-PROMPT_PATH = Path(__file__).with_name("prompts") / "hint-v2.txt"
+CATEGORIES = ("empty_translation", "numeric_mismatch", "terminology", "meaning_context")
+PROMPT_PATH = Path(__file__).with_name("prompts") / "hint-v3.txt"
 
-# Parâmetros do piloto (experiments/ollama-pilot): determinísticos e com contexto reduzido.
+# Configuração de geração herdada do piloto (experiments/ollama-pilot).
 DEFAULT_MODEL = "qwen3:4b-instruct-2507-q4_K_M"
 DEFAULT_URL = "http://localhost:11434"
 DEFAULT_TIMEOUT = 30.0
+GENERATION_OPTIONS = {"temperature": 0, "seed": 42, "num_ctx": 4096, "num_predict": 768}
 
 SCHEMA = {
     "type": "object",
@@ -51,7 +52,7 @@ class LLMError(Exception):
 
 
 def validate_answer(answer: Any) -> list[dict[str, str]]:
-    """Mesma validação do piloto: apenas {"issues": [{category, explanation, hint}]}."""
+    """Valida a estrutura e as categorias do prompt em uso."""
     if not isinstance(answer, dict) or set(answer) != {"issues"} or not isinstance(answer["issues"], list):
         raise LLMError("invalid", "A resposta deve conter apenas a lista issues.")
     issues = []
@@ -102,7 +103,7 @@ class OllamaClient:
             "stream": False,
             "format": SCHEMA,
             "keep_alive": "10m",
-            "options": {"temperature": 0, "seed": 42, "num_ctx": 4096, "num_predict": 768},
+            "options": GENERATION_OPTIONS,
             "messages": [
                 {"role": "system", "content": PROMPT_PATH.read_text(encoding="utf-8")},
                 {"role": "user", "content": json.dumps(user_input, ensure_ascii=False)},
@@ -113,6 +114,8 @@ class OllamaClient:
                 response = await client.post(f"{self.base_url}/api/chat", json=payload)
             response.raise_for_status()
             data = response.json()
+            if not isinstance(data, dict):
+                raise LLMError("invalid", "A resposta do Ollama deve ser um objeto JSON.")
             if data.get("done_reason") != "stop":
                 raise LLMError("invalid", "Resposta não concluída normalmente.")
             return validate_answer(json.loads(data["message"]["content"]))

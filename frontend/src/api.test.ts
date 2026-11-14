@@ -165,12 +165,12 @@ describe('pistas híbridas, memória e registos', () => {
 
   it('requestHint envia o contexto e devolve a origem de cada alerta', async () => {
     fetchMock.mockImplementation(() => json({
-      issues: [{ category: 'terminology', explanation: 'e', hint: 'h', source: 'llm' }],
+      issues: [{ category: 'meaning_context', explanation: 'e', hint: 'h', source: 'llm' }],
       llm_status: 'ok', sanitized: 1, elapsed_ms: 1500,
     }));
     const result = await requestHint('Abra.', 'Open.', { file: { target: 'ficheiro' } }, 'Manual');
     expect(result).toMatchObject({ llmStatus: 'ok', sanitized: 1, elapsedMs: 1500 });
-    expect(result.issues[0].source).toBe('llm');
+    expect(result.issues[0]).toMatchObject({ category: 'meaning_context', source: 'llm' });
     const body = JSON.parse(fetchMock.mock.calls[0][1]!.body as string);
     expect(body).toEqual({ target: 'Abra.', source: 'Open.', glossary: { file: { target: 'ficheiro' } }, context: 'Manual' });
   });
