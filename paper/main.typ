@@ -286,7 +286,7 @@ Com vista a responder aos desafios identificados, o projeto estabelece objetivos
 #underline[Objetivos de Avaliação:]
 
 - OA1 (Avaliação da deteção): Construir e anotar um conjunto EN–PT-PT e executar sobre ele as regras determinísticas, o modelo de linguagem e a abordagem híbrida, medindo precisão, recall e F1 nas categorias comparáveis.
-- OA2 (Avaliação do feedback): Definir uma grelha de apreciação e aplicá-la, pelos autores, a uma amostra de pistas, registando correção, fundamentação, clareza, utilidade e revelação da solução.
+- OA2 (Avaliação do feedback): Definir uma grelha de apreciação e aplicá-la a uma amostra de pistas, registando correção, fundamentação, clareza, utilidade e revelação da solução. A anotação final é decidida por consenso entre os dois autores, a partir de uma proposta inicial revista caso a caso.
 
 == Perguntas de Investigação
 
@@ -503,7 +503,7 @@ A avaliação planeada será interna, conduzida pelos dois autores, sem recrutam
 
 Será preparado um conjunto de segmentos com contexto, traduções aceitáveis e traduções com problemas nas categorias selecionadas. As anotações indicarão a presença ou ausência de problema, a categoria e a evidência, admitindo variantes legítimas de tradução. A dimensão e a distribuição por categoria serão definidas antes da avaliação final.
 
-Os conjuntos de desenvolvimento e teste serão separados por documento ou original, mantendo variantes relacionadas no mesmo conjunto. Os originais usados para selecionar o modelo, ajustar regras e prompts, demonstrar o editor ou calibrar a grelha de apreciação serão excluídos do teste. Os autores anotarão independentemente uma parte do conjunto e registarão as divergências antes da sua resolução. As anotações de referência serão fixadas antes da execução final.
+Os conjuntos de desenvolvimento e teste serão separados por documento ou original, mantendo variantes relacionadas no mesmo conjunto. Os originais usados para selecionar o modelo, ajustar regras e prompts, demonstrar o editor ou calibrar a grelha de apreciação serão excluídos do teste. As anotações de referência (presença de problema, categoria e evidência) serão definidas em conjunto pelos autores e fixadas antes da execução final. Não haverá dupla anotação independente, pelo que não será calculada concordância entre anotadores.
 
 == Desenho dos Testes Técnicos
 
@@ -515,13 +515,13 @@ Os testes funcionais verificarão a gravação e recuperação de traduções, a
 
 == Apreciação Interna das Pistas
 
-Para responder à RQ2, os dois autores apreciarão independentemente uma amostra de explicações e pistas segundo uma grelha com critérios de correção, fundamentação no texto, clareza, utilidade para orientar a revisão e revelação da solução. A primeira versão da grelha distingue orientações de revisão, revelações parciais (por exemplo, um equivalente que resolve parte do problema) e revelações totais (a correção suficiente para substituir o trecho em causa). A frequência de revelação será calculada a partir da anotação humana dos textos avaliados. O contador de generalizações indica quantas vezes o filtro interveio. A versão final da grelha e o critério de seleção da amostra serão fixados antes da avaliação. Serão registadas concordâncias, divergências e exemplos de explicações incorretas ou não sustentadas pelo texto. Esta apreciação interna cobre o feedback nos casos estudados. A utilidade percebida por estudantes e os ganhos de aprendizagem exigem outro desenho de avaliação.
+Para responder à RQ2, uma amostra de explicações e pistas será apreciada segundo uma grelha com critérios de correção, fundamentação no texto, clareza, utilidade para orientar a revisão e revelação da solução. A anotação inicial será uma proposta, sem indicação da versão do feedback no conjunto de teste, revista em conjunto pelos dois autores, que decidem por consenso o valor final de cada critério. A primeira versão da grelha distingue orientações de revisão, revelações parciais (por exemplo, um equivalente que resolve parte do problema) e revelações totais (a correção suficiente para substituir o trecho em causa). A frequência de revelação será calculada a partir da anotação final, revista pelos autores. O contador de generalizações indica quantas vezes o filtro interveio. A versão final da grelha e o critério de seleção da amostra serão fixados antes da avaliação. Serão registadas as alterações dos autores à proposta inicial, por critério, e exemplos de explicações incorretas ou não sustentadas pelo texto. Esta apreciação interna cobre o feedback nos casos estudados. A utilidade percebida por estudantes e os ganhos de aprendizagem exigem outro desenho de avaliação.
 
 == Calibração da Grelha
 
 Foi preparada uma recolha de calibração com oito traduções sintéticas de seis originais, abrangendo significado e contexto, números e glossário, e incluindo duas traduções aceitáveis. Em 14 de novembro, obtiveram-se oito respostas válidas do Qwen local (Ollama 0.14.3). O relatório conserva os alertas das regras, os alertas validados do modelo antes da fusão e os alertas finais. Para cada caso, a recolha usa uma única chamada ao modelo e aplica a mesma fusão que o editor.
 
-Entre as observações iniciais, o Qwen assinalou uma proibição traduzida como permissão, mas também levantou um falso alerta na variante aceitável. Noutro exemplo, identificou um falso cognato sob a categoria de terminologia com glossário vazio e a pista forneceu um equivalente que passou pelo filtro. Estes exemplos permitem discutir como anotar a categoria, a adequação do feedback e a revelação. A classificação independente pelos dois autores e a avaliação no conjunto de teste estão por realizar.
+Entre as observações iniciais, o Qwen assinalou uma proibição traduzida como permissão, mas também levantou um falso alerta na variante aceitável. Noutro exemplo, identificou um falso cognato sob a categoria de terminologia com glossário vazio e a pista forneceu um equivalente que passou pelo filtro. Estes exemplos permitem discutir como anotar a categoria, a adequação do feedback e a revelação. Para os textos desta recolha, a anotação inicial é uma proposta revista em conjunto pelos autores, sendo as alterações registadas no histórico do repositório. A avaliação no conjunto de teste está por realizar.
 
 = Resultados e Discussão
 
@@ -534,7 +534,7 @@ Entre as observações iniciais, o Qwen assinalou uma proibição traduzida como
 
 As regras têm limites conhecidos. A verificação numérica só deteta números do original que faltam na tradução, não números acrescentados, e é ambígua perante sequências como "5 100". A terminologia só é verificada quando o termo do glossário surge no original como palavra completa, pelo que variações do original (como o plural) não são cobertas, e flexões na tradução exigem variantes explícitas. A regra numérica não interpreta unidades, números por extenso, datas ou intervalos; a preservação do valor não prova a adequação da tradução. O conjunto de desenvolvimento é pequeno (10 casos) e sintético.
 
-Os autores participarão no desenvolvimento, na preparação dos dados e na avaliação, o que introduz risco de enviesamento. A anotação independente de parte dos exemplos e o registo de divergências ajudam a explicitar esse risco, mas não substituem validação externa especializada. Serão descritas as competências linguísticas dos avaliadores e as limitações daí decorrentes.
+Os autores participarão no desenvolvimento, na preparação dos dados e na avaliação, o que introduz risco de enviesamento. A anotação das pistas é decidida por consenso entre os autores, a partir de uma proposta inicial, sem anotação independente nem medida de concordância entre anotadores. O registo das alterações à proposta torna o risco visível, mas não o elimina nem substitui validação externa especializada. Serão descritas as competências linguísticas dos avaliadores e as limitações daí decorrentes.
 
 O conjunto delimitado EN–PT-PT, os tipos de texto selecionados e a configuração de um único modelo local limitarão a generalização dos resultados. A avaliação interna permitirá caracterizar o protótipo e o feedback nos exemplos estudados, mas não demonstrará a sua eficácia pedagógica, a usabilidade junto do público-alvo ou efeitos na autonomia dos estudantes.
 
@@ -542,5 +542,9 @@ O conjunto delimitado EN–PT-PT, os tipos de texto selecionados e a configuraç
 
 // TODO: Sintetizar as conclusões obtidas face às perguntas de investigação RQ1 e RQ2.
 // TODO: Propor avaliação futura com estudantes para estudar padrões de decisão, usabilidade e efeitos na aprendizagem.
+
+= Declaração de Utilização de Ferramentas de IA
+
+Foi utilizada uma ferramenta de IA generativa na preparação dos exemplos sintéticos do conjunto de desenvolvimento. Os autores reveem esses exemplos e assumem a responsabilidade pelo seu conteúdo.
 
 #print-acl-bibliography()
