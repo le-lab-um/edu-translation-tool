@@ -3,7 +3,7 @@
   "split": "development",
   "source_language": "en",
   "target_language": "pt-PT",
-  "provenance": "Exemplos sintéticos preparados com assistência do Codex para desenvolvimento do protótipo. Não são traduções recolhidas de participantes.",
+  "provenance": "Exemplos sintéticos construídos para desenvolvimento do protótipo. Não são traduções recolhidas de participantes.",
   "annotation_status": "pending_author_review",
   "categories": {
     "empty_translation": "Tradução vazia ou composta apenas por espaços em branco.",

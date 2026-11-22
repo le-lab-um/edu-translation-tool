@@ -12,6 +12,8 @@ Os prompts v1 e v2 estão arquivados nesta pasta. A aplicação usa [o prompt v3
 
 Os relatórios provêm, respetivamente, de `translation-ollama-results-x7uk5n4t.json`, `translation-ollama-results-b54nfjkn.json` e `translation-ollama-results-e42m7hd1.json`. Não foram gerados novamente ao integrar a experiência no repositório.
 
+Em 22/11/2026 foi reformulada apenas a descrição do campo `provenance` em `data/development.json`. Os dez casos, os dados de entrada e as anotações não foram alterados. O hash `02f8b895911188fdcfc61e408cdd195237950faba9a86b1099ca797c4858187f` conservado nos relatórios corresponde ao ficheiro anterior a essa edição de metadados; o hash da versão atual é `37a1af4cade3d0e70b269b2459ebf4919ddd1846948e4033383266f7d36c33de`.
+
 ## Repetir a experiência
 
 Requisitos: Python 3.9 ou posterior, Ollama em execução no endereço local `http://localhost:11434` e o modelo abaixo instalado. Não são necessárias bibliotecas Python adicionais.
