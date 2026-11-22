@@ -1,0 +1,12 @@
+﻿row_id;caso;versao;origem
+r01;cal-06;regra;rules
+r02;cal-03;sem_alerta;
+r03;cal-02;apresentada;llm
+r04;cal-07;modelo;llm
+r05;cal-05;sem_alerta;
+r06;cal-06;modelo;llm
+r07;cal-07;apresentada;llm
+r08;cal-04;modelo=apresentada;llm
+r09;cal-01;modelo=apresentada;llm
+r10;cal-02;modelo;llm
+r11;cal-08;regra;rules
