@@ -16,7 +16,7 @@ O objetivo é disponibilizar a ferramenta como open source. A licença do reposi
 - **Memória de tradução (nível 1):** após confirmar uma tradução não vazia, o editor tenta guardar o par original/tradução. A memória é partilhada pela instância local. Ao abrir um segmento, aparecem sugestões de segmentos parecidos (RapidFuzz, limiar 70 %) com o botão **Usar**.
 - **Registos e exportação:** a interface envia eventos de início de exercício, gravação, verificação, pistas e uso da memória, com um ID persistente do browser e metadados, sem texto da tradução. A API aceita dados adicionais no `payload` e permite exportar sem autenticação. O rodapé dá acesso ao JSON e ao CSV. O resumo devolve o total de eventos, o total de identificadores distintos e contagens por tipo.
 - **Prompts:** o editor usa [`hint-v3.txt`](backend/prompts/hint-v3.txt). Os prompts v1 e v2 e as três execuções originais estão na [pasta do piloto](experiments/ollama-pilot/notes.md).
-- **Calibração das pistas:** oito casos sintéticos com respostas do Qwen real antes da fusão e feedback apresentado ao aluno. A [grelha preliminar](experiments/evaluation/README.md) está pronta para revisão pelos dois autores. A avaliação no conjunto de teste fica para depois de fechar a grelha.
+- **Calibração das pistas:** oito casos sintéticos com respostas do Qwen real antes da fusão e feedback apresentado ao aluno. A [grelha](experiments/evaluation/README.md) foi aplicada numa proposta de anotação (`experiments/evaluation/anotacao-folha.csv`), que os dois autores revêem em conjunto. A avaliação no conjunto de teste fica para depois de fechar a grelha.
 
 Ainda por implementar: histórico de versões, justificações do aluno, comparação crítica, avaliação comparativa regras/LLM/híbrido e identidade de exercício (ver limitação abaixo).
 
@@ -134,7 +134,7 @@ npm test
 npm run build
 ```
 
-Estado verificado para a reunião: **70 testes backend + 26 frontend = 96**, com build de produção. Os testes do adaptador simulam respostas do Ollama com `httpx.MockTransport`. No ensaio manual de 9 de novembro, anterior às duas regras técnicas, o Qwen real respondeu pelo editor. No exemplo `5 kg` → `5 lb`, o botão «Verificar» não gerou alertas e «Pedir pista» apresentou uma sugestão generalizada. A recolha de calibração de 14 de novembro usou o Qwen real com o prompt v3. A avaliação comparativa e a anotação independente das pistas estão por fazer. Os checks do Pages referem-se à página estática.
+Estado verificado para a reunião: **70 testes backend + 26 frontend = 96**, com build de produção. Os testes do adaptador simulam respostas do Ollama com `httpx.MockTransport`. No ensaio manual de 9 de novembro, anterior às duas regras técnicas, o Qwen real respondeu pelo editor. No exemplo `5 kg` → `5 lb`, o botão «Verificar» não gerou alertas e «Pedir pista» apresentou uma sugestão generalizada. A recolha de calibração de 14 de novembro usou o Qwen real com o prompt v3. A avaliação comparativa e a revisão da anotação das pistas pelos autores estão por fazer. Os checks do Pages referem-se à página estática.
 
 Percurso de verificação no navegador:
 
@@ -149,9 +149,9 @@ Percurso de verificação no navegador:
 
 ## Próximos passos, por incrementos
 
-1. **Ensaiar a demonstração e calibrar a grelha:** cada autor aprecia as respostas já recolhidas, compara os seus juízos com os do outro autor e regista divergências.
+1. **Ensaiar a demonstração e calibrar a grelha:** os autores revêem em conjunto a anotação proposta para as respostas já recolhidas e registam as alterações.
 2. **Preparar o teste e fechar o protocolo:** reservar originais distintos dos exemplos de desenvolvimento, calibração, demonstração e prompt. Fixar categorias e anotações de referência antes da recolha.
-3. **Executar a avaliação interna** (regras / LLM / híbrido) e apreciar independentemente as explicações e pistas. Calcular a taxa de revelação (RQ2) a partir da anotação humana. Os contadores de generalização descrevem intervenções do filtro.
+3. **Executar a avaliação interna** (regras / LLM / híbrido) e anotar as explicações e pistas (proposta inicial revista em conjunto pelos autores). Calcular a taxa de revelação (RQ2) a partir da anotação final. Os contadores de generalização descrevem intervenções do filtro.
 4. **Corrigir a identidade dos exercícios:** separar segmentos iguais em contextos diferentes, com testes de reabertura e preservação dos registos existentes.
 5. **Consolidar o artigo até 30 de novembro** e definir com o professor o âmbito do histórico de versões, das justificações e da comparação crítica.
 
