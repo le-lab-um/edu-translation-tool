@@ -1,0 +1,298 @@
+{
+  "split": "diagnostic",
+  "annotation_status": "pending_author_review",
+  "source_language": "en",
+  "target_language": "pt-PT",
+  "provenance": "Exemplos sintéticos redigidos com assistência de uma ferramenta de IA generativa, a rever pelos autores. Não são traduções recolhidas de participantes.",
+  "purpose": "Diagnóstico do prompt v3 (primeira fase da secção «Aperfeiçoamento das Instruções» do artigo). Faz parte do desenvolvimento: as respostas podem orientar a revisão do prompt e nunca entram no teste.",
+  "analysis_scopes": {
+    "diagnostic_meaning": "Significado e contexto: tempo e advérbios, falsos cognatos, negação, modalidade, quantificadores, expressão idiomática e condição."
+  },
+  "annotation_policy": [
+    "As categorias esperadas são propostas iniciais a rever pelos autores.",
+    "Nenhum original pode coincidir com os do teste, da calibração, do desenvolvimento, dos prompts, do editor ou da demonstração (verificar com experiments/evaluation/check_overlap.py).",
+    "Apenas input deve ser fornecido aos métodos."
+  ],
+  "cases": [
+    {
+      "id": "diag-01",
+      "source_id": "results-tomorrow",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "The results will be published tomorrow.",
+        "target": "Os resultados serão publicados amanhã.",
+        "context": "Aviso numa página de uma unidade curricular.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "Tempo e advérbio mantêm-se."
+    },
+    {
+      "id": "diag-02",
+      "source_id": "results-tomorrow",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "The results will be published tomorrow.",
+        "target": "Os resultados foram publicados ontem.",
+        "context": "Aviso numa página de uma unidade curricular.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "O futuro passa a passado e «tomorrow» a «ontem»."
+    },
+    {
+      "id": "diag-03",
+      "source_id": "printer-always",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "The printer is always available.",
+        "target": "A impressora está sempre disponível.",
+        "context": "Informação sobre os serviços de uma biblioteca.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "O advérbio mantém-se."
+    },
+    {
+      "id": "diag-04",
+      "source_id": "printer-always",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "The printer is always available.",
+        "target": "A impressora está raramente disponível.",
+        "context": "Informação sobre os serviços de uma biblioteca.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "«always» passou a «raramente»."
+    },
+    {
+      "id": "diag-05",
+      "source_id": "teacher-sympathetic",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "He was very sympathetic when we explained the problem.",
+        "target": "Foi muito compreensivo quando lhe explicámos o problema.",
+        "context": "Descrição de um professor que ouviu os problemas dos alunos.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "«Compreensivo» corresponde a «sympathetic» neste contexto."
+    },
+    {
+      "id": "diag-06",
+      "source_id": "teacher-sympathetic",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "He was very sympathetic when we explained the problem.",
+        "target": "Foi muito simpático quando lhe explicámos o problema.",
+        "context": "Descrição de um professor que ouviu os problemas dos alunos.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "Falso cognato: «sympathetic» não é «simpático»."
+    },
+    {
+      "id": "diag-07",
+      "source_id": "pretend-asleep",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "He pretended to be asleep.",
+        "target": "Ele fingiu estar a dormir.",
+        "context": "Narração de uma história infantil.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "«Fingiu» corresponde a «pretended»."
+    },
+    {
+      "id": "diag-08",
+      "source_id": "pretend-asleep",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "He pretended to be asleep.",
+        "target": "Ele pretendeu estar a dormir.",
+        "context": "Narração de uma história infantil.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "Falso cognato: «pretended» não é «pretendeu»."
+    },
+    {
+      "id": "diag-09",
+      "source_id": "no-need-login",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "There is no need to log in again.",
+        "target": "Não é necessário iniciar sessão novamente.",
+        "context": "Mensagem numa aplicação de apoio ao cliente.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "A negação mantém-se."
+    },
+    {
+      "id": "diag-10",
+      "source_id": "no-need-login",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "There is no need to log in again.",
+        "target": "É necessário iniciar sessão novamente.",
+        "context": "Mensagem numa aplicação de apoio ao cliente.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "A negação perdeu-se e o sentido ficou invertido."
+    },
+    {
+      "id": "diag-11",
+      "source_id": "update-might-fail",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "The update might fail on older devices.",
+        "target": "A atualização pode falhar em dispositivos mais antigos.",
+        "context": "Notas de uma atualização de software.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "A possibilidade mantém-se."
+    },
+    {
+      "id": "diag-12",
+      "source_id": "update-might-fail",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "The update might fail on older devices.",
+        "target": "A atualização falha em dispositivos mais antigos.",
+        "context": "Notas de uma atualização de software.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "A possibilidade passa a certeza."
+    },
+    {
+      "id": "diag-13",
+      "source_id": "route-second",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "This is the second-fastest route.",
+        "target": "Este é o segundo percurso mais rápido.",
+        "context": "Informação de uma aplicação de navegação.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "A ordem mantém-se."
+    },
+    {
+      "id": "diag-14",
+      "source_id": "route-second",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "This is the second-fastest route.",
+        "target": "Este é o percurso mais rápido.",
+        "context": "Informação de uma aplicação de navegação.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "A ordem («second») perdeu-se."
+    },
+    {
+      "id": "diag-15",
+      "source_id": "only-members",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "Only members can edit the page.",
+        "target": "Só os membros podem editar a página.",
+        "context": "Regras de uma comunidade em linha.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "A exclusividade mantém-se."
+    },
+    {
+      "id": "diag-16",
+      "source_id": "only-members",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "Only members can edit the page.",
+        "target": "Os membros podem editar a página.",
+        "context": "Regras de uma comunidade em linha.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "A exclusividade («only») perdeu-se."
+    },
+    {
+      "id": "diag-17",
+      "source_id": "raining-cats",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "It's raining cats and dogs outside.",
+        "target": "Está a chover a cântaros lá fora.",
+        "context": "Conversa informal sobre o tempo.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "Traduz o sentido figurado da expressão."
+    },
+    {
+      "id": "diag-18",
+      "source_id": "raining-cats",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "It's raining cats and dogs outside.",
+        "target": "Estão a chover gatos e cães lá fora.",
+        "context": "Conversa informal sobre o tempo.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "Tradução à letra de uma expressão idiomática."
+    },
+    {
+      "id": "diag-19",
+      "source_id": "payment-fails",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "If the payment fails, the order is cancelled.",
+        "target": "Se o pagamento falhar, a encomenda é cancelada.",
+        "context": "Condições de uma loja em linha.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "A condição mantém-se."
+    },
+    {
+      "id": "diag-20",
+      "source_id": "payment-fails",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "If the payment fails, the order is cancelled.",
+        "target": "Se o pagamento for concluído, a encomenda é cancelada.",
+        "context": "Condições de uma loja em linha.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "A condição ficou invertida."
+    }
+  ]
+}

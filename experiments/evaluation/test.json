@@ -7,7 +7,7 @@
   "analysis_scopes": {
     "rq1_main": "Análise principal da RQ1: tradução vazia, valores em algarismos e glossário, com controlos aceitáveis.",
     "rq2_meaning": "Significado e contexto: categoria exclusiva do modelo, apreciada na RQ2 e contada nos falsos alertas.",
-    "robustness": "Análise complementar: unidades, números acrescentados, datas e valores por extenso. Não entra nos agregados da análise principal."
+    "robustness": "Análise complementar: unidades, números acrescentados, datas e horas, intervalos e valores por extenso. Não entra nos agregados da análise principal."
   },
   "annotation_policy": [
     "As categorias esperadas são propostas iniciais a rever e fixar por consenso entre os autores antes de consultar as saídas dos métodos; não constituem validação linguística especializada.",
@@ -611,6 +611,34 @@
         "numeric_mismatch"
       ],
       "annotation_note": "O valor mudou de 3 para quatro, escrito por extenso."
+    },
+    {
+      "id": "test-39",
+      "source_id": "workshop-dates",
+      "analysis_scope": "robustness",
+      "input": {
+        "source": "The workshop runs from 10 to 12 June.",
+        "target": "O workshop decorre de 10 a 12 de junho.",
+        "context": "Programa de um evento de formação.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "O intervalo mantém-se."
+    },
+    {
+      "id": "test-40",
+      "source_id": "workshop-dates",
+      "analysis_scope": "robustness",
+      "input": {
+        "source": "The workshop runs from 10 to 12 June.",
+        "target": "O workshop decorre de 10 a 21 de junho.",
+        "context": "Programa de um evento de formação.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "numeric_mismatch"
+      ],
+      "annotation_note": "O fim do intervalo mudou de 12 para 21."
     }
   ]
 }
