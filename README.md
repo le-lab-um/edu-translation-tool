@@ -41,8 +41,8 @@ Ainda por implementar: histórico de versões, justificações do aluno, compara
 | `tests/` | Testes das regras, API e persistência; esta última usa SQLite em memória. |
 | `data/development.json` | Dez exemplos sintéticos, com anotações pendentes de revisão pelos autores. |
 | `experiments/ollama-pilot/` | Script, prompts, notas e relatórios históricos do piloto. |
-| `experiments/evaluation/` | Casos de calibração e de teste, recolha com o prompt da aplicação, verificador de repetições, relatórios e grelha de apreciação. |
-| `paper/main.typ` | Artigo Typst: enquadramento, proposta, implementação e protocolo previsto. |
+| `experiments/evaluation/` | Casos de calibração, diagnóstico e teste, recolha com o prompt da aplicação ou outro indicado, verificador de repetições, relatórios e grelha de apreciação. |
+| `paper/main.typ` | Artigo Typst: enquadramento, proposta, implementação e protocolo previsto. `paper/make_review.py` gera uma cópia só com as secções 1 a 3 e as referências. |
 | `docs/` | Página estática de apresentação no GitHub Pages; não executa o editor nem a API. |
 | `.gitignore` | Exclui ambientes, dependências, builds e base de dados local. |
 

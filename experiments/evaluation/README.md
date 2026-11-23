@@ -46,13 +46,13 @@ Depois de calibrar a grelha, fixar os critérios de anotação. O conjunto de te
 
 ## Conjunto de teste
 
-`test.json` tem 38 casos de 20 originais, todos diferentes dos usados no desenvolvimento, na calibração, nos prompts, no editor e na demonstração. Dezoito casos são traduções aceitáveis, para contar falsos alertas. Cada caso tem `analysis_scope`, `expected_categories` (vazio se a tradução é aceitável) e `annotation_note` (a evidência). Apenas `input` chega aos métodos.
+`test.json` tem 40 casos de 21 originais, todos diferentes dos usados no desenvolvimento, na calibração, nos prompts, no editor e na demonstração. Vinte casos são traduções aceitáveis, para contar falsos alertas. Cada caso tem `analysis_scope`, `expected_categories` (vazio se a tradução é aceitável) e `annotation_note` (a evidência). Apenas `input` chega aos métodos.
 
 | `analysis_scope` | Casos | Conteúdo |
 | --- | --- | --- |
 | `rq1_main` | 18 | Tradução vazia (2), números em algarismos (8) e glossário (8), com controlos aceitáveis. É a análise principal da RQ1. |
 | `rq2_meaning` | 12 | Significado e contexto: modalidade, negação, expressão idiomática, falso cognato, papéis e tempo. Só entra na RQ2 e na contagem de falsos alertas. |
-| `robustness` | 8 | Análise complementar: unidade, número acrescentado, hora e valor por extenso. Fica fora dos agregados da análise principal. |
+| `robustness` | 10 | Análise complementar: unidade, número acrescentado, hora, intervalo e valor por extenso. Fica fora dos agregados da análise principal. |
 
 Antes de recolher as respostas:
 
@@ -67,3 +67,26 @@ Recolher as respostas (uma só vez por configuração, com o Ollama a correr):
 ```
 
 Antes do primeiro caso faz um pedido de aquecimento (`--no-warmup` desativa-o) e, por caso, uma única chamada ao modelo. Nas traduções vazias a chamada é experimental: o resultado do modelo serve só para a condição «LLM isolado» e o híbrido devolve apenas o alerta da regra. O relatório regista, além do que já guardava na calibração, a revisão do código (e se havia alterações por commitar), as versões do Python e das dependências, o aquecimento, o número de tentativas e a resposta completa do Ollama por caso (tempos e contagem de tokens incluídos). Para anotar as pistas: `make_sheet` aceita o relatório de teste.
+
+## Diagnóstico e prompt v4
+
+`diagnostico.json` tem 20 casos de 10 originais, todos de significado e contexto: tempo e advérbios, falsos cognatos, negação, modalidade, quantificadores, expressão idiomática e condição. Faz parte do desenvolvimento: as suas respostas podem orientar a revisão do prompt e nunca entram no teste. Verificar com `check_overlap --cases experiments/evaluation/diagnostico.json`, que também compara com o teste.
+
+1. **Diagnóstico com o v3.** Recolher as respostas no desenvolvimento, na calibração e no diagnóstico:
+
+   ```sh
+   .venv/bin/python -m experiments.evaluation.run --cases data/development.json --output output/dev-v3-AAAA-MM-DD.json
+   .venv/bin/python -m experiments.evaluation.run --output output/cal-v3-AAAA-MM-DD.json
+   .venv/bin/python -m experiments.evaluation.run --cases experiments/evaluation/diagnostico.json --output output/diag-v3-AAAA-MM-DD.json
+   ```
+
+   Gerar uma folha de anotação por relatório com `make_sheet`, anotar e listar os padrões de falha (falsos alertas, omissões, categoria errada, pista que não é pergunta, revelação).
+2. **Escrever o v4** em `backend/prompts/hint-v4.txt`, só a partir desses padrões. Os exemplos do prompt não podem coincidir com o teste (o `check_overlap` do teste lê os prompts).
+3. **Comparar no teste**, na mesma sessão e com a mesma versão do Ollama:
+
+   ```sh
+   .venv/bin/python -m experiments.evaluation.run --cases experiments/evaluation/test.json --output output/teste-v3-AAAA-MM-DD.json
+   .venv/bin/python -m experiments.evaluation.run --cases experiments/evaluation/test.json --prompt backend/prompts/hint-v4.txt --output output/teste-v4-AAAA-MM-DD.json
+   ```
+
+   `--prompt` só muda o prompt: modelo, parâmetros e filtro mantêm-se. A aplicação continua a usar `hint-v3.txt` até se alterar `PROMPT_PATH` em `backend/llm.py`. Se o filtro também for alterado, os resultados passam a comparar configurações completas e isso tem de ficar escrito.
