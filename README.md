@@ -41,7 +41,7 @@ Ainda por implementar: histórico de versões, justificações do aluno, compara
 | `tests/` | Testes das regras, API e persistência; esta última usa SQLite em memória. |
 | `data/development.json` | Dez exemplos sintéticos, com anotações pendentes de revisão pelos autores. |
 | `experiments/ollama-pilot/` | Script, prompts, notas e relatórios históricos do piloto. |
-| `experiments/evaluation/` | Casos de calibração, recolha com o prompt da aplicação, relatório e grelha de apreciação. |
+| `experiments/evaluation/` | Casos de calibração e de teste, recolha com o prompt da aplicação, verificador de repetições, relatórios e grelha de apreciação. |
 | `paper/main.typ` | Artigo Typst: enquadramento, proposta, implementação e protocolo previsto. |
 | `docs/` | Página estática de apresentação no GitHub Pages; não executa o editor nem a API. |
 | `.gitignore` | Exclui ambientes, dependências, builds e base de dados local. |
@@ -150,7 +150,7 @@ Percurso de verificação no navegador:
 ## Próximos passos, por incrementos
 
 1. **Ensaiar a demonstração e calibrar a grelha:** os autores revêem em conjunto a anotação proposta para as respostas já recolhidas e registam as alterações.
-2. **Preparar o teste e fechar o protocolo:** reservar originais distintos dos exemplos de desenvolvimento, calibração, demonstração e prompt. Fixar categorias e anotações de referência antes da recolha.
+2. **Rever o conjunto de teste e fechar o protocolo:** o rascunho está em `experiments/evaluation/test.json`, com os originais verificados por `check_overlap.py`. Rever e fixar as categorias de referência antes da recolha.
 3. **Executar a avaliação interna** (regras / LLM / híbrido) e anotar as explicações e pistas (proposta inicial revista em conjunto pelos autores). Calcular a taxa de revelação (RQ2) a partir da anotação final. Os contadores de generalização descrevem intervenções do filtro.
 4. **Corrigir a identidade dos exercícios:** separar segmentos iguais em contextos diferentes, com testes de reabertura e preservação dos registos existentes.
 5. **Consolidar o artigo até 30 de novembro** e definir com o professor o âmbito do histórico de versões, das justificações e da comparação crítica.

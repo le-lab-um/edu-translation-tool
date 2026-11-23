@@ -42,4 +42,28 @@ A execução de 14 de novembro devolveu respostas válidas nos oito casos. O [re
 - **cal-04, falso cognato.** O modelo classificou o caso como terminologia, embora o glossário estivesse vazio, e sugeriu «apresentação». A resposta passou pelo filtro. É um caso para decidir o grau de revelação após ler o alerta completo.
 - **cal-06 e cal-07, números.** Num valor alterado, a regra teve prioridade. Na troca de unidade com o mesmo valor, a regra ficou em silêncio e o filtro generalizou a sugestão do modelo.
 
-Depois de calibrar a grelha, fixar os critérios de anotação e preparar o conjunto de teste com originais diferentes dos usados no desenvolvimento, na demonstração e no prompt. Reservar as métricas para a execução de teste após essa revisão.
+Depois de calibrar a grelha, fixar os critérios de anotação. O conjunto de teste está em `test.json` (ver abaixo). Reservar as métricas para a execução de teste após a revisão das categorias de referência.
+
+## Conjunto de teste
+
+`test.json` tem 38 casos de 20 originais, todos diferentes dos usados no desenvolvimento, na calibração, nos prompts, no editor e na demonstração. Dezoito casos são traduções aceitáveis, para contar falsos alertas. Cada caso tem `analysis_scope`, `expected_categories` (vazio se a tradução é aceitável) e `annotation_note` (a evidência). Apenas `input` chega aos métodos.
+
+| `analysis_scope` | Casos | Conteúdo |
+| --- | --- | --- |
+| `rq1_main` | 18 | Tradução vazia (2), números em algarismos (8) e glossário (8), com controlos aceitáveis. É a análise principal da RQ1. |
+| `rq2_meaning` | 12 | Significado e contexto: modalidade, negação, expressão idiomática, falso cognato, papéis e tempo. Só entra na RQ2 e na contagem de falsos alertas. |
+| `robustness` | 8 | Análise complementar: unidade, número acrescentado, hora e valor por extenso. Fica fora dos agregados da análise principal. |
+
+Antes de recolher as respostas:
+
+1. **Verificar repetições:** `.venv/bin/python -m experiments.evaluation.check_overlap` procura cada original (e cada termo de glossário) nos ficheiros do projeto e termina com erro se encontrar coincidências ou originais muito parecidos. Repetir depois de qualquer alteração ao conjunto.
+2. **Rever as categorias de referência** em conjunto, sem consultar as saídas dos métodos. Quando estiverem fixadas, mudar `annotation_status` para `reviewed` e fazer commit. O hash do ficheiro fica registado no relatório.
+3. **Não alterar** o prompt, o filtro nem o conjunto entre a revisão e a execução. Nenhum caso é excluído em função do resultado.
+
+Recolher as respostas (uma só vez por configuração, com o Ollama a correr):
+
+```sh
+.venv/bin/python -m experiments.evaluation.run --cases experiments/evaluation/test.json --output output/teste-AAAA-MM-DD.json
+```
+
+Antes do primeiro caso faz um pedido de aquecimento (`--no-warmup` desativa-o) e, por caso, uma única chamada ao modelo. Nas traduções vazias a chamada é experimental: o resultado do modelo serve só para a condição «LLM isolado» e o híbrido devolve apenas o alerta da regra. O relatório regista, além do que já guardava na calibração, a revisão do código (e se havia alterações por commitar), as versões do Python e das dependências, o aquecimento, o número de tentativas e a resposta completa do Ollama por caso (tempos e contagem de tokens incluídos). Para anotar as pistas: `make_sheet` aceita o relatório de teste.
