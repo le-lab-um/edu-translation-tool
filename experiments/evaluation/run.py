@@ -3,8 +3,9 @@
 Uso (na raiz do repositório, com o Ollama a correr):
     .venv/bin/python -m experiments.evaluation.run --output output/calibracao.json
     .venv/bin/python -m experiments.evaluation.run --cases experiments/evaluation/test.json --output output/teste.json
+    .venv/bin/python -m experiments.evaluation.run --cases experiments/evaluation/test.json --prompt backend/prompts/hint-v4.txt --output output/teste-v4.json
 
-Sem --cases usa o conjunto de calibração. Faz um pedido de aquecimento antes do primeiro caso
+Sem --cases usa o conjunto de calibração e, sem --prompt, o prompt da aplicação. Faz um pedido de aquecimento antes do primeiro caso
 (desativável com --no-warmup) e uma única chamada ao modelo por caso. Nas traduções vazias a
 chamada é experimental: serve só para a condição «LLM isolado», e o híbrido devolve apenas a regra.
 """
@@ -22,8 +23,9 @@ from pathlib import Path
 
 import httpx
 
+from backend import llm as llm_module
 from backend.hybrid import merge_issues
-from backend.llm import GENERATION_OPTIONS, PROMPT_PATH, LLMError, OllamaClient
+from backend.llm import GENERATION_OPTIONS, LLMError, OllamaClient
 from backend.rules import run_all_rules
 
 
@@ -142,8 +144,8 @@ async def collect_report(cases_path, warmup):
         "annotation_status": data.get("annotation_status", "unknown"),
         "cases_file": cases_path.name,
         "started_at": datetime.now(timezone.utc).isoformat(),
-        "prompt": PROMPT_PATH.name,
-        "prompt_sha256": hashlib.sha256(PROMPT_PATH.read_bytes()).hexdigest(),
+        "prompt": llm_module.PROMPT_PATH.name,
+        "prompt_sha256": hashlib.sha256(llm_module.PROMPT_PATH.read_bytes()).hexdigest(),
         "dataset_sha256": hashlib.sha256(dataset).hexdigest(),
         "code_revision": code_revision(),
         "python_version": platform.python_version(),
@@ -168,10 +170,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--cases", type=Path, default=CASES_PATH, help="Conjunto de casos (por omissão, a calibração).")
     parser.add_argument("--output", type=Path, required=True, help="Caminho para um novo relatório JSON.")
+    parser.add_argument("--prompt", type=Path, help="Prompt a usar nesta recolha (por omissão, o da aplicação).")
     parser.add_argument("--no-warmup", action="store_true", help="Não fazer o pedido de aquecimento.")
     args = parser.parse_args()
     if args.output.exists():
         parser.error(f"O ficheiro já existe: {args.output}")
+    if args.prompt is not None:
+        if not args.prompt.is_file():
+            parser.error(f"Prompt inexistente: {args.prompt}")
+        llm_module.PROMPT_PATH = args.prompt.resolve()
     try:
         report = asyncio.run(collect_report(args.cases, warmup=not args.no_warmup))
         args.output.parent.mkdir(parents=True, exist_ok=True)

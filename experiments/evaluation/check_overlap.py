@@ -1,13 +1,13 @@
 """Verifica se os originais de um conjunto de casos já apareceram noutro sítio do repositório.
 
 Uso (na raiz do repositório):
-    .venv/bin/python -m experiments.evaluation.check_overlap
-    .venv/bin/python -m experiments.evaluation.check_overlap --cases experiments/evaluation/test.json
+    .venv/bin/python -m experiments.evaluation.check_overlap                      # test.json
+    .venv/bin/python -m experiments.evaluation.check_overlap --cases experiments/evaluation/diagnostico.json
 
 Procura cada original (ignorando maiúsculas e pontuação) no texto de todos os ficheiros do projeto,
-exceto o próprio conjunto e os seus relatórios (test*.json). Avisa também de originais muito
-parecidos e de termos de glossário já usados no desenvolvimento ou na calibração.
-Termina com código 1 se encontrar alguma coincidência.
+incluindo os outros conjuntos de casos e os prompts. Ignora o próprio conjunto e os relatórios de
+recolha feitos com ele. Avisa também de originais muito parecidos e de termos de glossário já usados
+noutros conjuntos. Termina com código 1 se encontrar alguma coincidência.
 """
 
 import argparse
@@ -19,11 +19,11 @@ from pathlib import Path
 from rapidfuzz import fuzz
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_CASES = Path(__file__).with_name("test.json")
+EVALUATION_DIR = Path(__file__).resolve().parent
+DEFAULT_CASES = EVALUATION_DIR / "test.json"
 SUFFIXES = {".py", ".ts", ".tsx", ".json", ".md", ".txt", ".typ", ".csv", ".bib"}
 SKIP_DIRS = {".git", ".venv", "node_modules", "dist", "output", "__pycache__"}
 SKIP_NAMES = {"package-lock.json"}
-GLOSSARY_SOURCES = [ROOT / "data" / "development.json", Path(__file__).with_name("calibration.json")]
 
 
 def norm(text):
@@ -34,22 +34,29 @@ def project_files(root, cases_path):
     for path in sorted(root.rglob("*")):
         if not path.is_file() or path.suffix not in SUFFIXES or path.name in SKIP_NAMES:
             continue
-        if SKIP_DIRS & set(path.relative_to(root).parts):
-            continue
-        if path.resolve() == cases_path.resolve() or (path.parent == cases_path.parent and path.name.startswith("test")):
+        if SKIP_DIRS & set(path.relative_to(root).parts) or path.resolve() == cases_path.resolve():
             continue
         yield path
 
 
-def glossary_terms(path):
-    if not path.exists():
-        return set()
-    cases = json.loads(path.read_text(encoding="utf-8"))["cases"]
-    return {norm(g["source_term"]) for c in cases for g in c["input"]["glossary"]}
+def is_report_of(raw_text, cases_path):
+    return f'"cases_file": "{cases_path.name}"' in raw_text
+
+
+def other_glossary_terms(root, cases_path):
+    terms = set()
+    candidates = [root / "data" / "development.json", *sorted(EVALUATION_DIR.glob("*.json"))]
+    for path in candidates:
+        if not path.exists() or path.resolve() == cases_path.resolve():
+            continue
+        data = json.loads(path.read_text(encoding="utf-8"))
+        for case in data.get("cases", []) if isinstance(data, dict) else []:
+            terms |= {norm(g["source_term"]) for g in case["input"]["glossary"]}
+    return terms
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--cases", type=Path, default=DEFAULT_CASES)
     parser.add_argument("--root", type=Path, default=ROOT)
     parser.add_argument("--threshold", type=int, default=90, help="Semelhança mínima (0-100) para avisar de originais parecidos.")
@@ -59,7 +66,11 @@ def main():
     sources = {}
     for case in cases:
         sources.setdefault(case["input"]["source"], case["source_id"])
-    texts = {path: norm(path.read_text(encoding="utf-8", errors="ignore")) for path in project_files(args.root, args.cases)}
+    texts = {}
+    for path in project_files(args.root, args.cases):
+        raw = path.read_text(encoding="utf-8", errors="ignore")
+        if not is_report_of(raw, args.cases):
+            texts[path] = norm(raw)
 
     problems = []
     for source, source_id in sources.items():
@@ -73,16 +84,17 @@ def main():
                 if score >= args.threshold:
                     problems.append(f"PARECIDO  {source_id}: «{source}» (semelhança {score:.0f}) em {where}")
 
-    used_terms = set().union(*(glossary_terms(p) for p in GLOSSARY_SOURCES))
+    used_terms = other_glossary_terms(args.root, args.cases)
     for case in cases:
         for entry in case["input"]["glossary"]:
             if norm(entry["source_term"]) in used_terms:
-                problems.append(f"GLOSSÁRIO {case['source_id']}: o termo «{entry['source_term']}» já foi usado no desenvolvimento ou na calibração")
+                problems.append(f"GLOSSÁRIO {case['source_id']}: o termo «{entry['source_term']}» já foi usado noutro conjunto")
 
-    for line in dict.fromkeys(problems):
+    unique = list(dict.fromkeys(problems))
+    for line in unique:
         print(line)
-    if problems:
-        print(f"\n{len(set(problems))} coincidência(s). Mudar os originais afetados antes de fixar o conjunto.")
+    if unique:
+        print(f"\n{len(unique)} coincidência(s). Mudar os originais afetados antes de fixar o conjunto.")
         sys.exit(1)
     print(f"OK: {len(sources)} originais verificados em {len(texts)} ficheiros, sem coincidências.")
 
