@@ -1,21 +1,22 @@
 #import "@preview/tracl:0.8.1": *
 #import "@preview/pergamon:0.7.1": *
+#import "@preview/fletcher:0.5.8" as fletcher: diagram, node, edge
 
-#set text(lang: "pt", region: "PT")
+#set text(lang: "en", region: "US")
 #set page(footer: context align(center)[#text(size: 9pt)[#counter(page).display("1")]])
 
 #show: doc => acl(
   doc,
   anonymous: false,
   title: [
-    Ferramenta educativa de tradução open source
+    Educational Translation Tool
   ],
   authors: make-authors(
     (
-      name: "Diogo Pinto (PG61515) e Mariana Pinto (PG61534)",
+      name: "Diogo Pinto (PG61515) and Mariana Pinto (PG61534)",
       affiliation: [
-        Universidade do Minho\
-        Mestrado em Engenharia Informática
+        University of Minho\
+        MSc in Informatics Engineering
       ],
     ),
   ),
@@ -27,88 +28,17 @@
   radius: 2pt,
 )[#text(size: 8.5pt, fill: rgb("#92400e"))[\[#strong[TODO:] #body\]]]
 
-#show regex("https?://[^\s)\]]+"): it => link(it.text)[#it]
-#show "Abstract": [Resumo]
-#show "References": [Referências]
+// Colors shared by the architecture diagrams (one per level of the application).
+#let c-l1 = rgb("#dbeafe")  // level 1: CAT core
+#let c-l2 = rgb("#dcfce7")  // level 2: deterministic checks
+#let c-l3 = rgb("#ffedd5")  // level 3: local model and merging
+#let c-x = rgb("#f1f5f9")   // cross-cutting instrumentation
+#let c-ext = rgb("#ede9fe") // storage and external services
+#let diamond = fletcher.shapes.diamond
 
+// Only peer-reviewed papers and preprints go in the bibliography.
+// Official documentation, product pages and repositories are given as footnotes.
 #let referencias = ```bib
-@misc{rws-studio,
-  author = {{RWS}},
-  title = {{Trados Studio}},
-  url = {https://www.trados.com/product/studio/},
-  note = {Documentação oficial. Consultado em 22/11/2026}
-}
-
-@misc{rws-qa,
-  author = {{RWS}},
-  title = {{eLearning for Trados Studio: Level 2 — QA check and term verifier}},
-  url = {https://www.trados.com/training/eLearning-trados-studio-level-2-qa-checker-and-term-verifier/},
-  note = {Curso oficial de formação (eLearning). Consultado em 22/11/2026}
-}
-
-@misc{rws-smart,
-  author = {{RWS}},
-  title = {{Learn about Smart Review}},
-  url = {https://www.trados.com/product/features/smart-review/},
-  note = {Documentação oficial. Consultado em 22/11/2026}
-}
-
-@misc{memoq-pro,
-  author = {{memoQ}},
-  title = {{memoQ translator pro}},
-  url = {https://www.memoq.com/product/memoq-translator-pro/},
-  note = {Documentação oficial. Consultado em 22/11/2026}
-}
-
-@misc{memoq-qa,
-  author = {{memoQ}},
-  title = {{Quality Assurance (QA) warnings}},
-  url = {https://docs.memoq.com/12-5/en/Concepts/concepts-quality-assurance-qa-warnings.html},
-  note = {Manual em linha, versão 12.5. Consultado em 22/11/2026}
-}
-
-@misc{memoq-lqa,
-  author = {{memoQ}},
-  title = {{Linguistic Quality Assurance (LQA) models}},
-  url = {https://docs.memoq.com/current/en/Concepts/concepts-linguistic-quality-assurance.html},
-  note = {Manual em linha, versão 12.6. Consultado em 22/11/2026}
-}
-
-@misc{memoq-history,
-  author = {{memoQ}},
-  title = {{History and reports}},
-  url = {https://docs.memoq.com/12-5/en/Workspace/history-reports.html},
-  note = {Manual em linha, versão 12.5. Consultado em 22/11/2026}
-}
-
-@misc{memoq-university,
-  author = {{memoQ}},
-  title = {{University Program}},
-  url = {https://www.memoq.com/services/programs/university-program/},
-  note = {Condições do programa educativo. Consultado em 22/11/2026}
-}
-
-@misc{omegat,
-  author = {{OmegaT Project}},
-  title = {{OmegaT: The Free Translation Memory Tool}},
-  url = {https://omegat.org/},
-  note = {Página oficial. Consultado em 22/11/2026}
-}
-
-@misc{omegat-manual,
-  author = {{OmegaT Project}},
-  title = {{OmegaT 6.1.0 User Manual: Chapter 4 — Menus}},
-  url = {https://omegat.sourceforge.io/manual-standard/en/chapter.menus.html},
-  note = {Manual oficial, secção Tools / Check Issues. Consultado em 22/11/2026}
-}
-
-@misc{opentlc,
-  author = {{KlinsBt}},
-  title = {{Open Translation Client (Open TLC)}},
-  url = {https://github.com/KlinsBt/open-translation-client},
-  note = {Repositório oficial e README, ramo main. Consultado em 22/11/2026}
-}
-
 @inproceedings{lefer2024,
   author = {Lefer, Marie-Aude and Bodart, Romane and Piette, Justine and Obrusník, Adam},
   title = {{MTPE quality evaluation in translator education: the postedit.me app}},
@@ -129,13 +59,6 @@
   address = {Tampere, Finland},
   publisher = {European Association for Machine Translation},
   url = {https://aclanthology.org/2023.eamt-1.52/}
-}
-
-@misc{mqm,
-  author = {{MQM Council}},
-  title = {{The MQM Error Typology}},
-  url = {https://www.themqm.org/mqm-pillars/typology/},
-  note = {Tipologia oficial MQM. Consultado em 22/11/2026}
 }
 
 @inproceedings{kocmi2023,
@@ -187,16 +110,9 @@
   author = {Dogru, Gokhan and Martín Mor, Adrià},
   title = {{From Tool Use to Technological Agency: LoopCAT as a Local-First, Open-Source Tool for Translation Technology Education}},
   year = {2026},
-  howpublished = {Pré-publicação arXiv:2609.00344},
+  howpublished = {arXiv preprint arXiv:2609.00344},
   url = {https://arxiv.org/abs/2609.00344v1},
-  note = {Versão v1. Consultado em 22/11/2026}
-}
-
-@misc{loopcat-repo,
-  author = {Dogru, Gokhan},
-  title = {{LoopCAT: repositório e documentação}},
-  url = {https://github.com/gokhandogru/LoopCAT},
-  note = {Repositório público e README consultados em 22/11/2026. Revisão documental, sem execução independente}
+  note = {Version 1}
 }
 
 @inproceedings{carl2012,
@@ -209,259 +125,393 @@
   publisher = {European Language Resources Association (ELRA)},
   url = {https://aclanthology.org/L12-1352/}
 }
-
-@misc{rapidfuzz-ratio,
-  author = {{RapidFuzz Contributors}},
-  title = {{RapidFuzz: fuzz.ratio}},
-  url = {https://rapidfuzz.github.io/RapidFuzz/Usage/fuzz.html},
-  note = {Documentação da similaridade Indel normalizada. Consultado em 22/11/2026}
-}
-
-@misc{qwen-ollama,
-  author = {{Ollama}},
-  title = {{Qwen3: 4b-instruct-2507-q4\_K\_M}},
-  url = {https://ollama.com/library/qwen3:4b-instruct-2507-q4_K_M},
-  note = {Ficha do modelo. Consultado em 22/11/2026}
-}
-
 ```
 
 #add-bib-resource(referencias.text)
 
 #abstract[
-Apresenta-se a Educational Translation Tool, uma aplicação web educativa para a prática de tradução de inglês para português europeu. O protótipo combina um editor segmentado com persistência e memória de tradução, cinco verificações determinísticas e pistas a pedido geradas por um modelo Qwen executado localmente através de Ollama. O desenho do feedback orientado à revisão pelo aluno é fundamentado numa revisão documental de sete ferramentas, enquanto a fusão dos alertas preserva a sua origem e inclui um filtro heurístico de possível revelação da solução. A verificação funcional abrangeu 96 testes automáticos e foi complementada por experiências exploratórias com o modelo real, nas quais se observaram deteções úteis, falsos alertas, omissões e pistas que fornecem a correção. Estas observações sustentam a definição de um protocolo interno para comparar regras, modelo e abordagem híbrida nas categorias comuns e apreciar a qualidade e a revelação das pistas. A avaliação final encontra-se em preparação, permanecendo o estudo da eficácia pedagógica junto de estudantes como uma questão para investigação futura.
+We present the Educational Translation Tool, an educational web application for practicing translation from English into European Portuguese. The prototype combines a segmented editor with persistence and translation memory, five deterministic checks and on-demand hints generated by a Qwen model run locally through Ollama. The feedback design, which aims to keep revision in the student's hands, is grounded in a document-based review of seven tools; when rule and model issues are merged, each keeps its origin, and a heuristic filter limits possible solution disclosure. Functional verification comprised 96 automated tests and was complemented by exploratory experiments with the real model, which revealed useful detections, false alarms, omissions and hints that give away the correction. These observations informed an internal protocol that compares rules, model and hybrid approach on the categories they share and assesses the quality and disclosure of the hints. The final evaluation is in preparation, and the pedagogical effectiveness of the tool with students remains a question for future research.
 ]
 
-= Introdução
+= Introduction
 
-As ferramentas de tradução assistida por computador, habitualmente designadas CAT (_Computer-Assisted Translation_), organizam o trabalho em torno da edição segmentada, das memórias de tradução e dos recursos terminológicos #cite("rws-studio", "memoq-pro", "omegat"). Na formação em tradução, a utilização destes recursos articula-se com a necessidade de desenvolver a capacidade de avaliar propostas e justificar escolhas. O estudo exploratório de #citet("dogru2026") ilustra esta dimensão ao mostrar como tarefas de comparação e pós-edição podem tornar observável o julgamento avaliativo dos estudantes.
+Computer-assisted translation (CAT) tools such as Trados Studio, memoQ and OmegaT organize work around segmented editing, translation memories and terminology resources.#footnote[Trados Studio: #link("https://www.trados.com/product/studio/")\; memoQ translator pro: #link("https://www.memoq.com/product/memoq-translator-pro/")\; OmegaT: #link("https://omegat.org/"). All URLs in this paper were accessed on 22 November 2026.] <fn-cat> In translator education, the use of these resources goes hand in hand with the need to develop the ability to assess proposals and justify choices. The exploratory study by #citet("dogru2026") illustrates this dimension by showing how comparison and post-editing tasks can make students' evaluative judgement observable.
 
-O feedback produzido por uma ferramenta influencia, contudo, o trabalho de revisão que permanece a cargo do aluno. Quando o sistema indica um equivalente ou reescreve a tradução, pode resolver imediatamente o trecho em causa; uma pista, por sua vez, pode orientar a comparação entre o original e a tradução, deixando a reformulação ao aluno. O desafio consiste, por isso, em produzir informação suficientemente específica para apoiar a revisão e, simultaneamente, controlar a revelação da resposta.
+The feedback produced by a tool, however, shapes the revision work that remains the student's responsibility. When the system points to an equivalent or rewrites the translation, it may immediately resolve the passage in question; a hint, in contrast, can guide the comparison between source and translation while leaving the reformulation to the student. The challenge is therefore to produce information specific enough to support revision while controlling how much of the answer is disclosed.
 
-A Educational Translation Tool explora este equilíbrio em textos curtos de inglês para português europeu (EN–PT-PT), através de um percurso em que o aluno escreve a tradução, utiliza recursos CAT, executa verificações explícitas e solicita pistas a um modelo local. A contribuição do trabalho reúne uma implementação inspecionável, a identificação da origem dos alertas e um protocolo para avaliar separadamente a deteção de problemas e a qualidade do feedback.
+The Educational Translation Tool explores this balance for short texts translated from English into European Portuguese (EN–PT-PT), through a workflow in which the student writes the translation, uses CAT resources, runs explicit checks and requests hints from a local model. Our contribution combines an inspectable implementation, the identification of the origin of each issue and a protocol that evaluates problem detection and feedback quality separately.
 
-Neste enquadramento, o estudo compreende a caracterização do protótipo e a análise das evidências exploratórias que sustentam a definição dos critérios de avaliação. A comparação experimental final encontra-se em preparação, pelo que os ensaios realizados permitem, nesta fase, identificar limitações e orientar a avaliação da deteção e do feedback.
+This paper characterizes the prototype and analyzes the exploratory evidence used to define the evaluation criteria. The final experimental comparison is in preparation; at this stage, the trials we have carried out serve to identify limitations and to guide the evaluation of detection and feedback.
 
-== Conceitos e Âmbito
+== Concepts and Scope
 
-No editor, um *segmento* constitui a unidade de trabalho e corresponde a uma linha não vazia do original e à tradução escrita pelo aluno. O apoio à tradução é complementado por um *glossário*, que define os equivalentes aceites num exercício, e por uma *memória de tradução*, que recupera pares original–tradução guardados anteriormente a partir da semelhança entre os originais.
+In the editor, a *segment* is the unit of work and corresponds to a non-empty line of the source text together with the translation written by the student. Translation support is complemented by a *glossary*, which defines the accepted equivalents in an exercise, and by a *translation memory*, which retrieves previously saved source–target pairs based on the similarity between source texts.
 
-O desenho das *pistas pedagógicas* inspira-se no conceito de _scaffolding_, entendido como o apoio do tutor à resolução de uma tarefa pelo aprendente #cite("wood1976"). Neste projeto, as pistas são solicitadas pelo aluno e procuram localizar um problema e suscitar a revisão da tradução. Cada alerta contém uma explicação e uma pista; quando é gerado pelo modelo, considera o original, a tradução atual, o contexto e o glossário, sem recorrer a um perfil do aluno ou ao histórico das suas tentativas.
+The design of the *pedagogical hints* draws on the concept of _scaffolding_, understood as the tutor's support for the learner's resolution of a task #cite("wood1976"). In this project, hints are requested by the student and aim to locate a problem and prompt the revision of the translation. Each issue contains an explanation and a hint; when generated by the model, it takes into account the source, the current translation, the context and the glossary, without relying on a student profile or on the history of previous attempts.
 
-As verificações de *QA determinístico* correspondem a condições escritas explicitamente em código, como a comparação de números ou marcadores. Esta dimensão formal distingue-se da avaliação linguística humana, conforme documentado em ferramentas como o memoQ #cite("memoq-qa"), e é complementada pelo *LLM local*, executado no computador que aloja o backend. A *abordagem híbrida* combina os alertas das regras e do modelo, preservando a origem de cada um. Para apreciar o seu comportamento, considera-se *falso alerta* a identificação de um problema ausente e *revelação* o fornecimento, na explicação ou na pista, de conteúdo suficiente para corrigir parte ou a totalidade do trecho em análise.
+*Deterministic QA* checks correspond to conditions written explicitly in code, such as comparing numbers or placeholders. This formal dimension is distinct from human linguistic assessment, as documented in tools such as memoQ,#footnote[memoQ, _Quality Assurance (QA) warnings_, online manual v12.5: #link("https://docs.memoq.com/12-5/en/Concepts/concepts-quality-assurance-qa-warnings.html").] <fn-memoq-qa> and is complemented by the *local LLM*, which runs on the computer that hosts the backend. The *hybrid approach* combines the issues raised by the rules and by the model while preserving the origin of each one. To assess its behavior, we define a *false alarm* as the identification of a problem that is not present, and *disclosure* as the provision, in the explanation or in the hint, of enough content to correct part or all of the passage under analysis.
 
-== Objetivos e Perguntas de Investigação
+== Objectives and Research Questions
 
-O objetivo geral consiste em desenvolver e avaliar um protótipo que apoie a revisão de traduções EN–PT-PT mediante verificações formais e pistas a pedido. Os objetivos pedagógicos orientam o desenho da ferramenta, enquanto a avaliação interna incide sobre o seu funcionamento e o feedback produzido. A apreciação dos efeitos na aprendizagem exigirá um estudo posterior com estudantes.
+Our overall objective is to develop and evaluate a prototype that supports the revision of EN–PT-PT translations through formal checks and on-demand hints. The pedagogical objectives guide the design of the tool, whereas the internal evaluation addresses its operation and the feedback it produces. Assessing the effects on learning will require a subsequent study with students.
 
-Os objetivos pedagógicos são apoiar o julgamento avaliativo por meio de pistas (*OP1*) e tornar observáveis as ações de revisão através do seu registo e consulta (*OP2*). OP1 encontra expressão nas explicações e pistas apresentadas ao aluno, enquanto OP2 é apoiado pelos eventos de utilização já recolhidos e exportáveis. Está prevista a organização desses eventos num histórico simples e cronológico, que permita consultar as ações realizadas durante o exercício.
+The pedagogical objectives are to support evaluative judgement through hints (*PO1*) and to make revision actions observable by logging them so that they can be inspected (*PO2*). PO1 is expressed in the explanations and hints shown to the student, while PO2 is supported by the usage events that are already collected and exportable. We plan to organize these events into a simple chronological history in which the actions performed during the exercise can be reviewed.
 
-Os objetivos de engenharia abrangem o editor CAT com memória e glossário (*OE1*), as cinco regras determinísticas (*OE2*), a integração do modelo local e a fusão dos alertas (*OE3*) e a instrumentação com exportação e histórico simples de ações (*OE4*). Neste último objetivo, o registo e a exportação encontram-se implementados, permanecendo prevista a extensão para consulta cronológica dos eventos.
+The engineering objectives cover the CAT editor with memory and glossary (*EO1*), the five deterministic rules (*EO2*), the integration of the local model and the merging of issues (*EO3*) and instrumentation with export and a simple action history (*EO4*). For EO4, logging and export are implemented, while chronological viewing of the events is still planned.
 
-A avaliação interna tem dois objetivos complementares: *OA1* compara a deteção das regras, do modelo e do híbrido sobre exemplos anotados; *OA2* aprecia a correção, a fundamentação, a clareza, a utilidade para orientar a revisão e a revelação da solução nas explicações e pistas. Estes objetivos traduzem-se nas seguintes perguntas de investigação:
+The internal evaluation has two complementary objectives: *EV1* compares the detection of the rules, the model and the hybrid approach on annotated examples; *EV2* assesses the correctness, grounding, clarity, usefulness for guiding revision and solution disclosure of the explanations and hints. These objectives translate into the following research questions:
 
-- *RQ1 — Deteção comparada.* Que diferenças de precisão, recall e F1 existem entre regras determinísticas, modelo local isolado e abordagem híbrida na deteção de problemas de tradução vazia, preservação de valores numéricos e cumprimento do glossário, face a anotações de referência definidas pelos autores num conjunto EN–PT-PT?
-- *RQ2 — Qualidade do feedback.* Como são apreciadas internamente as explicações e pistas do modelo e do híbrido quanto à correção, fundamentação, clareza e utilidade, e com que frequência revelam a solução?
+- *RQ1 — Comparative detection.* What differences in precision, recall and F1 exist between deterministic rules, the local model alone and the hybrid approach in detecting empty translations, non-preserved numeric values and glossary non-compliance, against reference annotations defined by the authors on an EN–PT-PT set?
+- *RQ2 — Feedback quality.* How are the explanations and hints of the model and of the hybrid approach internally assessed in terms of correctness, grounding, clarity and usefulness, and how often do they disclose the solution?
 
-A RQ1 incide na deteção produzida por OE2 e OE3, enquanto a RQ2 aprecia o feedback associado a OP1 e OE3. As funcionalidades de OE1, OE4 e as componentes implementadas de OP2 são sujeitas a verificação funcional. Deste modo, a avaliação interna caracteriza a deteção e o feedback nos exemplos estudados, sem medir ganhos de aprendizagem ou autonomia.
+RQ1 addresses the detection produced by EO2 and EO3, while RQ2 assesses the feedback associated with PO1 and EO3. The features of EO1, EO4 and the implemented components of PO2 are subject to functional verification. The internal evaluation thus characterizes detection and feedback on the examples studied, without measuring learning gains or autonomy.
 
-= Estado da Arte
+= Related Work
 
-== Critérios da Revisão Documental
+== Review Criteria
 
-A revisão documental foi orientada ao desenho do protótipo e abrangeu sete sistemas, selecionados por representarem CAT profissionais, alternativas abertas, plataformas educativas ou ferramentas de avaliação de tradução. A consulta de documentação oficial, repositórios e artigos científicos permitiu analisar o acesso ao código, o QA por regras, o feedback por LLM, a instrumentação e o enquadramento educativo de cada sistema.
+Our document-based review was oriented toward the design of the prototype and covered seven systems, selected because they represent professional CAT tools, open alternatives, educational platforms or translation evaluation tools. Drawing on official documentation, repositories and scientific articles, we analyzed for each system access to the source code, rule-based QA, LLM-based feedback, instrumentation and educational framing.
 
-A seleção procura reunir referências funcionais e pedagógicas relevantes, sem constituir uma revisão sistemática da literatura ou uma comparação de desempenho por execução independente das ferramentas. As características apresentadas resultam das fontes citadas, sendo a indicação «ND» utilizada quando uma característica não foi documentada nas fontes analisadas. Como os conteúdos online podem evoluir, as referências incluem as respetivas datas de consulta.
+The selection seeks to gather relevant functional and pedagogical references; it is neither a systematic literature review nor a performance comparison based on running the tools ourselves. The characteristics presented derive from the sources cited, with "ND" used when a characteristic was not documented in the sources analyzed. Peer-reviewed work is listed in the references, while official documentation, product pages and repositories are given in footnotes; since online content may change, all of them were accessed on the same date.
 
-== Ferramentas de Apoio à Tradução
+== Translation Support Tools
 
-Entre os CAT profissionais, o *Trados Studio* reúne memórias, terminologia e QA #cite("rws-studio", "rws-qa"), acrescentando, através do Smart Review, a utilização de um LLM para classificar segmentos, explicar a avaliação e sugerir intervenções, incluindo equivalentes para termos incorretos #cite("rws-smart"). Constitui, assim, uma referência para revisão assistida por IA, embora o grau de explicitação do feedback possa fornecer a correção de um exercício.
+Among professional CAT tools, *Trados Studio* brings together memories, terminology and QA checks,#footnote[RWS, _eLearning for Trados Studio: Level 2 — QA check and term verifier_: #link("https://www.trados.com/training/eLearning-trados-studio-level-2-qa-checker-and-term-verifier/").] and adds, through Smart Review, the use of an LLM to classify segments, explain the assessment and suggest interventions, including equivalents for incorrect terms.#footnote[RWS, _Learn about Smart Review_: #link("https://www.trados.com/product/features/smart-review/").] It is thus a reference for AI-assisted revision, although the explicitness of its feedback may give away the answer to an exercise.
 
-O *memoQ* combina igualmente recursos CAT e verificações formais automáticas, distinguindo-os da avaliação linguística humana configurável #cite("memoq-pro", "memoq-qa", "memoq-lqa"). O histórico e a comparação de versões apoiam a inspeção das alterações #cite("memoq-history"), enquanto o programa universitário documenta a utilização educativa de uma plataforma comercial #cite("memoq-university").
+*memoQ* likewise combines CAT resources with automatic formal checks,#footnote(<fn-memoq-qa>) distinguishing them from configurable human linguistic quality assurance (LQA).#footnote[memoQ, _Linguistic Quality Assurance (LQA) models_, online manual v12.6: #link("https://docs.memoq.com/current/en/Concepts/concepts-linguistic-quality-assurance.html").] History and version comparison support the inspection of changes,#footnote[memoQ, _History and reports_, online manual v12.5: #link("https://docs.memoq.com/12-5/en/Workspace/history-reports.html").] while its university program documents the educational use of a commercial platform.#footnote[memoQ, _University Program_: #link("https://www.memoq.com/services/programs/university-program/").]
 
-Como alternativa aberta para desktop, o *OmegaT* disponibiliza memórias TMX, glossários e verificações através de _Check Issues_, incluindo etiquetas, terminologia e integração com LanguageTool #cite("omegat", "omegat-manual"). Estas funcionalidades oferecem uma referência de núcleo CAT inspecionável. No contexto web, o *Open TLC* disponibiliza um CAT sob MPL-2.0 para tradutores, docentes e estudantes, com memórias, glossários e persistência dos projetos no navegador através de IndexedDB #cite("opentlc"). O seu desenho evidencia a viabilidade de um ambiente CAT web com persistência local.
+As an open desktop alternative, *OmegaT* provides TMX memories, glossaries and checks through _Check Issues_, including tags, terminology and LanguageTool integration.#footnote[OmegaT 6.1.0 User Manual, Chapter 4 (Tools › Check Issues): #link("https://omegat.sourceforge.io/manual-standard/en/chapter.menus.html").] These features offer a reference for an inspectable CAT core. In the web context, *Open TLC* provides a CAT tool under MPL-2.0 for translators, teachers and students, with memories, glossaries and in-browser project persistence through IndexedDB.#footnote[Open Translation Client (Open TLC), official repository and README, branch `main`: #link("https://github.com/KlinsBt/open-translation-client").] Its design shows the feasibility of a web CAT environment with local persistence.
 
-Nas ferramentas com enfoque educativo, o *postedit.me* centra-se na formação em pós-edição e na avaliação dos textos produzidos por estudantes #cite("lefer2024"). O artigo descreve anotações de erros, análise das intervenções e tipologias TAS e MTPEAS, com disponibilização gratuita às universidades para ensino e investigação interna mediante um acordo de licença.
+Among tools with an educational focus, *postedit.me* centers on post-editing training and on the assessment of texts produced by students #cite("lefer2024"). The paper describes error annotation, the analysis of interventions and the TAS and MTPEAS typologies; the tool is available free of charge to universities for teaching and internal research under a license agreement.
 
-O *MATEO*, por sua vez, fornece uma interface web para avaliar tradução automática com métricas como BLEU, chrF, TER e COMET #cite("vanroy2023"). A comparação de sistemas e a apresentação de pontuações agregadas apoiam a literacia avaliativa, constituindo um recurso distinto da orientação localizada que uma pista procura fornecer ao aluno.
+*MATEO*, in turn, provides a web interface for evaluating machine translation with metrics such as BLEU, chrF, TER and COMET #cite("vanroy2023"). By comparing systems and presenting aggregate scores, it supports evaluation literacy, which is a different kind of support from the localized guidance that a hint seeks to give the student.
 
-O *LoopCAT* aproxima várias destas componentes num ambiente CAT aberto sob Apache-2.0, com armazenamento local, memórias, terminologia, QA e histórico por segmento #cite("loopcat2026", "loopcat-repo"). A documentação inclui revisão por IA e ligações opcionais a modelos locais ou externos #cite("loopcat-repo"), enquadrando a ferramenta numa proposta educativa que abrange operação, avaliação e intervenção no sistema. A pré-publicação distingue, contudo, as capacidades implementadas dos benefícios pedagógicos ainda por estudar.
+*LoopCAT* brings several of these components together in an open CAT environment under Apache-2.0, with local storage, memories, terminology, QA and per-segment history #cite("loopcat2026").#footnote[LoopCAT public repository and README: #link("https://github.com/gokhandogru/LoopCAT"). Reviewed from its documentation only, without running the tool.] <fn-loopcat> Its documentation includes AI review and optional connections to local or external models,#footnote(<fn-loopcat>) and the authors frame the tool within an educational proposal that covers operating, evaluating and intervening in the system. The preprint nevertheless distinguishes the implemented capabilities from the pedagogical benefits that have yet to be studied.
 
 #figure(
   {
     set text(size: 8pt)
     set par(justify: false, leading: 0.5em)
     table(
-      columns: (1fr, 1fr, 1fr, 1.25fr, 1.3fr, 1.5fr),
+      columns: (1fr, 1fr, 1fr, 1fr, 1.3fr, 1.5fr),
       inset: 5pt,
       stroke: (x: none, y: 0.4pt + luma(75%)),
       align: left + horizon,
-      table.header([*Sistema*], [*Código aberto*], [*QA por regras*], [*Feedback por LLM*], [*Registo documentado*], [*Enquadramento educativo*]),
-      [Trados], [Não], [Sim], [Smart Review], [ND nesta revisão], [Uso profissional],
-      [memoQ], [Não], [Sim], [ND nesta revisão], [Histórico e versões], [Programa universitário],
-      [OmegaT], [Sim], [Sim], [ND nesta revisão], [Dados do projeto], [ND nesta revisão],
-      [Open TLC], [Sim], [ND nesta revisão], [ND nesta revisão], [Projetos no navegador], [Estudantes e docentes],
-      [postedit.me], [Não (licença institucional)], [ND nesta revisão], [ND nesta revisão], [Edições e anotações], [Formação em pós-edição],
-      [MATEO], [Sim], [ND nesta revisão], [ND nesta revisão], [Resultados e exportação], [Literacia avaliativa],
-      [LoopCAT], [Sim], [Sim], [Opcional], [Histórico por segmento], [Tecnologias de tradução],
+      table.header([*System*], [*Open source*], [*Rule-based QA*], [*LLM feedback*], [*Documented logging*], [*Educational framing*]),
+      [Trados], [No], [Yes], [Smart Review], [ND], [Professional use],
+      [memoQ], [No], [Yes], [ND], [History and versions], [University program],
+      [OmegaT], [Yes], [Yes], [ND], [Project data], [ND],
+      [Open TLC], [Yes], [ND], [ND], [In-browser projects], [Students and teachers],
+      [postedit.me], [No (institutional license)], [ND], [ND], [Edits and annotations], [Post-editing training],
+      [MATEO], [Yes], [ND], [ND], [Results and export], [Evaluation literacy],
+      [LoopCAT], [Yes], [Yes], [Optional], [Per-segment history], [Translation technology],
     )
   },
   kind: table,
-  supplement: [Tabela],
-  caption: [Síntese documental das sete ferramentas a partir das fontes citadas. ND indica informação não documentada na revisão. Projetos guardados, resultados exportados e histórico de revisões representam formas distintas de registo.],
+  caption: [Summary of the seven tools based on the sources cited. ND: not documented in the sources reviewed. Saved projects, exported results and revision histories are distinct forms of logging.],
   placement: top,
   scope: "parent",
-) <tab-ferramentas>
+) <tab-tools>
 
-== Feedback Pedagógico e Posicionamento
+== Pedagogical Feedback and Positioning
 
-O conceito de scaffolding #cite("wood1976") fundamenta o apoio que preserva uma parte da resolução para o aluno. Na análise da tradução, a tipologia MQM (_Multidimensional Quality Metrics_) organiza categorias de problemas como exatidão, terminologia, convenções linguísticas e estilo #cite("mqm"), oferecendo um enquadramento para a seleção operacional das categorias deste protótipo. Os alertas são apresentados por categoria, explicação e pista, sem atribuição de severidades ou cálculo de uma pontuação global de qualidade.
+The concept of scaffolding #cite("wood1976") underpins support that leaves part of the resolution to the student. For translation analysis, the MQM (_Multidimensional Quality Metrics_) typology organizes problem categories such as accuracy, terminology, linguistic conventions and style,#footnote[MQM Council, _The MQM Error Typology_: #link("https://www.themqm.org/mqm-pillars/typology/").] providing a framework for the operational selection of categories in this prototype. Issues are presented by category, explanation and hint, without severity levels or an overall quality score.
 
-A utilização de modelos de linguagem na avaliação de tradução é ilustrada pelo GEMBA-MQM, que usa GPT-4 para localizar possíveis erros sem exigir tradução humana de referência e discute a dependência de um modelo proprietário #cite("kocmi2023"). Por sua vez, #citet("qian2026") estudam GPT5 como parceiro de revisão com prompts inspirados em MQM, documentando tanto aproximações a juízos humanos como avaliações incorretas. Estes trabalhos sustentam a relevância de apreciar o conteúdo do feedback para além de contar alertas; a transferência desta abordagem para um modelo local de menor dimensão exige, por isso, uma verificação própria do seu desempenho.
+The use of language models in translation evaluation is illustrated by GEMBA-MQM, which uses GPT-4 to locate likely errors without requiring a human reference translation and discusses the dependence on a proprietary model #cite("kocmi2023"). #citet("qian2026"), in turn, study GPT-5 as a revision partner with MQM-inspired prompts, documenting both agreement with human judgements and incorrect assessments. These works show the importance of assessing the content of the feedback rather than only counting issues; transferring this approach to a smaller local model therefore requires verifying its performance separately.
 
-O estudo de #citet("dogru2026") examina justificações em tarefas de comparação e pós-edição, enquanto o Translog-II #cite("carl2012") fornece uma referência de registo da atividade de escrita e tradução para investigação empírica. No presente protótipo, a instrumentação centra-se em eventos discretos, como guardar uma tradução, executar uma verificação ou pedir uma pista. Esses dados permitem caracterizar a utilização das funcionalidades, sem conservar a sequência completa das edições do texto; a sua organização cronológica servirá de base ao histórico simples previsto.
+The study by #citet("dogru2026") examines justifications in comparison and post-editing tasks, while Translog-II #cite("carl2012") provides a reference for logging reading and writing activity for empirical research. In our prototype, instrumentation focuses on discrete events, such as saving a translation, running a check or requesting a hint. These data show how the features are used without keeping the full sequence of text edits; ordering them chronologically will form the basis of the planned simple history.
 
-A @tab-ferramentas sintetiza componentes que já existem em diferentes sistemas e permite situar as escolhas de implementação, em particular face a uma referência próxima como o LoopCAT. O recorte deste projeto consiste na articulação de regras explícitas, pistas do modelo com controlo de possível revelação e registo exportável das ações numa aplicação EN–PT-PT inspecionável. A contribuição é, assim, apreciada no protótipo desenvolvido, sem pressupor exclusividade funcional relativamente a todos os sistemas existentes.
+@tab-tools summarizes components that already exist in different systems and helps position our implementation choices, in particular relative to a close reference such as LoopCAT. What this project adds is the combination of explicit rules, model hints with control of possible disclosure and exportable logging of actions in an inspectable EN–PT-PT application. We therefore assess the contribution within the prototype developed, without claiming that this combination is unique among existing systems.
 
-= Arquitetura e Implementação
+= Architecture and Implementation
 
-== Componentes e Percurso de Utilização
+== Components and Usage Workflow
 
-A aplicação organiza-se em três níveis articulados: o *nível 1* reúne o editor segmentado, o glossário, a persistência e a memória de tradução; o *nível 2* executa verificações determinísticas; e o *nível 3* consulta o modelo local e funde o feedback. Uma camada transversal recebe os eventos de utilização e permite exportá-los. A interface foi desenvolvida em React 19, TypeScript e Vite, comunicando com um backend que utiliza FastAPI, Pydantic e SQLAlchemy sobre SQLite.
+The application is organized into three interrelated levels (@fig-architecture): *level 1* comprises the segmented editor, the glossary, persistence and the translation memory; *level 2* runs deterministic checks; and *level 3* queries the local model and merges the feedback. A cross-cutting layer receives usage events and allows them to be exported. The interface was developed with React 19, TypeScript and Vite and communicates with a backend that uses FastAPI, Pydantic and SQLAlchemy on top of SQLite.
 
-O percurso inicia-se com o carregamento do original e o fornecimento opcional de contexto e glossário, após o que o aluno escreve a tradução de cada segmento. A ação «Guardar» persiste o texto, enquanto «Verificar» aplica as regras e «Pedir pista» combina essas mesmas regras com o modelo. As duas operações de revisão incidem sobre o texto atual, incluindo alterações ainda por guardar, mas apenas o modelo recebe o contexto como dado adicional.
+@fig-architecture shows how these levels map onto the running system. The student works in the web interface, and each action is handled by a backend service. Level 1 (blue) saves and reloads translations and suggests matches from the translation memory. Level 2 (green) runs the rule checks when the student selects _Verificar_ (Check). Level 3 (orange) produces hints when the student selects _Pedir pista_ (Ask for a hint): the hint service reuses the rule checks and adds a review by a language model. A logging service (gray) records the student's actions across all levels. The database and the model (purple) run on the same computer as the backend, so no text is sent to external services.
 
-No backend, as regras, a pesquisa de memória, a adaptação ao Ollama e a fusão são mantidas em funções separadas. Esta organização permite executar as verificações sem a interface e substituir a rede por respostas simuladas nos testes. A configuração estudada utiliza Ollama em _localhost_ e o modelo `qwen3:4b-instruct-2507-q4_K_M`, com cerca de quatro mil milhões de parâmetros e quantização Q4_K_M #cite("qwen-ollama"). Embora o endereço e o modelo sejam configuráveis, as observações do artigo dizem respeito às execuções locais descritas.
+#figure(
+  {
+    set text(size: 7.5pt)
+    set par(justify: false, leading: 0.45em)
+    diagram(
+      spacing: (14mm, 6mm),
+      node-stroke: 0.5pt + luma(45%),
+      node-corner-radius: 2pt,
+      node-inset: 4.5pt,
+      edge-stroke: 0.6pt + luma(35%),
+      mark-scale: 70%,
 
-== Editor e Persistência
+      // Student side
+      node((0, 2), align(center)[*Web interface* \ (student's browser) \ \ exercise setup: source text, \ context and glossary \ \ segment editor with the \ actions _Save_, _Check_ \ and _Ask for a hint_], width: 36mm, name: <client>),
 
-O editor aceita texto escrito ou colado, ficheiros `.txt` até 200 KiB e exemplos incorporados, dividindo o original em linhas não vazias que correspondem a segmentos, até ao limite de 200 por exercício. A configuração e a posição no exercício são recuperáveis através de `localStorage`, enquanto a tradução atual é lida e guardada pela API no SQLite. O glossário é definido para o exercício e admite vários equivalentes aceites, sendo validado antes de iniciar a tarefa.
+      // Backend services
+      node((1, 0), [*Translation storage* \ saves and reloads each segment], fill: c-l1, width: 52mm, name: <store>),
+      node((1, 1), [*Translation memory* \ suggests translations of similar segments], fill: c-l1, width: 52mm, name: <tm>),
+      node((1, 2), [*Usage logging* \ records each action; export as JSON or CSV], fill: c-x, width: 52mm, name: <log>),
+      node((1, 3), [*Rule checks* \ five deterministic checks (empty translation, \ numbers, glossary, placeholders, tags)], fill: c-l2, width: 52mm, name: <rules>),
+      node((1, 4.7), [*Hint service* \ runs the rule checks, asks the local model, \ merges both and filters revealing hints], fill: c-l3, width: 52mm, name: <hint>),
 
-A tabela `segments` conserva o identificador, a tradução atual e a data de atualização. Para proteger a edição, a interface aguarda a leitura antes de disponibilizar o campo de tradução e bloqueia-o durante a gravação, permitindo navegar após alterações apenas quando a escrita é confirmada. Um contador de pedidos impede ainda que resultados de verificação anteriores a uma nova edição substituam o feedback atual. Os pedidos de leitura, gravação e verificação têm um prazo de 10 segundos no cliente; em caso de falha, o texto permanece no editor, embora o fim da espera não comprove que o servidor cancelou a operação.
+      // Data and model, both on the same computer
+      node((2, 1), [*Local database* \ (SQLite) \ translations, memory \ and usage events], fill: c-ext, width: 34mm, name: <db>),
+      node((2, 4.7), [*Local language model* \ Qwen3 4B, \ served by Ollama], fill: c-ext, width: 34mm, name: <llm>),
 
-Na versão atual, o identificador deriva de um hash FNV-1a de 32 bits do original após remover espaços nas extremidades. Como depende apenas do texto, ocorrências iguais partilham a tradução guardada, mesmo quando pertencem a exercícios ou contextos diferentes, sendo também possíveis colisões entre originais distintos. Está prevista a atribuição de uma identidade própria a cada ocorrência dentro do respetivo exercício, de modo a preservar a independência das traduções. A persistência também não separa os dados por utilizador, e o controlo das operações aplica-se a uma instância do editor, o que limita a utilização concorrente.
+      edge(<client>, <store>, "-|>"),
+      edge(<client>, <tm>, "-|>"),
+      edge(<client>, <log>, "-|>"),
+      edge(<client>, <rules>, "-|>"),
+      edge(<client>, (0, 4.7), <hint>, "-|>"),
+      edge(<store>, <db>, "-|>"),
+      edge(<tm>, <db>, "-|>"),
+      edge(<log>, <db>, "-|>"),
+      edge(<hint>, <rules>, "-|>", [reuses], label-side: left, label-size: 6.5pt),
+      edge(<hint>, <llm>, "<|-|>"),
+    )
+  },
+  caption: [Overview of the architecture.],
+  placement: top,
+  scope: "parent",
+) <fig-architecture>
 
-== Cinco Verificações Determinísticas
+The workflow starts with loading the source text and optionally providing context and a glossary, after which the student writes the translation of each segment. The _Guardar_ (Save) action persists the text, _Verificar_ (Check) applies the rules, and _Pedir pista_ (Ask for a hint) combines the same rules with the model. Both revision operations act on the current text, including unsaved changes, but only the model receives the context as additional input. @fig-editor shows the editor after a hint request. The exercise context states that restarting is mandatory, but the translation turns the obligation into a permission (_Podes reiniciar_, 'You may restart') and changes the number of updates. The number rule flags the missing value, while the model adds a meaning issue; because the model's original wording revealed the solution, the disclosure filter described in @sec-hints replaced it with the generic message shown.
 
-O endpoint `POST /api/check` recebe o original, a tradução e o glossário e devolve alertas com categoria, explicação e pista. As cinco verificações são implementadas em Python com expressões regulares, aritmética decimal e contagem de ocorrências:
+#figure(
+  {
+    set text(size: 8pt)
+    let shot(path) = box(stroke: 0.4pt + luma(80%), image(path, width: 100%))
+    grid(
+      columns: (auto, 1fr),
+      column-gutter: 6pt,
+      row-gutter: 6pt,
+      align: (right + top, left),
+      [(a)], shot("figures/editor-segment.png"),
+      [(b)], shot("figures/editor-hint.png"),
+    )
+  },
+  caption: [The editor after a hint request: (a) source segment and student translation; (b) actions and issues, each labeled with its origin.],
+  placement: top,
+  scope: "parent",
+) <fig-editor>
 
-1. *Tradução vazia.* A ausência de conteúdo depois de retirar espaços gera `empty_translation` e termina a verificação do segmento, evitando alertas derivados da falta de uma tradução.
-2. *Números.* A regra `numeric_mismatch` identifica valores do original que faltam ou ocorrem menos vezes na tradução. Utiliza `Decimal` e normaliza os separadores en-US no original e PT-PT na tradução, conservando sinais e repetições, pelo que `1,000.50` e `1 000,50` são considerados equivalentes. Unidades, datas e intervalos não são interpretados, sendo comparados apenas os valores que contêm; um número do original escrito por extenso na tradução é assinalado como valor em falta.
-3. *Terminologia.* Quando um termo do glossário aparece como palavra ou expressão completa no original, a regra `terminology` exige pelo menos um equivalente aceite na tradução. A comparação ignora diferenças entre maiúsculas e minúsculas, mas as flexões têm de constar das variantes prescritas.
-4. *Marcadores.* A regra `placeholder_mismatch` compara nomes e contagens de marcadores como `{name}`, permitindo reorganizar a frase desde que os tokens sejam preservados. Formatos como `{{name}}`, `{0}` e `%s` ficam fora do padrão suportado.
-5. *Etiquetas.* A regra `inline_tag_mismatch` compara as contagens de etiquetas simples `b`, `i`, `em`, `strong` e `u`, sem atributos, detetando tokens ausentes ou adicionais. A comparação limita-se à presença e à contagem desses tokens, sem validar a ordem ou o aninhamento.
+In the backend, the rules, memory search, Ollama adapter and merging are kept in separate functions. This organization allows the checks to run without the interface and lets tests replace the network with simulated responses. The configuration studied uses Ollama on _localhost_ and the model `qwen3:4b-instruct-2507-q4_K_M`, with about four billion parameters and Q4\_K\_M quantization.#footnote[Ollama model card, _Qwen3: 4b-instruct-2507-q4\_K\_M_: #link("https://ollama.com/library/qwen3:4b-instruct-2507-q4_K_M").] Although the endpoint and the model are configurable, the observations in this paper refer to the local runs described.
 
-As duas verificações técnicas seguem o princípio de preservação formal documentado em ferramentas CAT #cite("memoq-qa"), apresentando mensagens que dirigem o aluno para a comparação dos elementos. A ausência de alertas indica apenas que os critérios implementados foram satisfeitos naquele segmento.
+== Editor and Persistence
 
-== Memória de Tradução
+The editor accepts typed or pasted text, `.txt` files up to 200 KiB and built-in examples, splitting the source into non-empty lines that correspond to segments, up to a limit of 200 per exercise. The configuration and the position in the exercise can be restored through `localStorage`, while the current translation is read and saved by the API in SQLite. The glossary is defined per exercise, accepts several equivalents per term and is validated before the task starts.
 
-Depois de confirmar a gravação de uma tradução com conteúdo, a aplicação tenta guardar o par original–tradução na tabela `memory_entries`, onde uma restrição de unicidade evita a repetição de pares idênticos. Esta operação decorre separadamente da gravação do segmento, permitindo continuar a tarefa mesmo quando a atualização da memória falha.
+The `segments` table stores the identifier, the current translation and the update timestamp. To protect editing, the interface waits for the read to complete before enabling the translation field and locks it while saving, allowing navigation after changes only once the write is confirmed. A request counter also prevents check results that predate a new edit from replacing the current feedback. Read, save and check requests have a 10-second client-side timeout; on failure, the text remains in the editor, although the end of the wait does not prove that the server has cancelled the operation.
 
-Ao abrir um segmento, o endpoint `POST /api/memory/search` compara o seu original com os originais já guardados. Para esse efeito, o código normaliza maiúsculas e espaços e aplica `fuzz.ratio`, que calcula a similaridade Indel normalizada #cite("rapidfuzz-ratio"). A pesquisa devolve até três pares com pontuação arredondada de pelo menos 70 numa escala de 0 a 100, mas a tradução sugerida só preenche o campo de edição quando o aluno seleciona «Usar».
+In the current version, the identifier is derived from a 32-bit FNV-1a hash of the source after trimming leading and trailing whitespace. Because it depends only on the text, identical occurrences share the saved translation, even when they belong to different exercises or contexts, and collisions between distinct sources are also possible. Assigning each occurrence its own identity within its exercise is planned, so as to keep translations independent. Persistence also does not separate data by user, and operation control applies to a single editor instance, which limits concurrent use.
 
-Por exemplo, `The total is €1,000.50 today.` recupera o par de `The total is €1,000.50.` com pontuação 88, embora a tradução anterior ainda exija adaptação a _today_. A pontuação caracteriza, portanto, a semelhança entre os originais, que pode permanecer elevada mesmo perante alterações numéricas importantes. O limiar foi adotado como configuração inicial e permanece por calibrar experimentalmente. A memória é partilhada pela instância local e pode conter várias traduções do mesmo original.
+== Five Deterministic Checks
 
-== Pistas do Modelo e Fusão Híbrida
+The `POST /api/check` endpoint receives the source, the translation and the glossary and returns issues with a category, an explanation and a hint. The five checks are implemented in Python using regular expressions, decimal arithmetic and occurrence counting:
 
-O endpoint `POST /api/hint` começa por executar as regras e consulta o modelo quando a tradução contém texto. O adaptador envia o original, a tradução atual, o contexto e o glossário, sem histórico de conversa ou de tentativas do aluno. Estes conteúdos são apresentados como dados no prompt versionado `hint-v3.txt`, que pede uma explicação e uma pergunta de revisão em português europeu.
+1. *Empty translation.* The absence of content after stripping whitespace raises `empty_translation` and ends the check for the segment, avoiding issues that merely follow from the lack of a translation.
+2. *Numbers.* The `numeric_mismatch` rule identifies source values that are missing or occur fewer times in the translation. It uses `Decimal` and normalizes en-US separators in the source and PT-PT separators in the translation, preserving signs and repetitions, so that `1,000.50` and `1 000,50` are treated as equivalent. Units, dates and ranges are not interpreted, and only the values they contain are compared; a source number written out in words in the translation is flagged as a missing value.
+3. *Terminology.* When a glossary term appears as a whole word or phrase in the source, the `terminology` rule requires at least one accepted equivalent in the translation. Matching is case-insensitive, but inflected forms must be listed among the prescribed variants.
+4. *Placeholders.* The `placeholder_mismatch` rule compares the names and counts of placeholders such as `{name}`, allowing the sentence to be reordered as long as the tokens are preserved. Formats such as `{{name}}`, `{0}` and `%s` fall outside the supported pattern.
+5. *Inline tags.* The `inline_tag_mismatch` rule compares the counts of the simple tags `b`, `i`, `em`, `strong` and `u`, without attributes, detecting missing or extra tokens. The comparison is limited to the presence and number of these tokens and does not validate their order or nesting.
 
-O modelo pode emitir as categorias `empty_translation`, `numeric_mismatch`, `terminology` e `meaning_context`, ficando os marcadores e as etiquetas reservados às regras. A categoria `meaning_context` abrange alterações de significado ou intenção, incluindo negação, falsos cognatos, expressões idiomáticas e força de instruções. Para orientar essa análise, o prompt pede que se aceitem paráfrases válidas e que se evitem interpretações especulativas quando falta contexto. O trabalho realizado incide nas instruções de inferência e no tratamento da saída, mantendo o treino e os pesos do Qwen tal como são distribuídos.
+The two technical checks follow the principle of formal preservation documented in CAT tools,#footnote(<fn-memoq-qa>) with messages that direct the student to compare the elements. The absence of issues only indicates that the implemented criteria were met for that segment.
 
-A geração utiliza temperatura 0, semente 42, contexto de 4096 tokens e limite de 768 tokens de saída. É solicitado um esquema JSON com uma lista de alertas, cada um com `category`, `explanation` e `hint`, cabendo ao adaptador validar a estrutura, as categorias e o preenchimento dos campos textuais. Esta validação garante o contrato de dados, mas uma resposta estruturalmente válida pode ainda conter um falso alerta, uma categoria semanticamente inadequada ou uma correção explícita.
+== Translation Memory
 
-A fusão conserva os alertas das regras e acrescenta, no máximo, uma sugestão do modelo por categoria ainda não presente, identificando cada origem como «Regra» ou «Sugestão do modelo local». Nos alertas do modelo retidos, um filtro procura determinados tipos de aspas, equivalentes do glossário e dígitos do original em alertas numéricos. Quando encontra um desses sinais, substitui a explicação e a pista por mensagens genéricas da categoria e incrementa `sanitized`. Por depender destes padrões, a heurística pode tanto generalizar texto útil como deixar passar correções por extenso.
+Once the save of a non-empty translation is confirmed, the application attempts to store the source–target pair in the `memory_entries` table, where a uniqueness constraint prevents duplicate pairs. This operation runs separately from saving the segment, so that the task can continue even when the memory update fails.
 
-Quando o adaptador reconhece indisponibilidade, timeout ou resposta inválida, a API devolve o feedback determinístico e o estado do modelo, permitindo manter as verificações por regras. O prazo HTTPX predefinido é de 30 segundos por operação de rede, enquanto o cliente da interface espera até 40 segundos pelo pedido de pista. Uma nova edição invalida o resultado anterior no ecrã, preservando a associação entre o feedback e o texto revisto.
+When a segment is opened, the `POST /api/memory/search` endpoint compares its source with the sources already stored. To this end, the code normalizes case and whitespace and applies `fuzz.ratio`, which computes the normalized Indel similarity.#footnote[RapidFuzz documentation, _fuzz.ratio_: #link("https://rapidfuzz.github.io/RapidFuzz/Usage/fuzz.html").] The search returns up to three pairs with a rounded score of at least 70 on a 0–100 scale, but the suggested translation only fills the editing field when the student selects _Usar_ (Use).
 
-== Instrumentação e Dados Guardados
+For example, `The total is €1,000.50 today.` retrieves the pair for `The total is €1,000.50.` with a score of 88, although the earlier translation still has to be adapted to include _today_. The score therefore characterizes the similarity between source texts, which may remain high even when numbers change significantly. The threshold was adopted as an initial setting and has yet to be calibrated experimentally. The memory is shared by the local instance and may contain several translations of the same source.
 
-A tabela `events` regista o início do exercício, a gravação, a verificação, o pedido e a apresentação de pistas e a utilização da memória. Para cada evento, o editor envia um identificador persistente do navegador, o segmento quando aplicável e metadados como contagens por origem, latência e generalizações. A interface omite o texto das traduções e pistas nesses eventos, embora os textos traduzidos permaneçam nas tabelas de segmentos e memória. A API de eventos aceita também um campo adicional genérico, truncado acima de 2000 caracteres, pelo que a ausência de texto nos registos depende do cliente e não é garantida pelo servidor.
+== Model Hints and Hybrid Merging <sec-hints>
 
-Os eventos da instância podem ser exportados em JSON e CSV através dos acessos no rodapé, e um resumo disponibiliza contagens agregadas. Está prevista a sua apresentação cronológica num histórico simples de ações, construído a partir dos registos já recolhidos e destinado a facilitar a consulta do percurso de utilização. Esta extensão centra-se nas ações registadas, enquanto a análise textual da RQ2 utiliza relatórios de recolha próprios com as explicações e pistas. O exercício pode prosseguir mesmo quando o envio de um evento falha, pelo que os registos podem apresentar lacunas.
+The `POST /api/hint` endpoint first runs the rules and queries the model when the translation contains text (@fig-hint). The adapter sends the source, the current translation, the context and the glossary, without conversation history or the student's previous attempts. These contents are presented as data in the versioned prompt `hint-v3.txt`, which requests an explanation and a revision question in European Portuguese.
 
-A configuração atual destina-se à execução local, com CORS permissivo e endpoints disponíveis sem autenticação, incluindo os de exportação. Estas condições limitam a utilização partilhada, para a qual será necessário definir o isolamento por utilizador, o controlo de acesso e uma política de conservação dos dados.
+As @fig-hint shows, the rule checks always run, so their issues reach the student even when the model is not called or fails. The model's issues are then merged with the rule issues, and any model issue that appears to reveal the solution has its explanation and hint replaced with a generic message. A model issue is treated as revealing when it contains quoted text, a glossary equivalent or, for numbers, a value from the source text.
 
-= Protocolo de Avaliação
+#figure(
+  {
+    set text(size: 7pt)
+    show raw: set text(size: 6.6pt)
+    set par(justify: false, leading: 0.45em)
+    diagram(
+      spacing: (5mm, 5mm),
+      node-stroke: 0.5pt + luma(45%),
+      node-corner-radius: 2pt,
+      node-inset: 3.5pt,
+      edge-stroke: 0.6pt + luma(35%),
+      mark-scale: 70%,
 
-A avaliação será interna e conduzida pelos dois autores. RQ1 incide na deteção por categoria e RQ2 na qualidade do feedback produzido. O protocolo seguinte orienta a execução final. A dimensão do conjunto, as anotações de referência e a configuração experimental serão fixadas antes dessa execução.
+      node((0, 0), [*Student asks for a hint* \ source, translation, \ context, glossary], width: 40mm, name: <req>),
+      node((0, 1), [Run the five deterministic checks], fill: c-l2, width: 40mm, name: <rules>),
+      node((0, 2), [Empty \ translation?], shape: diamond, name: <empty>),
+      node((1, 2), [Model is \ not called], width: 26mm, name: <skip>),
+      node((0, 3), [Local model reviews \ the translation and returns \ a structured answer], fill: c-l3, width: 40mm, name: <llm>),
+      node((0, 4), [Valid \ answer?], shape: diamond, name: <valid>),
+      node((1, 4), [No model issues \ (model off, \ unavailable or \ invalid answer)], width: 26mm, name: <fail>),
+      node((0, 5), [*Merge*: keep all rule issues; \ add at most one model issue \ per category not yet present], fill: c-l3, width: 40mm, name: <merge>),
+      node((0, 6), [Reveals the \ solution?], shape: diamond, name: <signal>),
+      node((1, 6), [Replace with a \ generic explanation \ and hint], width: 26mm, name: <generic>),
+      node((0, 7), [*Issues shown to the student*, \ each labeled _Rule_ or \ _Local model suggestion_], width: 40mm, name: <resp>),
 
-== Dados e Anotação de Referência <sec-dados>
+      edge(<req>, <rules>, "-|>"),
+      edge(<rules>, <empty>, "-|>"),
+      edge(<empty>, <skip>, "-|>", [yes], label-size: 6pt),
+      edge(<empty>, <llm>, "-|>", [no], label-size: 6pt),
+      edge(<skip>, <fail>, "-|>"),
+      edge(<llm>, <valid>, "-|>"),
+      edge(<valid>, <fail>, "-|>", [no], label-size: 6pt),
+      edge(<valid>, <merge>, "-|>", [yes], label-size: 6pt),
+      edge(<fail>, <merge>, "-|>"),
+      edge(<merge>, <signal>, "-|>"),
+      edge(<signal>, <generic>, "-|>", [yes], label-size: 6pt),
+      edge(<signal>, <resp>, "-|>", [no], label-size: 6pt),
+      edge(<generic>, <resp>, "-|>"),
+    )
+  },
+  caption: [Processing of a hint request.],
+  placement: top,
+) <fig-hint>
 
-Serão preparados originais curtos com contexto e glossário quando pertinentes, traduções aceitáveis e variantes com problemas. Cada caso terá identificador, grupo de original ou documento, dados de entrada e anotações de presença ou ausência de problema, categoria, âmbito da análise e evidência. A referência admite alternativas legítimas e distingue cumprimento do glossário de preferências estilísticas. Está prevista a construção de casos sintéticos, sem recolha de traduções junto de estudantes. #todo[origem dos casos de teste: quem os redige e com que procedimento] #todo[competências linguísticas dos avaliadores]
+The model may emit the categories `empty_translation`, `numeric_mismatch`, `terminology` and `meaning_context`, while placeholders and tags are reserved for the rules. The `meaning_context` category covers changes in meaning or intent, including negation, false friends, idioms and the force of instructions. To guide this analysis, the prompt asks the model to accept valid paraphrases and to avoid speculative interpretations when context is missing. Our work focuses on the inference instructions and output handling, using the model's weights as distributed, without fine-tuning.
 
-A partição será feita por original ou documento, mantendo variantes relacionadas no mesmo conjunto. Os exemplos do piloto, da calibração, dos prompts e das demonstrações ficam reservados ao desenvolvimento. O conjunto de teste deverá incluir traduções aceitáveis para medir falsos alertas e casos com problemas nas categorias selecionadas. Serão publicados a dimensão efetiva e o número de casos por categoria e por grupo.
+Generation uses temperature 0, seed 42, a 4096-token context and a limit of 768 output tokens. A JSON schema is requested with a list of issues, each with `category`, `explanation` and `hint`, and the adapter validates the structure, the categories and that the text fields are filled in. This validation guarantees the data contract, but a structurally valid response may still contain a false alarm, a semantically inappropriate category or an explicit correction.
 
-As anotações de referência serão revistas e fixadas por consenso entre os dois autores, com base no original, na tradução, no contexto e no glossário de cada caso. Esta fase antecede a consulta das saídas dos métodos e estabelece a presença ou ausência dos problemas avaliados. Após a recolha das respostas, será realizada a apreciação das explicações e pistas. A participação dos autores na construção e avaliação do sistema constitui uma limitação à independência dos juízos.
+The merge keeps the rule issues and adds at most one model suggestion per category not yet present, labeling each origin as _Regra_ (Rule) or _Sugestão do modelo local_ (Local model suggestion). In the retained model issues, a filter looks for certain types of quotation marks, glossary equivalents and, in numeric issues, digits from the source. When it finds one of these signals, it replaces the explanation and the hint with a generic message for the category and increments the `sanitized` counter; we refer to such issues as _generalized_. Because it depends on these patterns, the heuristic may both generalize useful text and let through corrections written out in words.
 
-== Comparação da Deteção — RQ1
+When the adapter recognizes unavailability, a timeout or an invalid response, the API returns the deterministic feedback and the model status, so that the rule-based checks remain available. The default HTTPX timeout is 30 seconds per network operation, while the interface client waits up to 40 seconds for the hint request. A new edit invalidates the previous result on screen, preserving the association between the feedback and the revised text.
 
-Serão executados três métodos. *Regras* aplica apenas o motor determinístico. *LLM isolado* usa os alertas validados do modelo antes da fusão e do filtro. *Híbrido* aplica a política da aplicação às regras e à mesma resposta do modelo. Uma única geração por caso não vazio e configuração alimenta os dois últimos métodos, evitando que diferenças entre gerações sejam confundidas com o efeito da fusão. Nas traduções vazias, a condição híbrida devolve apenas o alerta determinístico, enquanto a geração experimental é usada exclusivamente na condição LLM isolado.
+== Instrumentation and Stored Data
 
-A análise principal da RQ1 abrange tradução vazia, preservação de valores numéricos do original escritos em algarismos e cumprimento do glossário. Serão incluídos controlos aceitáveis e variantes com problemas nessas categorias. Os critérios de inclusão, a pertença de cada caso ao âmbito da análise e as anotações de referência serão fixados antes da consulta das respostas dos métodos. A referência será determinada pela análise dos textos e dos critérios do exercício, sem usar as saídas das regras como verdade de referência.
+The `events` table records when an exercise starts, when a translation is saved or checked, when a hint is requested or displayed and when the memory is used. For each event, the editor sends a persistent browser identifier, the segment when applicable and metadata such as counts by origin, latency and the number of generalized issues. The interface omits the text of translations and hints from these events, although translated texts remain in the segment and memory tables. The events API also accepts a generic additional field, truncated above 2000 characters, so the absence of text in the logs depends on the client and is not guaranteed by the server.
 
-As diferenças de âmbito serão examinadas numa análise complementar de robustez, com exemplos de trocas de unidade, números exclusivamente acrescentados, datas, intervalos e valores escritos por extenso. Para estes casos serão apresentados a anotação humana e os alertas de cada método, identificando falsos alertas e omissões face aos fenómenos estudados. Por exemplo, a tradução aceitável de um algarismo por um número por extenso pode gerar um falso alerta da regra. Estes comportamentos serão relatados juntamente com as limitações da análise principal. As contagens de casos incluídos em cada análise serão publicadas, e os casos não serão excluídos em função do resultado observado.
+The instance's events can be exported as JSON and CSV through links in the footer, and a summary provides aggregate counts. We plan to present them chronologically in a simple action history, built from the logs already collected, so that the usage path is easier to inspect. This extension focuses on logged actions, whereas the textual analysis for RQ2 relies on dedicated collection reports containing the explanations and hints. The exercise can continue even when sending an event fails, so the logs may contain gaps.
 
-Os marcadores e etiquetas terão verificação funcional própria. Os alertas de significado e contexto serão apresentados separadamente e incluídos na RQ2. Os agregados da análise principal e as contagens e observações da análise complementar serão apresentados separadamente, preservando a distinção entre os respetivos âmbitos.
+The current configuration is intended for local execution, with permissive CORS and endpoints available without authentication, including the export endpoints. These conditions limit shared use, which will require per-user isolation, access control and a data retention policy.
 
-A análise principal incide em fenómenos explicitamente cobertos pelas regras, cuja implementação será avaliada face à referência anotada, admitindo erros de deteção e falsos alertas. As divergências relativamente à referência serão documentadas caso a caso. Na mesma amostra, com as mesmas categorias e anotações, a fusão conserva todos os alertas das regras. Nestas condições, o recall do híbrido é igual ou superior ao das regras. A precisão e o F1 dependerão dos verdadeiros e falsos positivos acrescentados pelo modelo, pelo que serão determinados experimentalmente.
+= Evaluation Protocol
 
-Na avaliação do modelo isolado, será realizada uma chamada experimental também nas traduções vazias. Este procedimento será distinguido do comportamento operacional da aplicação, que devolve diretamente o alerta determinístico. O coletor experimental chama o modelo também nestas traduções e regista o resultado antes da fusão, enquanto, na condição híbrida, o relatório conserva apenas o alerta da regra.
+We, the two authors, will conduct the evaluation internally. RQ1 addresses detection per category and RQ2 the quality of the feedback produced. The following protocol guides the final run. We will fix the size of the set, the reference annotations and the experimental configuration before that run.
 
-A unidade de contagem é o par caso–categoria, com categorias repetidas reduzidas a uma ocorrência. Um verdadeiro positivo (VP) corresponde a uma categoria esperada e emitida, um falso positivo (FP) a uma categoria emitida mas ausente na referência e um falso negativo (FN) a uma categoria esperada e omitida. Uma categoria errada pode produzir simultaneamente FP e FN.
+@fig-evaluation summarizes this design. A single model generation per case feeds both the LLM-only and the hybrid conditions, so that differences between them reflect the merge and the filter rather than variation between generations. Detection by the three methods is scored against the reference annotation (RQ1), and the explanations and hints of the model and of the hybrid approach are assessed with the grid (RQ2).
+
+#figure(
+  {
+    set text(size: 7pt)
+    show raw: set text(size: 6.6pt)
+    set par(justify: false, leading: 0.45em)
+    diagram(
+      spacing: (5mm, 5mm),
+      node-stroke: 0.5pt + luma(45%),
+      node-corner-radius: 2pt,
+      node-inset: 3.5pt,
+      edge-stroke: 0.6pt + luma(35%),
+      mark-scale: 70%,
+
+      node((1, 0), [*Held-out* \ *test case*], width: 22mm, name: <case>),
+      node((2, 1), [One Qwen \ generation \ per case], fill: c-l3, width: 22mm, name: <gen>),
+      node((0, 2), [*Rules*], fill: c-l2, width: 22mm, name: <rules>),
+      node((1, 2), [*Hybrid* \ merge + filter], fill: c-l3, width: 22mm, name: <hyb>),
+      node((2, 2), [*LLM-only* \ validated, \ before merge], fill: c-l3, width: 22mm, name: <llm>),
+      node((0, 3), [*Reference* \ annotation, \ fixed before \ outputs], width: 22mm, name: <ref>),
+      node((1, 3), [*RQ1* \ precision, \ recall, F1], fill: c-x, width: 22mm, name: <rq1>),
+      node((2, 3), [*RQ2* grid \ correctness, \ grounding, \ clarity, \ usefulness, \ disclosure], fill: c-x, width: 22mm, name: <rq2>),
+
+      edge(<case>, <rules>, "-|>"),
+      edge(<case>, <gen>, "-|>"),
+      edge(<rules>, <hyb>, "-|>"),
+      edge(<gen>, <hyb>, "-|>"),
+      edge(<gen>, <llm>, "-|>"),
+      edge(<rules>, <rq1>, "-|>"),
+      edge(<hyb>, <rq1>, "-|>"),
+      edge(<llm>, <rq1>, "-|>"),
+      edge(<ref>, <rq1>, "-|>"),
+      edge(<hyb>, <rq2>, "-|>"),
+      edge(<llm>, <rq2>, "-|>"),
+    )
+  },
+  caption: [Evaluation design.],
+  placement: top,
+) <fig-evaluation>
+
+== Data and Reference Annotation <sec-data>
+
+We will prepare short source texts, with context and glossary where relevant, along with acceptable translations and variants containing problems. Each case will have an identifier, a source or document group, input data and annotations of the presence or absence of a problem, its category, its scope for the analysis and its evidence. The reference admits legitimate alternatives and distinguishes glossary compliance from stylistic preferences. All cases will be synthetic; no translations will be collected from students. #todo[origin of the test cases: who writes them and with what procedure] #todo[linguistic competence of the annotators]
+
+We will split the data by source or document, keeping related variants in the same set. Examples from the pilot, calibration, prompts and demonstrations are reserved for development. The test set should include acceptable translations, to measure false alarms, and cases with problems in the selected categories. We will report the actual size and the number of cases per category and per group.
+
+The two authors will review the reference annotations and fix them by consensus, based on the source, the translation, the context and the glossary of each case. This phase takes place before the methods' outputs are examined and establishes the presence or absence of the problems evaluated. Once the responses are collected, we will assess the explanations and hints. Because the authors both build and evaluate the system, the independence of the judgements is limited.
+
+== Detection Comparison — RQ1
+
+We will run three methods. *Rules* applies only the deterministic engine. *LLM-only* uses the model's validated issues before merging and filtering. *Hybrid* applies the application's policy to the rules and to the same model response. A single generation per non-empty case and configuration feeds the latter two methods, so that differences between generations are not confused with the effect of merging. For empty translations, the hybrid condition returns only the deterministic issue, while the experimental generation is used only in the LLM-only condition.
+
+The main RQ1 analysis covers empty translations, the preservation of source numeric values written as digits and glossary compliance. It will include acceptable controls and variants with problems in these categories. We will fix the inclusion criteria, the scope assigned to each case and the reference annotations before examining the methods' responses. The reference will be determined by analyzing the texts and the exercise criteria, without using the outputs of the rules as ground truth.
+
+We will examine differences in scope in a complementary robustness analysis, with examples of unit swaps, numbers added only in the translation, dates, ranges and values written out in words. For these cases, we will present the human annotation and the issues raised by each method, identifying false alarms and omissions with respect to the phenomena studied. For example, an acceptable translation of a numeral as a number written in words may trigger a false alarm from the rule. These behaviors will be reported together with the limitations of the main analysis. We will report the number of cases included in each analysis and will not exclude any case based on the observed result.
+
+Placeholders and tags will undergo their own functional verification. Meaning and context issues will be presented separately and included in RQ2. The aggregates of the main analysis and the counts and observations of the complementary analysis will be presented separately, preserving the distinction between their scopes.
+
+The main analysis addresses phenomena explicitly covered by the rules, whose implementation will be evaluated against the annotated reference, allowing for detection errors and false alarms. Divergences from the reference will be documented case by case. On the same sample, with the same categories and annotations, the merge keeps all rule issues. Under these conditions, the recall of the hybrid approach is equal to or higher than that of the rules. Precision and F1 depend on the true and false positives added by the model and will therefore be determined experimentally.
+
+In the evaluation of the model alone, an experimental call will also be made for empty translations. This procedure will be distinguished from the operational behavior of the application, which directly returns the deterministic issue. The experimental collector also calls the model for these translations and records the result before merging, whereas, in the hybrid condition, the report keeps only the rule issue.
+
+The counting unit is the case–category pair, with repeated categories reduced to a single occurrence. A true positive (TP) is an expected category that is emitted; a false positive (FP) is a category that is emitted but absent from the reference; a false negative (FN) is an expected category that is omitted. A wrong category may produce both an FP and an FN.
 
 #block(breakable: false)[
-As métricas de deteção são definidas por
+The detection metrics are defined as
 
-$ "Precisão" = "VP" / ("VP" + "FP") $
+$ "Precision" = "TP" / ("TP" + "FP") $
 
-$ "Recall" = "VP" / ("VP" + "FN") $
+$ "Recall" = "TP" / ("TP" + "FN") $
 
-$ "F1" = (2 "VP") / (2 "VP" + "FP" + "FN") $
+$ "F1" = (2 "TP") / (2 "TP" + "FP" + "FN") $
 ]
 
-Serão reportados resultados por categoria e agregação micro, com numeradores, denominadores e métricas indefinidas quando o denominador for nulo. Serão também contados os casos aceitáveis com pelo menos um falso alerta.
+Results will be reported per category and micro-averaged, with numerators and denominators, and metrics will be reported as undefined when the denominator is zero. Acceptable cases with at least one false alarm will also be counted.
 
-As falhas do modelo serão reportadas por estado e número de tentativas. A comparação da deteção usará o mesmo subconjunto de chamadas válidas para os três métodos, explicitando quantos casos foram excluídos. Em complemento, será descrito o comportamento operacional do híbrido em todos os casos, incluindo o recurso às regras quando o modelo falha.
+Model failures will be reported by status and number of attempts. The detection comparison will use the same subset of valid calls for the three methods, stating how many cases were excluded. In addition, we will describe the operational behavior of the hybrid approach for all cases, including the fallback to rules when the model fails.
 
-== Apreciação do Feedback — RQ2
+== Feedback Assessment — RQ2
 
-A grelha incide sobre cada par explicação–pista. *Correção* indica se identifica uma discrepância real. *Fundamentação* avalia o suporte no original, tradução, contexto e glossário. *Clareza* aprecia a compreensão da mensagem. *Utilidade* indica se orienta para uma comparação concreta que possa apoiar a revisão. Para estes critérios registam-se os valores definidos na grelha, incluindo «parcial» quando aplicável e «incerto» com justificação.
+The grid applies to each explanation–hint pair. *Correctness* indicates whether it identifies a real discrepancy. *Grounding* assesses its support in the source, translation, context and glossary. *Clarity* assesses how understandable the message is. *Usefulness* indicates whether it guides the student toward a concrete comparison that can support revision. For these criteria, the values defined in the grid are recorded, including "partial" where applicable and "uncertain" with a justification.
 
-A *revelação* tem três níveis. «Nenhuma» corresponde a orientação que deixa a reformulação ao aluno. «Parcial» indica que é fornecido um equivalente, valor ou interpretação que resolve parte do problema. «Total» corresponde a uma correção suficiente para substituir o trecho em causa, mesmo que o trecho seja uma única palavra. Esta apreciação inclui a explicação e a pista, porque ambas ficam visíveis ao aluno.
+*Disclosure* has three levels. "None" corresponds to guidance that leaves the reformulation to the student. "Partial" indicates that an equivalent, value or interpretation is provided that solves part of the problem. "Full" corresponds to a correction sufficient to replace the passage in question, even if the passage is a single word. This assessment covers both the explanation and the hint, because both are visible to the student.
 
-A proposta inicial #todo[indicar quem prepara a proposta inicial e com que procedimento] será revista caso a caso pelos dois autores, que decidirão por consenso e registarão alterações e evidências. As linhas de anotação serão baralhadas, com a versão do feedback numa chave separada. Esta ocultação reduz pistas sobre a condição experimental, mas a redação genérica pode permitir reconhecê-la. O procedimento não inclui dupla anotação independente nem permite calcular concordância entre anotadores.
+The initial proposal #todo[state who prepares the initial proposal and with what procedure] will be reviewed case by case by both authors, who will decide by consensus and record changes and evidence. The annotation rows will be shuffled, with the feedback version kept in a separate key. This blinding reduces cues about the experimental condition, but the generic wording may still allow it to be recognized. The procedure does not include independent double annotation and does not allow inter-annotator agreement to be computed.
 
-Serão distinguidos alertas originais do modelo, alertas retidos sem alteração, alertas generalizados e alertas do modelo descartados pela prioridade das regras. Textos idênticos antes e depois da fusão podem ser anotados uma vez e associados às duas condições pela chave. Os alertas determinísticos serão identificados à parte na análise do feedback final. Casos sem alerta ou com falha de execução serão contabilizados separadamente, evitando atribuir-lhes valores de qualidade textual.
+We will distinguish original model issues, issues retained unchanged, generalized issues and model issues discarded because of rule priority. Texts that are identical before and after merging may be annotated once and linked to both conditions through the key. Deterministic issues will be identified separately in the analysis of the final feedback. Cases without issues or with execution failures will be counted separately, so that no textual quality values are assigned to them.
 
-A comparação do filtro incidirá prioritariamente nos alertas retidos, emparelhando o texto antes e depois da generalização. Serão ainda descritos o feedback total mostrado pelo híbrido e os alertas eliminados pela fusão. A taxa de revelação usará o número de textos avaliados como denominador, apresentando separadamente revelações parciais e totais e o número de casos incertos. O contador `sanitized` descreve intervenções do filtro. A classificação humana determina a revelação observada.
+The comparison of the filter will focus primarily on retained issues, pairing the text before and after generalization. We will also describe the total feedback shown by the hybrid approach and the issues removed by the merge. The disclosure rate will use the number of texts assessed as the denominator, reporting partial and full disclosures separately along with the number of uncertain cases. The `sanitized` counter describes filter interventions; human classification determines the observed disclosure.
 
-== Aperfeiçoamento das Instruções e Avaliação Comparativa
+== Prompt Refinement and Comparative Evaluation
 
-O aperfeiçoamento do feedback será organizado em duas fases. A primeira corresponde à análise de diagnóstico da configuração inicial, com o prompt v3, sobre exemplos de desenvolvimento e calibração. As respostas serão apreciadas segundo a grelha definida para a RQ2, permitindo identificar padrões de falsos alertas, omissões, explicações inadequadas e revelação da solução. Esta análise fundamentará a revisão das instruções de geração e, quando pertinente, dos mecanismos de filtragem.
+We will refine the feedback in two phases. The first is a diagnostic analysis of the initial configuration, with prompt v3, on development and calibration examples. Assessing the responses with the RQ2 grid will reveal patterns of false alarms, omissions, inadequate explanations and solution disclosure. This analysis will inform the revision of the generation instructions and, where relevant, of the filtering mechanisms.
 
-A segunda fase consiste na avaliação comparativa das configurações. A versão revista do prompt, designada v4, será fixada após a análise de diagnóstico. Ambas as configurações serão executadas sobre o mesmo conjunto de teste, constituído por originais e documentos excluídos das fases de desenvolvimento, demonstração e calibração. Os exemplos cujas respostas tenham sido consultadas para orientar alterações serão mantidos no conjunto de desenvolvimento. Este procedimento permite apreciar as diferenças de desempenho e de qualidade do feedback em condições comparáveis.
+The second phase is the comparative evaluation of the configurations. The revised version of the prompt, called v4, will be fixed after the diagnostic analysis. Both configurations will be run on the same test set, consisting of sources and documents excluded from the development, demonstration and calibration phases. Examples whose responses were examined to guide changes will be kept in the development set. This procedure allows us to compare performance and feedback quality under comparable conditions.
 
-Na comparação do efeito do prompt, manter-se-ão constantes o modelo, os parâmetros de geração e o filtro. Caso sejam introduzidas alterações simultâneas no filtro, estas serão documentadas e os resultados serão interpretados como comparação entre configurações completas do sistema. As revisões do prompt atuam sobre as instruções de inferência do Qwen, preservando os pesos do modelo distribuído.
+When comparing the effect of the prompt, we will keep the model, the generation parameters and the filter constant. If the filter is changed at the same time, the changes will be documented and the results will be interpreted as a comparison between complete system configurations. Prompt revisions act only on the inference instructions; the model's weights remain as distributed.
 
-== Condições de Reprodutibilidade
+== Reproducibility Conditions
 
-Os relatórios de recolha registam os hashes dos dados e do prompt, a identificação e o digest do modelo, a versão do Ollama, os parâmetros de geração, o prazo de rede e o sistema operativo, bem como o estado e a duração de cada chamada ao modelo. Registam ainda a revisão do código e se existiam alterações por commitar, as versões do Python e das dependências, o estado e a duração do aquecimento e a resposta completa do Ollama, incluindo os tempos de carregamento e de avaliação do prompt e da geração e as contagens de tokens, tal como disponibilizados pelo serviço. As características do equipamento são indicadas pelos autores. #todo[equipamento usado na execução final] As anotações de referência são utilizadas apenas no cálculo dos resultados e na apreciação posterior, permanecendo excluídas dos pedidos ao modelo.
+The collection reports record the hashes of the data and of the prompt, the model identifier and digest, the Ollama version, the generation parameters, the network timeout and the operating system, as well as the status and duration of each call to the model. They also record the code revision and whether there were uncommitted changes, the Python and dependency versions, the status and duration of the warm-up and the full Ollama response, including load, prompt-evaluation and generation times and token counts, as provided by the service. We report the hardware characteristics separately. #todo[hardware used in the final run] Reference annotations are used only to compute results and in the subsequent assessment, and are excluded from the requests sent to the model.
 
-O coletor mede o tempo decorrido entre o início da revisão pelo cliente Ollama e o seu retorno ou falha. Este intervalo abrange o pedido ao serviço, a receção da resposta e a validação efetuada pelo adaptador. As regras e a fusão são executadas fora dessa medição e sem o servidor FastAPI. A latência do endpoint híbrido fica fora da medição atual. Nas recolhas anteriores a esta versão do coletor não foi registado um procedimento de aquecimento. O coletor atual faz uma chamada de aquecimento, com um exemplo fixo que não pertence a nenhum conjunto de casos, antes do primeiro caso, e regista o seu estado e a sua duração à parte, pelo que não entra nos tempos dos casos. A temperatura 0 e a semente fixa permitem controlar parâmetros da geração, embora a reprodução dependa também do ambiente de execução.
+The collector measures the time elapsed between the start of the review by the Ollama client and its return or failure. This interval covers the request to the service, the reception of the response and the validation performed by the adapter. Rules and merging run outside this measurement and without the FastAPI server, so the latency of the hybrid endpoint is not measured. Collections prior to this version of the collector did not record a warm-up procedure. The current collector makes a warm-up call before the first case, with a fixed example that does not belong to any case set, and records its status and duration separately, so it does not count toward case timings. Temperature 0 and a fixed seed control the generation parameters, although reproduction also depends on the execution environment.
 
-= Evidências Preliminares e Discussão
+= Preliminary Evidence and Discussion
 
-Os resultados disponíveis provêm da verificação funcional, de um piloto de viabilidade e da calibração da grelha. Os exemplos já influenciaram o desenvolvimento e ficam excluídos do teste final. Nesta versão, as evidências permitem caracterizar comportamentos concretos, enquanto as respostas quantitativas finais a RQ1 e RQ2 permanecem por completar.
+The available results come from functional verification, a feasibility pilot and the calibration of the grid. These examples have already influenced development and are excluded from the final test. At this stage, the evidence characterizes concrete behaviors, while the final quantitative answers to RQ1 and RQ2 are still pending.
 
-== Verificação Funcional
+== Functional Verification
 
-Foram verificados 70 testes de backend e 26 de frontend, totalizando 96, bem como a compilação de produção da interface. Os testes abrangem regras, contratos da API, persistência com SQLite em memória, pesquisa difusa, registos e exportação, validação de respostas, fusão e falhas de rede simuladas. A integração automática com Ollama usa `httpx.MockTransport`. O gerador de folhas de anotação foi adicionalmente executado sobre a recolha de calibração, produzindo 11 linhas para oito casos.
+A total of 96 tests were run, 70 for the backend and 26 for the frontend, together with the production build of the interface. The tests cover rules, API contracts, persistence with in-memory SQLite, fuzzy search, logging and export, response validation, merging and simulated network failures. Automated integration with Ollama uses `httpx.MockTransport`. The annotation sheet generator was additionally run on the calibration collection, producing 11 rows for eight cases.
 
-Estes controlos verificam comportamentos de software e contratos de dados. A adequação linguística das pistas exige apreciação do modelo real, como a que está prevista no protocolo.
+These controls verify software behavior and data contracts. The linguistic adequacy of the hints requires an assessment of the real model, as planned in the protocol.
 
-== Piloto de Viabilidade com Prompts v1 e v2
+== Feasibility Pilot with Prompts v1 and v2
 
-O piloto de 23 de outubro usou dez casos sintéticos de desenvolvimento, derivados de seis originais e construídos para desenvolvimento do protótipo. Os casos incluem traduções aceitáveis e variantes destinadas a testar a deteção de tradução vazia, alterações numéricas e incumprimento do glossário. A execução utilizou o Qwen de 4 mil milhões de parâmetros, em Q4_K_M, com parâmetros de geração fixos. Os relatórios históricos conservam respostas, tempos e metadados. A @tab-piloto apresenta as contagens recalculadas por par caso–categoria a partir desses ficheiros. As anotações iniciais do conjunto ainda estão assinaladas como pendentes de revisão.
+The 23 October pilot used ten synthetic development cases, derived from six sources and built for the development of the prototype. The cases include acceptable translations and variants designed to test the detection of empty translations, numeric changes and glossary non-compliance. The run used the 4-billion-parameter Qwen model in Q4\_K\_M with fixed generation parameters. The historical reports keep responses, timings and metadata. @tab-pilot presents the counts recomputed per case–category pair from these files. The initial annotations of the set are still marked as pending review.
 
 #figure(
   {
@@ -472,55 +522,54 @@ O piloto de 23 de outubro usou dez casos sintéticos de desenvolvimento, derivad
       inset: 5pt,
       stroke: (x: none, y: 0.4pt + luma(75%)),
       align: center + horizon,
-      table.header([*Execução*], [*VP*], [*FP*], [*FN*], [*Precisão*], [*Recall*], [*F1*], [*Tempo médio (s)*]),
-      [v1, primeira], [5], [2], [0], [71,4 %], [100 %], [83,3 %], [2,43],
-      [v1, repetição], [5], [2], [0], [71,4 %], [100 %], [83,3 %], [2,37],
-      [v2], [4], [1], [1], [80 %], [80 %], [80 %], [1,48],
+      table.header([*Run*], [*TP*], [*FP*], [*FN*], [*Precision*], [*Recall*], [*F1*], [*Mean time (s)*]),
+      [v1, first], [5], [2], [0], [71.4%], [100%], [83.3%], [2.43],
+      [v1, repeat], [5], [2], [0], [71.4%], [100%], [83.3%], [2.37],
+      [v2], [4], [1], [1], [80%], [80%], [80%], [1.48],
     )
   },
   kind: table,
-  supplement: [Tabela],
-  caption: [Piloto exploratório sobre dez exemplos de desenvolvimento. As métricas são micro e dependem das anotações provisórias. Os tempos médios descrevem execuções não controladas quanto ao carregamento e cache do modelo.],
+  caption: [Exploratory pilot on ten development examples. Metrics are micro-averaged and depend on the provisional annotations. Mean times describe runs that were not controlled for model loading and caching.],
   placement: top,
   scope: "parent",
-) <tab-piloto>
+) <tab-pilot>
 
-A versão v2 eliminou um falso alerta, mas omitiu um problema antes detetado. Assim, as contagens ilustram uma troca entre falsos positivos e omissões. Foram observadas explicações incorretas mesmo quando a categoria coincidia com a referência e pistas que indicavam equivalentes aceites. As duas execuções v1 produziram os mesmos textos no ambiente do piloto. Estes dados sustentaram a continuidade do desenvolvimento, sem estabelecer superioridade numa avaliação independente.
+Version v2 eliminated one false alarm but missed a problem that had previously been detected. The counts thus illustrate a trade-off between false positives and omissions. Incorrect explanations were observed even when the category matched the reference, as well as hints that stated accepted equivalents. The two v1 runs produced the same texts in the pilot environment. These data supported the continuation of development, without establishing superiority in an independent evaluation.
 
-== Calibração do Feedback com o Prompt v3
+== Feedback Calibration with Prompt v3
 
-A recolha de 14 de novembro contém oito traduções sintéticas de seis originais, das quais duas são aceitáveis e servem de controlo. Os exemplos foram construídos durante o desenvolvimento para calibrar a apreciação das pistas. Abrangem alterações de modalidade, expressões idiomáticas, falsos cognatos, convenções e valores numéricos, unidades e cumprimento do glossário. As oito chamadas produziram respostas válidas. O relatório regista Ollama 0.14.3, o digest do Qwen e o hash do prompt v3 e conserva os alertas antes e depois da fusão. As categorias esperadas do conjunto e os juízos das folhas de anotação constituem propostas iniciais #todo[indicar quem preparou cada proposta de calibração e com que procedimento], que aguardam revisão por consenso.
+The 14 November collection contains eight synthetic translations of six sources, two of which are acceptable and serve as controls. The examples were built during development to calibrate the assessment of hints. They cover changes in modality, idioms, false friends, numeric conventions and values, units and glossary compliance. All eight calls produced valid responses. The report records Ollama 0.14.3, the Qwen digest and the hash of prompt v3, and keeps the issues before and after merging. The expected categories of the set and the judgements in the annotation sheets are initial proposals #todo[state who prepared each calibration proposal and with what procedure] awaiting consensus review.
 
-Em `Do not bypass the safety check.` traduzido por «Podes ignorar a verificação de segurança.», o Qwen emitiu um alerta de significado. A pergunta «A instrução é uma proibição ou uma recomendação?» orienta para a modalidade, embora o contraste com a tradução seja proibição–permissão. Na variante aceitável «Não saltes a verificação de segurança.», o modelo também levantou um alerta. O filtro generalizou o texto, preservando o falso alerta.
+For `Do not bypass the safety check.` translated as _Podes ignorar a verificação de segurança._ ('You may skip the safety check.'), Qwen raised a meaning issue. Its question _A instrução é uma proibição ou uma recomendação?_ ('Is the instruction a prohibition or a recommendation?') points toward modality, although the contrast with the translation is one of prohibition versus permission. For the acceptable variant _Não saltes a verificação de segurança._ ('Do not skip the safety check.'), the model also raised an issue. The filter generalized the text, preserving the false alarm.
 
-Em `She gave a lecture on the results.` traduzido por «Deu uma leitura sobre os resultados.», o Qwen classificou o problema como terminologia apesar do glossário vazio e indicou «apresentação» na pista. A resposta passou pelo filtro porque as aspas simples só são procuradas em alertas de `meaning_context`, e o adaptador não verifica a coerência entre a categoria e o glossário. Uma categoria errada pode, assim, impedir a aplicação de uma das heurísticas de controlo de revelação. O caso mostra ainda uma discrepância entre identificar um problema plausível, atribuir a categoria operacional correta e preservar o trabalho de reformulação do aluno.
+For `She gave a lecture on the results.` translated as _Deu uma leitura sobre os resultados._ (a false-friend rendering, literally 'gave a reading'), Qwen classified the problem as terminology despite the empty glossary and suggested _apresentação_ ('presentation') in the hint. The response passed through the filter because single quotes are only searched for in `meaning_context` issues, and the adapter does not check the consistency between the category and the glossary. A wrong category can thus prevent one of the disclosure-control heuristics from being applied. The case also shows a gap between identifying a plausible problem, assigning the correct operational category and preserving the student's reformulation work.
 
-Na troca de `80 °C` por `80 °F`, a regra numérica manteve-se silenciosa porque o valor 80 foi preservado. O modelo assinalou a unidade e o filtro generalizou o feedback. Este caso fundamenta a separação de âmbitos prevista na RQ1. No exemplo da expressão _broke the ice_, a ausência de alerta é registada, mas a aceitabilidade da tradução «partiu o gelo» está assinalada para discussão e exige resolver a anotação antes de calcular métricas.
+When `80 °C` was replaced by `80 °F`, the numeric rule remained silent because the value 80 was preserved. The model flagged the unit and the filter generalized the feedback. This case supports the separation of scopes planned for RQ1. For the idiom _broke the ice_, no issue was raised, but the acceptability of the translation _partiu o gelo_ is flagged for discussion, and the annotation must be resolved before computing metrics.
 
-Os registos permitem observar falhas e preparar a grelha. A proposta de anotação ainda não permite publicar uma taxa final de revelação. A avaliação de uma pista também pode divergir entre critérios, como no caso de uma mensagem clara que fornece a correção ou de uma mensagem genérica que preserva o falso alerta.
+The logs reveal failures and help us prepare the grid. The annotation proposal does not yet allow a final disclosure rate to be reported. The assessment of a hint may also diverge across criteria, as in the case of a clear message that provides the correction or a generic message that preserves a false alarm.
 
-== Síntese das Evidências Disponíveis
+== Summary of the Available Evidence
 
-Os ensaios evidenciam que a deteção, a fundamentação do alerta e a preservação do trabalho do aluno constituem dimensões distintas. Uma categoria esperada pode acompanhar uma explicação incorreta, e a generalização pode manter um falso alerta. Estas observações fundamentam a articulação das métricas da RQ1 com a apreciação textual da RQ2. A avaliação comparativa encontra-se em preparação e incidirá sobre as configurações fixadas e o conjunto de teste definido no protocolo.
+The trials show that detection, the grounding of the issue and the preservation of the student's work are distinct dimensions. An expected category may come with an incorrect explanation, and generalization may keep a false alarm. These observations support linking the RQ1 metrics with the textual assessment of RQ2. The comparative evaluation is in preparation and will address the fixed configurations and the test set defined in the protocol.
 
-= Ameaças à Validade e Limitações
+= Threats to Validity and Limitations
 
-*Referência e anotação.* Os autores desenvolvem o sistema, preparam os exemplos e decidem as anotações por consenso, o que introduz enviesamento. A proposta inicial e as alterações ficam registadas, mas a ausência de anotação independente limita a apreciação da fiabilidade dos juízos. O contacto prévio com as respostas do sistema pode influenciar os juízos. No conjunto de teste final, a fixação da referência antes da consulta das respostas e o registo de evidência textual destinam-se a reduzir esta influência. Os juízos provisórios de desenvolvimento e calibração permanecem sujeitos a revisão.
+*Reference and annotation.* We develop the system, prepare the examples and decide the annotations by consensus, which introduces bias. The initial proposal and the changes are recorded, but the lack of independent annotation limits the assessment of the reliability of the judgements. Prior contact with the system's responses may influence the judgements. In the final test set, fixing the reference before examining the responses and recording textual evidence are intended to reduce this influence. The provisional development and calibration judgements remain subject to review.
 
-*Dados e generalização.* Os dez casos do piloto e os oito de calibração são pequenos conjuntos sintéticos. A exposição prévia a estes exemplos impede usá-los como teste final. Uma avaliação delimitada a EN–PT-PT, textos curtos e uma configuração local caracteriza esse recorte. A caracterização do conjunto de teste e dos avaliadores será concluída na #ref(<sec-dados>, supplement: [secção]), antes da execução final.
+*Data and generalization.* The ten pilot cases and the eight calibration cases are small synthetic sets. Prior exposure to these examples prevents their use as a final test. An evaluation restricted to EN–PT-PT, short texts and a local configuration characterizes only that scope. The characterization of the test set and of the annotators will be completed in @sec-data before the final run.
 
-*Âmbito das verificações.* A regra numérica procura valores do original ausentes ou com ocorrências em falta, pode ser ambígua em sequências como «5 100» e não interpreta unidades ou números por extenso. A terminologia depende de correspondências e variantes explícitas. As etiquetas são comparadas por contagem, sem análise do aninhamento. O modelo pode errar nas categorias e na avaliação de paráfrases.
+*Scope of the checks.* The numeric rule looks for source values that are absent or have missing occurrences, may be ambiguous in sequences such as "5 100" and does not interpret units or numbers written in words. Terminology depends on explicit matches and variants. Tags are compared by count, without analyzing nesting. The model may err in its categories and in assessing paraphrases.
 
-*Revelação e utilidade.* O filtro depende de padrões e pode tanto deixar passar uma correção lexical como generalizar uma explicação adequada. A forma interrogativa pedida no prompt não garante que o feedback preserve a resolução para o aluno. A apreciação dos autores sobre utilidade é interna. A observação de alunos a rever e justificar escolhas será necessária para estudar efeitos pedagógicos.
+*Disclosure and usefulness.* The filter depends on patterns and may both let a lexical correction through and replace an appropriate explanation with a generic message. The interrogative form requested in the prompt does not guarantee that the feedback leaves the resolution to the student. Our assessment of usefulness is internal. Observing students as they revise and justify their choices will be necessary to study pedagogical effects.
 
-*Operação e reprodutibilidade.* O estado atual da persistência associa segmentos pelo original e partilha memória e exportações na instância. CORS permissivo e falta de autenticação limitam a utilização partilhada. As latências exploratórias dependem do equipamento, da versão do Ollama, do carregamento e do comprimento da saída. As versões do piloto e da calibração diferem, pelo que os seus tempos não permitem comparar os prompts em condições controladas.
+*Operation and reproducibility.* In its current state, persistence associates segments by source text and shares memory and exports across the instance. Permissive CORS and the lack of authentication limit shared use. Exploratory latencies depend on the hardware, the Ollama version, model loading and output length. The pilot and calibration versions differ, so their timings do not allow the prompts to be compared under controlled conditions.
 
-= Conclusão e Trabalho Futuro
+= Conclusion and Future Work
 
-A Educational Translation Tool concretiza um percurso de escrita, verificação, reutilização e revisão por pistas numa aplicação EN–PT-PT com componentes inspecionáveis. As cinco regras e a memória fornecem apoio formal e reutilização explícita. A integração com o Qwen acrescenta alertas de significado, e a fusão identifica a origem de cada alerta.
+The Educational Translation Tool implements a workflow of writing, checking, reuse and hint-based revision in an EN–PT-PT application with inspectable components. The five rules and the memory provide formal support and explicit reuse. The integration with Qwen adds meaning issues, and the merge identifies the origin of each issue.
 
-Os ensaios exploratórios identificaram comportamentos úteis, falsos alertas e pistas que entregam uma correção. Estas observações motivam a avaliação separada de deteção e conteúdo pedagógico. As perguntas RQ1 e RQ2 serão respondidas após a execução do teste e a revisão das anotações segundo o protocolo apresentado.
+The exploratory trials identified useful behaviors, false alarms and hints that give away a correction. These observations motivate the separate evaluation of detection and pedagogical content. RQ1 and RQ2 will be answered after the test run and the review of the annotations according to the protocol presented.
 
-A conclusão do trabalho inclui consolidar essa avaliação, corrigir a identidade dos segmentos e documentar as condições de utilização. O histórico de versões, as justificações do aluno e a comparação crítica, necessários para OP2 e para completar OP3, permanecem por implementar. A distribuição requer ainda escolher a licença do projeto. Uma avaliação futura com estudantes poderá estudar como as pistas influenciam a revisão, a tomada de decisão e a aprendizagem.
+To complete the work, we still need to consolidate this evaluation, fix segment identity and document the conditions of use. Version history, student justifications and critical comparison, which are needed to fully address PO2, remain to be implemented. Distribution also requires choosing the project's license. A future evaluation with students could study how hints influence revision, decision-making and learning.
 
 #print-acl-bibliography()
