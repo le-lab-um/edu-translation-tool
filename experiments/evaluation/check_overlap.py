@@ -5,8 +5,9 @@ Uso (na raiz do repositório):
     .venv/bin/python -m experiments.evaluation.check_overlap --cases experiments/evaluation/diagnostico.json
 
 Procura cada original (ignorando maiúsculas e pontuação) no texto de todos os ficheiros do projeto,
-incluindo os outros conjuntos de casos e os prompts. Ignora o próprio conjunto e os relatórios de
-recolha feitos com ele. Avisa também de originais muito parecidos e de termos de glossário já usados
+incluindo os outros conjuntos de casos e os prompts. Ignora o próprio conjunto e os ficheiros feitos
+com ele (relatórios de recolha e folhas de anotação, reconhecidos pelo nome do ficheiro do conjunto
+ou pelos identificadores dos casos). Avisa também de originais muito parecidos e de termos de glossário já usados
 noutros conjuntos. Termina com código 1 se encontrar alguma coincidência.
 """
 
@@ -39,8 +40,11 @@ def project_files(root, cases_path):
         yield path
 
 
-def is_report_of(raw_text, cases_path):
-    return f'"cases_file": "{cases_path.name}"' in raw_text
+def derived_from(raw_text, cases_path, case_ids):
+    """Relatórios e folhas de anotação do próprio conjunto: citam o ficheiro ou os identificadores dos casos."""
+    if f'"cases_file": "{cases_path.name}"' in raw_text:
+        return True
+    return any(re.search(rf"(?<![\w-]){re.escape(case_id)}(?![\w-])", raw_text) for case_id in case_ids)
 
 
 def other_glossary_terms(root, cases_path):
@@ -63,13 +67,14 @@ def main():
     args = parser.parse_args()
 
     cases = json.loads(args.cases.read_text(encoding="utf-8"))["cases"]
+    case_ids = [case["id"] for case in cases]
     sources = {}
     for case in cases:
         sources.setdefault(case["input"]["source"], case["source_id"])
     texts = {}
     for path in project_files(args.root, args.cases):
         raw = path.read_text(encoding="utf-8", errors="ignore")
-        if not is_report_of(raw, args.cases):
+        if not derived_from(raw, args.cases, case_ids):
             texts[path] = norm(raw)
 
     problems = []
