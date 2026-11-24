@@ -68,6 +68,24 @@ Recolher as respostas (uma só vez por configuração, com o Ollama a correr):
 
 Antes do primeiro caso faz um pedido de aquecimento (`--no-warmup` desativa-o) e, por caso, uma única chamada ao modelo. Nas traduções vazias a chamada é experimental: o resultado do modelo serve só para a condição «LLM isolado» e o híbrido devolve apenas o alerta da regra. O relatório regista, além do que já guardava na calibração, a revisão do código (e se havia alterações por commitar), as versões do Python e das dependências, o aquecimento, o número de tentativas e a resposta completa do Ollama por caso (tempos e contagem de tokens incluídos). Para anotar as pistas: `make_sheet` aceita o relatório de teste.
 
+## Métricas de deteção (RQ1)
+
+`metrics.py` lê um relatório, ou dois para comparar o v3 com o v4, e calcula VP, FP e FN por categoria e a micro-média para Regras, LLM isolado e Híbrido. A unidade é o par caso-categoria, e a referência é `expected_categories`.
+
+```sh
+.venv/bin/python -m experiments.evaluation.metrics output/teste-v3-AAAA-MM-DD.json output/teste-v4-AAAA-MM-DD.json --json output/metricas.json
+```
+
+- **Análise principal:** âmbito `rq1_main` e as categorias `empty_translation`, `numeric_mismatch` e `terminology`.
+- **Robustez:** o âmbito `robustness` sai numa tabela à parte.
+- **Significado e contexto:** os alertas `meaning_context` são descritos em separado (RQ2) e não entram na micro-média.
+- **Casos com a mesma base:** os três métodos usam os mesmos casos, os que têm `llm_status` igual a `ok` em todos os relatórios. Os casos excluídos são listados.
+- **Métricas indefinidas:** com denominador nulo, a métrica aparece como `indef.`.
+- **Falsos alertas:** conta também os casos aceitáveis com pelo menos um alerta.
+- **Aviso de comparação:** avisa se os relatórios diferem no conjunto, no modelo, na versão do Ollama ou nos parâmetros.
+
+Com `--scope all` analisa todos os casos (útil para os conjuntos de desenvolvimento e diagnóstico, que não têm `rq1_main`).
+
 ## Diagnóstico e prompt v4
 
 `diagnostico.json` tem 20 casos de 10 originais, todos de significado e contexto: tempo e advérbios, falsos cognatos, negação, modalidade, quantificadores, expressão idiomática e condição. Faz parte do desenvolvimento: as suas respostas podem orientar a revisão do prompt e nunca entram no teste. Verificar com `check_overlap --cases experiments/evaluation/diagnostico.json`, que também compara com o teste.
