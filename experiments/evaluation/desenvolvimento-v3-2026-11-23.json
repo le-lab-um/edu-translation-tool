@@ -1,0 +1,596 @@
+{
+  "split": "development",
+  "annotation_status": "pending_author_review",
+  "cases_file": "development.json",
+  "started_at": "2026-11-23T11:48:38.474375+00:00",
+  "prompt": "hint-v3.txt",
+  "prompt_sha256": "a068f761fdf156fe4d16fdb3e7136a6f6c471828c60fa444dae2b0518290dd07",
+  "dataset_sha256": "37a1af4cade3d0e70b269b2459ebf4919ddd1846948e4033383266f7d36c33de",
+  "code_revision": {
+    "commit": "5fbcdc780d0a40cbfbdf4804c56d7335717320a3",
+    "uncommitted_changes": false
+  },
+  "python_version": "3.11.15",
+  "dependencies": {
+    "fastapi": "0.163.1",
+    "pydantic": "2.14.3",
+    "uvicorn": "0.54.0",
+    "starlette": "1.10.0",
+    "httpx": "0.28.1",
+    "sqlalchemy": "2.1.8",
+    "rapidfuzz": "3.14.6"
+  },
+  "ollama_version": "0.40.13",
+  "model": "qwen3:4b-instruct-2507-q4_K_M",
+  "model_digest": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
+  "generation_options": {
+    "temperature": 0,
+    "seed": 42,
+    "num_ctx": 4096,
+    "num_predict": 768
+  },
+  "timeout_seconds": 30.0,
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "warmup": {
+    "performed": true,
+    "status": "ok",
+    "elapsed_ms": 2676
+  },
+  "results": [
+    {
+      "id": "dev-001",
+      "source_id": "instructions-001",
+      "input": {
+        "source": "Read the instructions before you start.",
+        "target": "Leia as instruções antes de começar.",
+        "context": "Instrução apresentada antes de um exercício educativo.",
+        "glossary": []
+      },
+      "expected_issues": [],
+      "annotation_note": "Caso de controlo: tradução não vazia e sem problemas nas categorias avaliadas.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 197,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T11:48:41.39203Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 191606917,
+        "load_duration": 433542,
+        "prompt_eval_count": 1132,
+        "prompt_eval_cached_count": 1084,
+        "prompt_eval_duration": 94343000,
+        "eval_count": 5,
+        "eval_duration": 92596000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "dev-002",
+      "source_id": "instructions-001",
+      "input": {
+        "source": "Read the instructions before you start.",
+        "target": "",
+        "context": "Instrução apresentada antes de um exercício educativo.",
+        "glossary": []
+      },
+      "expected_issues": [
+        {
+          "category": "empty_translation",
+          "source_evidence": "Read the instructions before you start.",
+          "target_evidence": "",
+          "explanation": "O segmento original contém texto, mas não foi introduzida uma tradução."
+        }
+      ],
+      "annotation_note": "Caso de tradução totalmente vazia.",
+      "rule_issues": [
+        {
+          "category": "empty_translation",
+          "explanation": "O segmento ainda não contém uma tradução com texto.",
+          "hint": "Como traduzirias este segmento para português europeu?"
+        }
+      ],
+      "llm_issues_before_fusion": [
+        {
+          "category": "empty_translation",
+          "explanation": "A tradução está vazia após a remoção de espaços em branco.",
+          "hint": "A tradução está vazia. Há conteúdo no original. O que deveria ser traduzido?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "empty_translation",
+          "explanation": "O segmento ainda não contém uma tradução com texto.",
+          "hint": "Como traduzirias este segmento para português europeu?",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": true,
+      "llm_elapsed_ms": 1478,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T11:48:42.870365Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\": [{\"category\": \"empty_translation\", \"explanation\": \"A tradução está vazia após a remoção de espaços em branco.\", \"hint\": \"A tradução está vazia. Há conteúdo no original. O que deveria ser traduzido?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1472633666,
+        "load_duration": 2428416,
+        "prompt_eval_count": 1122,
+        "prompt_eval_cached_count": 1094,
+        "prompt_eval_duration": 89780000,
+        "eval_count": 61,
+        "eval_duration": 1376853000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "dev-003",
+      "source_id": "instructions-001",
+      "input": {
+        "source": "Read the instructions before you start.",
+        "target": "   ",
+        "context": "Instrução apresentada antes de um exercício educativo.",
+        "glossary": []
+      },
+      "expected_issues": [
+        {
+          "category": "empty_translation",
+          "source_evidence": "Read the instructions before you start.",
+          "target_evidence": "   ",
+          "explanation": "A tradução contém apenas três espaços e deve ser tratada como vazia."
+        }
+      ],
+      "annotation_note": "Os três espaços são intencionais: este caso distingue uma cadeia não vazia de uma tradução com conteúdo.",
+      "rule_issues": [
+        {
+          "category": "empty_translation",
+          "explanation": "O segmento ainda não contém uma tradução com texto.",
+          "hint": "Como traduzirias este segmento para português europeu?"
+        }
+      ],
+      "llm_issues_before_fusion": [
+        {
+          "category": "empty_translation",
+          "explanation": "A tradução está vazia após a remoção de espaços em branco.",
+          "hint": "A frase original é uma instrução que deve ser traduzida para o português europeu."
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "empty_translation",
+          "explanation": "O segmento ainda não contém uma tradução com texto.",
+          "hint": "Como traduzirias este segmento para português europeu?",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": true,
+      "llm_elapsed_ms": 1342,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T11:48:44.212715Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"empty_translation\",\"explanation\":\"A tradução está vazia após a remoção de espaços em branco.\",\"hint\":\"A frase original é uma instrução que deve ser traduzida para o português europeu.\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1336804333,
+        "load_duration": 615666,
+        "prompt_eval_count": 1124,
+        "prompt_eval_cached_count": 1094,
+        "prompt_eval_duration": 89794000,
+        "eval_count": 55,
+        "eval_duration": 1242642000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "dev-004",
+      "source_id": "price-001",
+      "input": {
+        "source": "The total is €1,000.50.",
+        "target": "O total é 1 000,50 €.",
+        "context": "Resumo de uma compra. No original, a vírgula separa milhares e o ponto separa a parte decimal.",
+        "glossary": []
+      },
+      "expected_issues": [],
+      "annotation_note": "O valor monetário foi preservado. A mudança de separadores e da posição do símbolo monetário não deve gerar um alerta numérico.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "A posição da moeda e o agrupamento dos milhares não correspondem ao original.",
+          "hint": "O original coloca a moeda antes do valor e agrupa os milhares com espaço; a tradução inverte a ordem e usa espaço para agrupar milhares."
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "A posição da moeda e o agrupamento dos milhares não correspondem ao original.",
+          "hint": "O original coloca a moeda antes do valor e agrupa os milhares com espaço; a tradução inverte a ordem e usa espaço para agrupar milhares.",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1945,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T11:48:46.158089Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"numeric_mismatch\",\"explanation\":\"A posição da moeda e o agrupamento dos milhares não correspondem ao original.\",\"hint\":\"O original coloca a moeda antes do valor e agrupa os milhares com espaço; a tradução inverte a ordem e usa espaço para agrupar milhares.\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1939545709,
+        "load_duration": 411625,
+        "prompt_eval_count": 1158,
+        "prompt_eval_cached_count": 1084,
+        "prompt_eval_duration": 102398000,
+        "eval_count": 76,
+        "eval_duration": 1832756000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "dev-005",
+      "source_id": "price-001",
+      "input": {
+        "source": "The total is €1,000.50.",
+        "target": "O total é 100,50 €.",
+        "context": "Resumo de uma compra. No original, a vírgula separa milhares e o ponto separa a parte decimal.",
+        "glossary": []
+      },
+      "expected_issues": [
+        {
+          "category": "numeric_mismatch",
+          "source_evidence": "1,000.50",
+          "target_evidence": "100,50",
+          "explanation": "O original indica mil euros e cinquenta cêntimos, enquanto a tradução indica cem euros e cinquenta cêntimos."
+        }
+      ],
+      "annotation_note": "Variante de dev-004 com alteração real do valor, para distinguir erro numérico de adaptação do formato.",
+      "rule_issues": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português."
+        }
+      ],
+      "llm_issues_before_fusion": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "A posição da vírgula e do ponto é invertida, alterando o valor numérico.",
+          "hint": "O original separa milhares com vírgula e decimais com ponto — a tradução mantém essa separação correta?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português.",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 2123,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T11:48:48.283237Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"numeric_mismatch\",\"explanation\":\"A posição da vírgula e do ponto é invertida, alterando o valor numérico.\",\"hint\":\"O original separa milhares com vírgula e decimais com ponto — a tradução mantém essa separação correta?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 2118852833,
+        "load_duration": 434292,
+        "prompt_eval_count": 1156,
+        "prompt_eval_cached_count": 1106,
+        "prompt_eval_duration": 132771999,
+        "eval_count": 67,
+        "eval_duration": 1981613000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "dev-006",
+      "source_id": "discount-001",
+      "input": {
+        "source": "A 15% discount applies.",
+        "target": "Aplica-se um desconto de 50 %.",
+        "context": "Aviso sobre a percentagem de desconto de uma promoção.",
+        "glossary": []
+      },
+      "expected_issues": [
+        {
+          "category": "numeric_mismatch",
+          "source_evidence": "15%",
+          "target_evidence": "50 %",
+          "explanation": "A percentagem passou de 15 para 50. O espaço antes do símbolo não é a causa do alerta."
+        }
+      ],
+      "annotation_note": "Caso de percentagem com mudança de valor e diferença de espaçamento.",
+      "rule_issues": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português."
+        }
+      ],
+      "llm_issues_before_fusion": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "O valor do desconto é incorreto: 15% não corresponde a 50%.",
+          "hint": "Qual é o valor real do desconto mencionado no original?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português.",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1501,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T11:48:49.784724Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"numeric_mismatch\",\"explanation\":\"O valor do desconto é incorreto: 15% não corresponde a 50%.\",\"hint\":\"Qual é o valor real do desconto mencionado no original?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1497163625,
+        "load_duration": 503667,
+        "prompt_eval_count": 1138,
+        "prompt_eval_cached_count": 1084,
+        "prompt_eval_duration": 116533000,
+        "eval_count": 54,
+        "eval_duration": 1376025000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "dev-007",
+      "source_id": "save-file-001",
+      "input": {
+        "source": "Save the file in the folder.",
+        "target": "Guarde o ficheiro no diretório.",
+        "context": "Instrução de uma aplicação de gestão de ficheiros. O glossário admite duas designações para folder neste exercício.",
+        "glossary": [
+          {
+            "source_term": "file",
+            "accepted_targets": [
+              "ficheiro"
+            ]
+          },
+          {
+            "source_term": "folder",
+            "accepted_targets": [
+              "pasta",
+              "diretório"
+            ]
+          }
+        ]
+      },
+      "expected_issues": [],
+      "annotation_note": "A utilização do segundo equivalente aceite, diretório, deve ser reconhecida como válida.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 214,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T11:48:49.998102Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 209622416,
+        "load_duration": 441291,
+        "prompt_eval_count": 1182,
+        "prompt_eval_cached_count": 1084,
+        "prompt_eval_duration": 111435000,
+        "eval_count": 5,
+        "eval_duration": 93586000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "dev-008",
+      "source_id": "save-file-001",
+      "input": {
+        "source": "Save the file in the folder.",
+        "target": "Guarde o ficheiro no arquivo.",
+        "context": "Instrução de uma aplicação de gestão de ficheiros. O glossário admite duas designações para folder neste exercício.",
+        "glossary": [
+          {
+            "source_term": "file",
+            "accepted_targets": [
+              "ficheiro"
+            ]
+          },
+          {
+            "source_term": "folder",
+            "accepted_targets": [
+              "pasta",
+              "diretório"
+            ]
+          }
+        ]
+      },
+      "expected_issues": [
+        {
+          "category": "terminology",
+          "source_evidence": "folder",
+          "target_evidence": "arquivo",
+          "explanation": "O termo folder está presente no original, mas a tradução não usa pasta nem diretório, os equivalentes aceites neste exercício."
+        }
+      ],
+      "annotation_note": "O alerta é relativo ao glossário prescrito neste contexto; não estabelece uma proibição geral do termo arquivo.",
+      "rule_issues": [
+        {
+          "category": "terminology",
+          "explanation": "O termo prescrito para 'folder' não foi identificado na tradução.",
+          "hint": "Consulte o glossário da tarefa para verificar a tradução recomendada de 'folder'."
+        }
+      ],
+      "llm_issues_before_fusion": [
+        {
+          "category": "terminology",
+          "explanation": "A tradução utiliza 'arquivo' ao invés de 'pasta' ou 'diretório', que são termos aceitos no glossário.",
+          "hint": "O original menciona 'folder' — qual é a designação aceite no glossário para este termo?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "terminology",
+          "explanation": "O termo prescrito para 'folder' não foi identificado na tradução.",
+          "hint": "Consulte o glossário da tarefa para verificar a tradução recomendada de 'folder'.",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1801,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T11:48:51.798874Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"terminology\",\"explanation\":\"A tradução utiliza 'arquivo' ao invés de 'pasta' ou 'diretório', que são termos aceitos no glossário.\",\"hint\":\"O original menciona 'folder' — qual é a designação aceite no glossário para este termo?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1795254666,
+        "load_duration": 382541,
+        "prompt_eval_count": 1181,
+        "prompt_eval_cached_count": 1102,
+        "prompt_eval_duration": 105424000,
+        "eval_count": 70,
+        "eval_duration": 1685694000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "dev-009",
+      "source_id": "profile-001",
+      "input": {
+        "source": "Update your profile.",
+        "target": "Atualize o seu perfil.",
+        "context": "Instrução para atualizar o perfil de utilizador. O glossário do projeto também contém termos usados noutros segmentos.",
+        "glossary": [
+          {
+            "source_term": "file",
+            "accepted_targets": [
+              "ficheiro"
+            ]
+          }
+        ]
+      },
+      "expected_issues": [],
+      "annotation_note": "A sequência file ocorre dentro de profile, mas não como termo completo. Não se deve exigir ficheiro na tradução.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 205,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T11:48:52.0038Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 199776125,
+        "load_duration": 437500,
+        "prompt_eval_count": 1158,
+        "prompt_eval_cached_count": 1084,
+        "prompt_eval_duration": 102757000,
+        "eval_count": 5,
+        "eval_duration": 92610000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "dev-010",
+      "source_id": "open-file-001",
+      "input": {
+        "source": "Open the file.",
+        "target": "Abra o FICHEIRO.",
+        "context": "Instrução de interface em que a palavra FICHEIRO aparece destacada em maiúsculas por opção de apresentação.",
+        "glossary": [
+          {
+            "source_term": "file",
+            "accepted_targets": [
+              "ficheiro"
+            ]
+          }
+        ]
+      },
+      "expected_issues": [],
+      "annotation_note": "O equivalente aceite está presente em maiúsculas e seguido de pontuação. Não deve gerar um alerta terminológico.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 208,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T11:48:52.213013Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 204035291,
+        "load_duration": 370916,
+        "prompt_eval_count": 1159,
+        "prompt_eval_cached_count": 1084,
+        "prompt_eval_duration": 104994000,
+        "eval_count": 5,
+        "eval_duration": 92954000
+      },
+      "sanitized": 0
+    }
+  ]
+}

@@ -1,0 +1,441 @@
+{
+  "split": "calibration",
+  "annotation_status": "pending_author_review",
+  "cases_file": "calibration.json",
+  "started_at": "2026-11-23T12:55:35.098965+00:00",
+  "prompt": "hint-v3.txt",
+  "prompt_sha256": "a068f761fdf156fe4d16fdb3e7136a6f6c471828c60fa444dae2b0518290dd07",
+  "dataset_sha256": "d7d73aaad415397de4426d0662025044e23f54b3e7df6c67a3fc109d99340146",
+  "code_revision": {
+    "commit": "d52e1974866e9aee01398b69984de1f98e515272",
+    "uncommitted_changes": false
+  },
+  "python_version": "3.11.15",
+  "dependencies": {
+    "fastapi": "0.165.0",
+    "pydantic": "2.14.4",
+    "uvicorn": "0.54.0",
+    "starlette": "1.10.0",
+    "httpx": "0.28.1",
+    "sqlalchemy": "2.1.9",
+    "rapidfuzz": "3.14.6"
+  },
+  "ollama_version": "0.40.13",
+  "model": "qwen3:4b-instruct-2507-q4_K_M",
+  "model_digest": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
+  "generation_options": {
+    "temperature": 0,
+    "seed": 42,
+    "num_ctx": 4096,
+    "num_predict": 768
+  },
+  "timeout_seconds": 30.0,
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "warmup": {
+    "performed": true,
+    "status": "ok",
+    "elapsed_ms": 253
+  },
+  "results": [
+    {
+      "id": "cal-01",
+      "source_id": "safety-bypass",
+      "input": {
+        "source": "Do not bypass the safety check.",
+        "target": "Podes ignorar a verificação de segurança.",
+        "context": "Instruções de utilização de um simulador. Estas instruções são obrigatórias.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "A proibição passa a permissão.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução contradiz a obrigação expressa no original.",
+          "hint": "A instrução é uma proibição ou uma recomendação?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução contradiz a obrigação expressa no original.",
+          "hint": "A instrução é uma proibição ou uma recomendação?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1072,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:36.453788Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"meaning_context\",\"explanation\":\"A tradução contradiz a obrigação expressa no original.\",\"hint\":\"A instrução é uma proibição ou uma recomendação?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1068526625,
+        "load_duration": 417000,
+        "prompt_eval_count": 1142,
+        "prompt_eval_cached_count": 1084,
+        "prompt_eval_duration": 95662000,
+        "eval_count": 43,
+        "eval_duration": 968365000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "cal-02",
+      "source_id": "safety-bypass",
+      "input": {
+        "source": "Do not bypass the safety check.",
+        "target": "Não saltes a verificação de segurança.",
+        "context": "Instruções de utilização de um simulador. Estas instruções são obrigatórias.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "A paráfrase conserva a proibição.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução interpreta 'bypass' como 'saltar', o que altera o sentido de uma ação obrigatória.",
+          "hint": "O original fala de uma verificação de segurança que não deve ser ignorada ou contornada — a ação é proibida, não é uma recomendação de pular."
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução pode alterar o sentido ou a intenção do original.",
+          "hint": "Que diferença encontras entre o que o original comunica neste contexto e o que se entende na tua tradução?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 2000,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:38.454438Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"meaning_context\",\"explanation\":\"A tradução interpreta 'bypass' como 'saltar', o que altera o sentido de uma ação obrigatória.\",\"hint\":\"O original fala de uma verificação de segurança que não deve ser ignorada ou contornada — a ação é proibida, não é uma recomendação de pular.\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1994016958,
+        "load_duration": 386708,
+        "prompt_eval_count": 1141,
+        "prompt_eval_cached_count": 1095,
+        "prompt_eval_duration": 93438000,
+        "eval_count": 83,
+        "eval_duration": 1896333000
+      },
+      "sanitized": 1
+    },
+    {
+      "id": "cal-03",
+      "source_id": "agenda-ice",
+      "input": {
+        "source": "The opening activity broke the ice.",
+        "target": "A atividade de abertura partiu o gelo.",
+        "context": "Uma sessão de apresentação com participantes que ainda não se conheciam.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "A expressão descreve o efeito social da atividade. A escolha de «partiu» favorece uma leitura literal neste contexto.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 198,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:38.652475Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 192811916,
+        "load_duration": 375000,
+        "prompt_eval_count": 1140,
+        "prompt_eval_cached_count": 1084,
+        "prompt_eval_duration": 95756000,
+        "eval_count": 5,
+        "eval_duration": 92433000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "cal-04",
+      "source_id": "results-lecture",
+      "input": {
+        "source": "She gave a lecture on the results.",
+        "target": "Deu uma leitura sobre os resultados.",
+        "context": "Sessão oral apresentada por uma investigadora num seminário.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "A escolha de «leitura» altera o tipo de intervenção. Há várias traduções aceitáveis conforme o tipo de sessão.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "terminology",
+          "explanation": "A palavra 'lecture' é traduzida por 'leitura', o que é um falso cognato e altera o sentido original.",
+          "hint": "No contexto de uma sessão oral em seminário, 'lecture' refere-se a uma apresentação, não a uma leitura."
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "terminology",
+          "explanation": "A palavra 'lecture' é traduzida por 'leitura', o que é um falso cognato e altera o sentido original.",
+          "hint": "No contexto de uma sessão oral em seminário, 'lecture' refere-se a uma apresentação, não a uma leitura.",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1766,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:40.418923Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"terminology\",\"explanation\":\"A palavra 'lecture' é traduzida por 'leitura', o que é um falso cognato e altera o sentido original.\",\"hint\":\"No contexto de uma sessão oral em seminário, 'lecture' refere-se a uma apresentação, não a uma leitura.\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1761362500,
+        "load_duration": 346333,
+        "prompt_eval_count": 1136,
+        "prompt_eval_cached_count": 1084,
+        "prompt_eval_duration": 94573000,
+        "eval_count": 73,
+        "eval_duration": 1662809000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "cal-05",
+      "source_id": "tax",
+      "input": {
+        "source": "The tax rate is 12.5%.",
+        "target": "A taxa de imposto é de 12,5 %.",
+        "context": "Exemplo de um documento informativo sobre impostos.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "O valor mantém-se com separador decimal e espaçamento diferentes.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 197,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:40.616879Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 192077459,
+        "load_duration": 348792,
+        "prompt_eval_count": 1140,
+        "prompt_eval_cached_count": 1084,
+        "prompt_eval_duration": 95337000,
+        "eval_count": 5,
+        "eval_duration": 92523000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "cal-06",
+      "source_id": "tax",
+      "input": {
+        "source": "The tax rate is 12.5%.",
+        "target": "A taxa de imposto é de 15,2 %.",
+        "context": "Exemplo de um documento informativo sobre impostos.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "numeric_mismatch"
+      ],
+      "annotation_note": "O valor mudou. No híbrido, a regra tem prioridade se o modelo também assinalar números.",
+      "rule_issues": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português."
+        }
+      ],
+      "llm_issues_before_fusion": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "O valor da taxa de imposto é diferente no original e na tradução.",
+          "hint": "Os dois valores apresentam a mesma unidade, mas o valor numérico é diferente: 12,5% versus 15,2%."
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português.",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1599,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:42.217116Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"numeric_mismatch\",\"explanation\":\"O valor da taxa de imposto é diferente no original e na tradução.\",\"hint\":\"Os dois valores apresentam a mesma unidade, mas o valor numérico é diferente: 12,5% versus 15,2%.\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1594830375,
+        "load_duration": 343542,
+        "prompt_eval_count": 1140,
+        "prompt_eval_cached_count": 1108,
+        "prompt_eval_duration": 88689000,
+        "eval_count": 66,
+        "eval_duration": 1499965000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "cal-07",
+      "source_id": "tool-temperature",
+      "input": {
+        "source": "Preheat the tool to 80 °C.",
+        "target": "Pré-aqueça a ferramenta a 80 °F.",
+        "context": "Instrução de um manual técnico. A unidade do original deve ser preservada.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "numeric_mismatch"
+      ],
+      "annotation_note": "O número mantém-se, mas a unidade mudou. Caso de calibração com âmbito desigual entre os métodos.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "A unidade de temperatura foi alterada de °C para °F, o que muda o valor do ponto de referência.",
+          "hint": "O original especifica 80 °C, mas a tradução indica 80 °F — qual é a unidade correta no contexto técnico?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Os números ou unidades podem não corresponder ao original.",
+          "hint": "Compara, um a um, os valores do original com os da tua tradução.",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1844,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:44.060318Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"numeric_mismatch\",\"explanation\":\"A unidade de temperatura foi alterada de °C para °F, o que muda o valor do ponto de referência.\",\"hint\":\"O original especifica 80 °C, mas a tradução indica 80 °F — qual é a unidade correta no contexto técnico?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1838686167,
+        "load_duration": 386042,
+        "prompt_eval_count": 1149,
+        "prompt_eval_cached_count": 1084,
+        "prompt_eval_duration": 100055000,
+        "eval_count": 76,
+        "eval_duration": 1734533000
+      },
+      "sanitized": 1
+    },
+    {
+      "id": "cal-08",
+      "source_id": "dashboard",
+      "input": {
+        "source": "Open the dashboard.",
+        "target": "Abra o quadro.",
+        "context": "Interface de monitorização de um serviço.",
+        "glossary": [
+          {
+            "source_term": "dashboard",
+            "accepted_targets": [
+              "painel",
+              "painel de controlo"
+            ]
+          }
+        ]
+      },
+      "expected_categories": [
+        "terminology"
+      ],
+      "annotation_note": "O exercício prescreve «painel» ou «painel de controlo».",
+      "rule_issues": [
+        {
+          "category": "terminology",
+          "explanation": "O termo prescrito para 'dashboard' não foi identificado na tradução.",
+          "hint": "Consulte o glossário da tarefa para verificar a tradução recomendada de 'dashboard'."
+        }
+      ],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [
+        {
+          "category": "terminology",
+          "explanation": "O termo prescrito para 'dashboard' não foi identificado na tradução.",
+          "hint": "Consulte o glossário da tarefa para verificar a tradução recomendada de 'dashboard'.",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 198,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:44.259078Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 193056542,
+        "load_duration": 392000,
+        "prompt_eval_count": 1143,
+        "prompt_eval_cached_count": 1084,
+        "prompt_eval_duration": 95745000,
+        "eval_count": 5,
+        "eval_duration": 93203000
+      },
+      "sanitized": 0
+    }
+  ]
+}

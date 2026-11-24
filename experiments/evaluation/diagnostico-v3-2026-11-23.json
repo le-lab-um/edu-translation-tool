@@ -1,0 +1,977 @@
+{
+  "split": "diagnostic",
+  "annotation_status": "pending_author_review",
+  "cases_file": "diagnostico.json",
+  "started_at": "2026-11-23T12:55:44.390295+00:00",
+  "prompt": "hint-v3.txt",
+  "prompt_sha256": "a068f761fdf156fe4d16fdb3e7136a6f6c471828c60fa444dae2b0518290dd07",
+  "dataset_sha256": "1584a1e065fee25a09286c209e355f22682a3c13b2e8a485cc2eabc9cb7055b5",
+  "code_revision": {
+    "commit": "d52e1974866e9aee01398b69984de1f98e515272",
+    "uncommitted_changes": false
+  },
+  "python_version": "3.11.15",
+  "dependencies": {
+    "fastapi": "0.165.0",
+    "pydantic": "2.14.4",
+    "uvicorn": "0.54.0",
+    "starlette": "1.10.0",
+    "httpx": "0.28.1",
+    "sqlalchemy": "2.1.9",
+    "rapidfuzz": "3.14.6"
+  },
+  "ollama_version": "0.40.13",
+  "model": "qwen3:4b-instruct-2507-q4_K_M",
+  "model_digest": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
+  "generation_options": {
+    "temperature": 0,
+    "seed": 42,
+    "num_ctx": 4096,
+    "num_predict": 768
+  },
+  "timeout_seconds": 30.0,
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "warmup": {
+    "performed": true,
+    "status": "ok",
+    "elapsed_ms": 257
+  },
+  "results": [
+    {
+      "id": "diag-01",
+      "source_id": "results-tomorrow",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "The results will be published tomorrow.",
+        "target": "Os resultados serão publicados amanhã.",
+        "context": "Aviso numa página de uma unidade curricular.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "Tempo e advérbio mantêm-se.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 195,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:44.868426Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 191512792,
+        "load_duration": 410792,
+        "prompt_eval_count": 1131,
+        "prompt_eval_cached_count": 1084,
+        "prompt_eval_duration": 93565000,
+        "eval_count": 5,
+        "eval_duration": 93024000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "diag-02",
+      "source_id": "results-tomorrow",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "The results will be published tomorrow.",
+        "target": "Os resultados foram publicados ontem.",
+        "context": "Aviso numa página de uma unidade curricular.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "O futuro passa a passado e «tomorrow» a «ontem».",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução inverte a sequência temporal do evento.",
+          "hint": "O original fala de um evento futuro ou de um evento passado?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução inverte a sequência temporal do evento.",
+          "hint": "O original fala de um evento futuro ou de um evento passado?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1081,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:45.950267Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"meaning_context\",\"explanation\":\"A tradução inverte a sequência temporal do evento.\",\"hint\":\"O original fala de um evento futuro ou de um evento passado?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1078545208,
+        "load_duration": 388833,
+        "prompt_eval_count": 1130,
+        "prompt_eval_cached_count": 1097,
+        "prompt_eval_duration": 92107000,
+        "eval_count": 43,
+        "eval_duration": 982682000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "diag-03",
+      "source_id": "printer-always",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "The printer is always available.",
+        "target": "A impressora está sempre disponível.",
+        "context": "Informação sobre os serviços de uma biblioteca.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "O advérbio mantém-se.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 194,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:46.143704Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 191096208,
+        "load_duration": 434625,
+        "prompt_eval_count": 1127,
+        "prompt_eval_cached_count": 1085,
+        "prompt_eval_duration": 93540000,
+        "eval_count": 5,
+        "eval_duration": 92887000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "diag-04",
+      "source_id": "printer-always",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "The printer is always available.",
+        "target": "A impressora está raramente disponível.",
+        "context": "Informação sobre os serviços de uma biblioteca.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "«always» passou a «raramente».",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução inverte o significado da disponibilidade do serviço.",
+          "hint": "O original indica disponibilidade constante ou ocasiônica?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução inverte o significado da disponibilidade do serviço.",
+          "hint": "O original indica disponibilidade constante ou ocasiônica?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1044,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:47.188718Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"meaning_context\",\"explanation\":\"A tradução inverte o significado da disponibilidade do serviço.\",\"hint\":\"O original indica disponibilidade constante ou ocasiônica?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1039755708,
+        "load_duration": 370292,
+        "prompt_eval_count": 1129,
+        "prompt_eval_cached_count": 1098,
+        "prompt_eval_duration": 89402000,
+        "eval_count": 42,
+        "eval_duration": 946343000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "diag-05",
+      "source_id": "teacher-sympathetic",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "He was very sympathetic when we explained the problem.",
+        "target": "Foi muito compreensivo quando lhe explicámos o problema.",
+        "context": "Descrição de um professor que ouviu os problemas dos alunos.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "«Compreensivo» corresponde a «sympathetic» neste contexto.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução altera o sujeito da ação, passando de 'he' para 'lhe', o que muda quem é compreensivo.",
+          "hint": "No original, quem é compreensivo? O professor ou os alunos?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução pode alterar o sentido ou a intenção do original.",
+          "hint": "Que diferença encontras entre o que o original comunica neste contexto e o que se entende na tua tradução?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1636,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:48.823249Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"meaning_context\",\"explanation\":\"A tradução altera o sujeito da ação, passando de 'he' para 'lhe', o que muda quem é compreensivo.\",\"hint\":\"No original, quem é compreensivo? O professor ou os alunos?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1632503417,
+        "load_duration": 538875,
+        "prompt_eval_count": 1144,
+        "prompt_eval_cached_count": 1084,
+        "prompt_eval_duration": 96158000,
+        "eval_count": 67,
+        "eval_duration": 1531808000
+      },
+      "sanitized": 1
+    },
+    {
+      "id": "diag-06",
+      "source_id": "teacher-sympathetic",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "He was very sympathetic when we explained the problem.",
+        "target": "Foi muito simpático quando lhe explicámos o problema.",
+        "context": "Descrição de um professor que ouviu os problemas dos alunos.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "Falso cognato: «sympathetic» não é «simpático».",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução altera o sujeito da ação, indicando que o professor foi o que explicou o problema, quando o original diz que foi o professor que ouviu os problemas dos alunos.",
+          "hint": "O problema foi explicado por quem e a quem foi explicado?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução altera o sujeito da ação, indicando que o professor foi o que explicou o problema, quando o original diz que foi o professor que ouviu os problemas dos alunos.",
+          "hint": "O problema foi explicado por quem e a quem foi explicado?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1793,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:50.616189Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\": [{\"category\":\"meaning_context\",\"explanation\":\"A tradução altera o sujeito da ação, indicando que o professor foi o que explicou o problema, quando o original diz que foi o professor que ouviu os problemas dos alunos.\",\"hint\":\"O problema foi explicado por quem e a quem foi explicado?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1787685125,
+        "load_duration": 375458,
+        "prompt_eval_count": 1142,
+        "prompt_eval_cached_count": 1101,
+        "prompt_eval_duration": 93349000,
+        "eval_count": 74,
+        "eval_duration": 1690183000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "diag-07",
+      "source_id": "pretend-asleep",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "He pretended to be asleep.",
+        "target": "Ele fingiu estar a dormir.",
+        "context": "Narração de uma história infantil.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "«Fingiu» corresponde a «pretended».",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 195,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:50.811873Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 190472500,
+        "load_duration": 407625,
+        "prompt_eval_count": 1127,
+        "prompt_eval_cached_count": 1085,
+        "prompt_eval_duration": 93590000,
+        "eval_count": 5,
+        "eval_duration": 92585000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "diag-08",
+      "source_id": "pretend-asleep",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "He pretended to be asleep.",
+        "target": "Ele pretendeu estar a dormir.",
+        "context": "Narração de uma história infantil.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "Falso cognato: «pretended» não é «pretendeu».",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução altera a intenção do original ao indicar uma intenção deliberada em vez de uma ação real.",
+          "hint": "A frase descreve uma ação que ocorreu ou uma intenção que foi expressa?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução altera a intenção do original ao indicar uma intenção deliberada em vez de uma ação real.",
+          "hint": "A frase descreve uma ação que ocorreu ou uma intenção que foi expressa?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1512,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:52.324515Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"meaning_context\",\"explanation\":\"A tradução altera a intenção do original ao indicar uma intenção deliberada em vez de uma ação real.\",\"hint\":\"A frase descreve uma ação que ocorreu ou uma intenção que foi expressa?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1507497917,
+        "load_duration": 346500,
+        "prompt_eval_count": 1128,
+        "prompt_eval_cached_count": 1095,
+        "prompt_eval_duration": 91816000,
+        "eval_count": 62,
+        "eval_duration": 1411928000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "diag-09",
+      "source_id": "no-need-login",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "There is no need to log in again.",
+        "target": "Não é necessário iniciar sessão novamente.",
+        "context": "Mensagem numa aplicação de apoio ao cliente.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "A negação mantém-se.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 198,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:52.522425Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 192719834,
+        "load_duration": 339167,
+        "prompt_eval_count": 1132,
+        "prompt_eval_cached_count": 1084,
+        "prompt_eval_duration": 93773000,
+        "eval_count": 5,
+        "eval_duration": 92663000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "diag-10",
+      "source_id": "no-need-login",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "There is no need to log in again.",
+        "target": "É necessário iniciar sessão novamente.",
+        "context": "Mensagem numa aplicação de apoio ao cliente.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "A negação perdeu-se e o sentido ficou invertido.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução inverte a intenção da mensagem original.",
+          "hint": "A frase original indica que não é necessário fazer algo, ou que é opcional; a tradução diz que é necessário."
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução inverte a intenção da mensagem original.",
+          "hint": "A frase original indica que não é necessário fazer algo, ou que é opcional; a tradução diz que é necessário.",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1310,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:53.832119Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"meaning_context\",\"explanation\":\"A tradução inverte a intenção da mensagem original.\",\"hint\":\"A frase original indica que não é necessário fazer algo, ou que é opcional; a tradução diz que é necessário.\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1304582209,
+        "load_duration": 352917,
+        "prompt_eval_count": 1131,
+        "prompt_eval_cached_count": 1097,
+        "prompt_eval_duration": 91351000,
+        "eval_count": 53,
+        "eval_duration": 1209227000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "diag-11",
+      "source_id": "update-might-fail",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "The update might fail on older devices.",
+        "target": "A atualização pode falhar em dispositivos mais antigos.",
+        "context": "Notas de uma atualização de software.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "A possibilidade mantém-se.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 198,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:54.030035Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 192187666,
+        "load_duration": 515125,
+        "prompt_eval_count": 1134,
+        "prompt_eval_cached_count": 1084,
+        "prompt_eval_duration": 94261000,
+        "eval_count": 5,
+        "eval_duration": 92807000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "diag-12",
+      "source_id": "update-might-fail",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "The update might fail on older devices.",
+        "target": "A atualização falha em dispositivos mais antigos.",
+        "context": "Notas de uma atualização de software.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "A possibilidade passa a certeza.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução interpreta 'might' como certeza, ao invés de possibilidade.",
+          "hint": "O original expressa uma possibilidade ou uma probabilidade?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução pode alterar o sentido ou a intenção do original.",
+          "hint": "Que diferença encontras entre o que o original comunica neste contexto e o que se entende na tua tradução?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1191,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:55.221774Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"meaning_context\",\"explanation\":\"A tradução interpreta 'might' como certeza, ao invés de possibilidade.\",\"hint\":\"O original expressa uma possibilidade ou uma probabilidade?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1186581417,
+        "load_duration": 364875,
+        "prompt_eval_count": 1133,
+        "prompt_eval_cached_count": 1099,
+        "prompt_eval_duration": 92599000,
+        "eval_count": 48,
+        "eval_duration": 1089817000
+      },
+      "sanitized": 1
+    },
+    {
+      "id": "diag-13",
+      "source_id": "route-second",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "This is the second-fastest route.",
+        "target": "Este é o segundo percurso mais rápido.",
+        "context": "Informação de uma aplicação de navegação.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "A ordem mantém-se.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução altera a comparação entre rotas ao usar 'percurso' em vez de 'rotas'.",
+          "hint": "O original fala de velocidade relativa entre rotas — a tradução mantém essa comparação?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução pode alterar o sentido ou a intenção do original.",
+          "hint": "Que diferença encontras entre o que o original comunica neste contexto e o que se entende na tua tradução?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1586,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:56.806987Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"meaning_context\",\"explanation\":\"A tradução altera a comparação entre rotas ao usar 'percurso' em vez de 'rotas'.\",\"hint\":\"O original fala de velocidade relativa entre rotas — a tradução mantém essa comparação?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1580565125,
+        "load_duration": 383083,
+        "prompt_eval_count": 1132,
+        "prompt_eval_cached_count": 1084,
+        "prompt_eval_duration": 93570000,
+        "eval_count": 65,
+        "eval_duration": 1482880000
+      },
+      "sanitized": 1
+    },
+    {
+      "id": "diag-14",
+      "source_id": "route-second",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "This is the second-fastest route.",
+        "target": "Este é o percurso mais rápido.",
+        "context": "Informação de uma aplicação de navegação.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "A ordem («second») perdeu-se.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução contradiz o original em termos de velocidade do percurso.",
+          "hint": "O original diz que é o segundo mais rápido, o target diz que é o mais rápido — qual é a posição relativa no ranking?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução contradiz o original em termos de velocidade do percurso.",
+          "hint": "O original diz que é o segundo mais rápido, o target diz que é o mais rápido — qual é a posição relativa no ranking?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1486,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:58.293419Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"meaning_context\",\"explanation\":\"A tradução contradiz o original em termos de velocidade do percurso.\",\"hint\":\"O original diz que é o segundo mais rápido, o target diz que é o mais rápido — qual é a posição relativa no ranking?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1480993333,
+        "load_duration": 364417,
+        "prompt_eval_count": 1131,
+        "prompt_eval_cached_count": 1099,
+        "prompt_eval_duration": 89398000,
+        "eval_count": 61,
+        "eval_duration": 1387331000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "diag-15",
+      "source_id": "only-members",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "Only members can edit the page.",
+        "target": "Só os membros podem editar a página.",
+        "context": "Regras de uma comunidade em linha.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "A exclusividade mantém-se.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 196,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:58.489896Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 191203750,
+        "load_duration": 385750,
+        "prompt_eval_count": 1131,
+        "prompt_eval_cached_count": 1084,
+        "prompt_eval_duration": 94047000,
+        "eval_count": 5,
+        "eval_duration": 92955000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "diag-16",
+      "source_id": "only-members",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "Only members can edit the page.",
+        "target": "Os membros podem editar a página.",
+        "context": "Regras de uma comunidade em linha.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "A exclusividade («only») perdeu-se.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 194,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:58.683826Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 189055625,
+        "load_duration": 337250,
+        "prompt_eval_count": 1129,
+        "prompt_eval_cached_count": 1095,
+        "prompt_eval_duration": 91923000,
+        "eval_count": 5,
+        "eval_duration": 93123000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "diag-17",
+      "source_id": "raining-cats",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "It's raining cats and dogs outside.",
+        "target": "Está a chover a cântaros lá fora.",
+        "context": "Conversa informal sobre o tempo.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "Traduz o sentido figurado da expressão.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução literal pode perder o sentido idiomático da expressão.",
+          "hint": "A pessoa está a descrever o clima ou a comentar uma situação difícil?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução literal pode perder o sentido idiomático da expressão.",
+          "hint": "A pessoa está a descrever o clima ou a comentar uma situação difícil?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1216,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:55:59.899751Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"meaning_context\",\"explanation\":\"A tradução literal pode perder o sentido idiomático da expressão.\",\"hint\":\"A pessoa está a descrever o clima ou a comentar uma situação difícil?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1210692250,
+        "load_duration": 343292,
+        "prompt_eval_count": 1133,
+        "prompt_eval_cached_count": 1084,
+        "prompt_eval_duration": 93728000,
+        "eval_count": 49,
+        "eval_duration": 1112935000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "diag-18",
+      "source_id": "raining-cats",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "It's raining cats and dogs outside.",
+        "target": "Estão a chover gatos e cães lá fora.",
+        "context": "Conversa informal sobre o tempo.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "Tradução à letra de uma expressão idiomática.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A leitura literal pode perder o sentido idiomático da expressão.",
+          "hint": "A pessoa está a falar de tempo ou de comida?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A leitura literal pode perder o sentido idiomático da expressão.",
+          "hint": "A pessoa está a falar de tempo ou de comida?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1075,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:56:00.975124Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"meaning_context\",\"explanation\":\"A leitura literal pode perder o sentido idiomático da expressão.\",\"hint\":\"A pessoa está a falar de tempo ou de comida?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1070152500,
+        "load_duration": 370375,
+        "prompt_eval_count": 1134,
+        "prompt_eval_cached_count": 1097,
+        "prompt_eval_duration": 91809000,
+        "eval_count": 43,
+        "eval_duration": 974007000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "diag-19",
+      "source_id": "payment-fails",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "If the payment fails, the order is cancelled.",
+        "target": "Se o pagamento falhar, a encomenda é cancelada.",
+        "context": "Condições de uma loja em linha.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "A condição mantém-se.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 198,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:56:01.173594Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 192863625,
+        "load_duration": 378875,
+        "prompt_eval_count": 1138,
+        "prompt_eval_cached_count": 1084,
+        "prompt_eval_duration": 95217000,
+        "eval_count": 5,
+        "eval_duration": 93232000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "diag-20",
+      "source_id": "payment-fails",
+      "analysis_scope": "diagnostic_meaning",
+      "input": {
+        "source": "If the payment fails, the order is cancelled.",
+        "target": "Se o pagamento for concluído, a encomenda é cancelada.",
+        "context": "Condições de uma loja em linha.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "A condição ficou invertida.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução inverte o sentido da condição original.",
+          "hint": "O original refere-se ao caso de falha de pagamento, ou ao caso de sucesso?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução inverte o sentido da condição original.",
+          "hint": "O original refere-se ao caso de falha de pagamento, ou ao caso de sucesso?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1150,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-23T12:56:02.323548Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"meaning_context\",\"explanation\":\"A tradução inverte o sentido da condição original.\",\"hint\":\"O original refere-se ao caso de falha de pagamento, ou ao caso de sucesso?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1145131458,
+        "load_duration": 400041,
+        "prompt_eval_count": 1140,
+        "prompt_eval_cached_count": 1101,
+        "prompt_eval_duration": 92589000,
+        "eval_count": 46,
+        "eval_duration": 1048000000
+      },
+      "sanitized": 0
+    }
+  ]
+}
