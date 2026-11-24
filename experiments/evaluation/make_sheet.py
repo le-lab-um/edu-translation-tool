@@ -72,10 +72,10 @@ def main():
     args.out.parent.mkdir(parents=True, exist_ok=True)
     sheet_fields = ["row_id", "caso", "original", "traducao", "contexto", "glossario",
                     "categoria", "explicacao", "pista", *CRITERIA, "problema_omitido"]
-    with args.out.with_name(args.out.name + "-folha.csv").open("x", encoding="utf-8", newline="") as f_sheet, \
-         args.out.with_name(args.out.name + "-chave.csv").open("x", encoding="utf-8", newline="") as f_key:
-        sheet = csv.DictWriter(f_sheet, fieldnames=sheet_fields)
-        key = csv.writer(f_key)
+    with args.out.with_name(args.out.name + "-folha.csv").open("x", encoding="utf-8-sig", newline="") as f_sheet, \
+         args.out.with_name(args.out.name + "-chave.csv").open("x", encoding="utf-8-sig", newline="") as f_key:
+        sheet = csv.DictWriter(f_sheet, fieldnames=sheet_fields, delimiter=";")
+        key = csv.writer(f_key, delimiter=";")
         sheet.writeheader()
         key.writerow(["row_id", "caso", "versao", "origem"])
         for n, (base, issue, version) in enumerate(entries, start=1):

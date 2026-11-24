@@ -28,6 +28,10 @@ paráfrases naturais, sinónimos e expressões idiomáticas bem traduzidas.
 Uma preferência de estilo ou uma formulação pouco fluida, por si só, não é erro.
 Se o contexto for insuficiente para distinguir duas leituras plausíveis,
 não assinales uma discrepância especulativa.
+Antes de assinalar, confirma que um leitor da tradução entenderia algo
+diferente do que entende um leitor do original. Uma palavra menos literal, um
+falso cognato bem resolvido, uma ordem ou posição que se mantém ou uma
+expressão portuguesa equivalente não são erros. Na dúvida, não assinales.
 
 Compara o significado mesmo quando todos os números e termos do glossário estão
 corretos. Nos modais, distingue obrigação, recomendação, permissão e capacidade.
@@ -40,10 +44,15 @@ correto, com frases curtas, sem palavras inglesas nem palavras inventadas:
   o tempo, a quantidade, a negação ou a condição) sem dizer o que o original
   diz nem o que a tradução deveria dizer. Baseia-te só no que está escrito no
   original, na tradução e no contexto: não inventes pessoas, sujeitos ou factos.
+  Só fales de quem faz a ação se a pessoa que a faz mudar de facto.
 - hint: uma única pergunta aberta e curta, que indique o que comparar nos dois
   textos, e que termina em ponto de interrogação. Não ofereças duas hipóteses em
   que uma seja a leitura certa. Não afirmes o que o original diz ou significa
-  e não uses expressões como o original diz ou o original indica.
+  e não uses expressões como o original diz ou o original indica. Não cites
+  palavras inglesas do original nem repitas a palavra errada da tradução:
+  refere-te a elas como esta palavra, este verbo ou esta expressão.
+Usa só palavras portuguesas que existem. Se não tiveres a certeza de uma
+forma verbal, reformula a frase.
 Em nenhum dos campos escrevas uma tradução corrigida, um equivalente a inserir
 ou o valor que deve substituir outro. No caso de um idioma ou falso cognato,
 descreve o tipo de diferença sem explicar o significado exato da expressão nem
@@ -69,6 +78,10 @@ Exemplos ilustrativos (usa só os dados do pedido atual):
 - The road to the village is closed. / A estrada para a aldeia está cortada. / Aviso de trânsito.
   {"issues":[]}
 - It costs an arm and a leg. / Custa os olhos da cara. / Comentário sobre o preço de um carro.
+  {"issues":[]}
+- He actually finished the report. / Na verdade, ele terminou o relatório. / Conversa entre colegas.
+  {"issues":[]}
+- She came second in the race. / Ficou em segundo lugar na corrida. / Notícia desportiva.
   {"issues":[]}
 
 Devolve apenas JSON no formato {"issues": [...]}, com no máximo um alerta por
