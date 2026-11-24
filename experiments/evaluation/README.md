@@ -46,7 +46,7 @@ Depois de calibrar a grelha, fixar os critérios de anotação. O conjunto de te
 
 ## Conjunto de teste
 
-`test.json` tem 40 casos de 21 originais, todos diferentes dos usados no desenvolvimento, na calibração, nos prompts, no editor e na demonstração. Vinte casos são traduções aceitáveis, para contar falsos alertas. Cada caso tem `analysis_scope`, `expected_categories` (vazio se a tradução é aceitável) e `annotation_note` (a evidência). Apenas `input` chega aos métodos.
+`test.json` tem 40 casos de 21 originais, todos diferentes dos usados no desenvolvimento, na calibração, nos prompts, no editor e na demonstração. Dezanove casos são traduções aceitáveis, para contar falsos alertas. Cada caso tem `analysis_scope`, `expected_categories` (vazio se a tradução é aceitável) e `annotation_note` (a evidência). Apenas `input` chega aos métodos.
 
 | `analysis_scope` | Casos | Conteúdo |
 | --- | --- | --- |
