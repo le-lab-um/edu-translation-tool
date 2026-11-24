@@ -90,3 +90,9 @@ Antes do primeiro caso faz um pedido de aquecimento (`--no-warmup` desativa-o) e
    ```
 
    `--prompt` só muda o prompt: modelo, parâmetros e filtro mantêm-se. A aplicação continua a usar `hint-v3.txt` até se alterar `PROMPT_PATH` em `backend/llm.py`. Se o filtro também for alterado, os resultados passam a comparar configurações completas e isso tem de ficar escrito.
+
+### Estado
+
+- **Recolhas v3 de 2026-11-23** (Ollama 0.40.13): `desenvolvimento-v3-2026-11-23.json`, `calibration-2026-11-23.json` e `diagnostico-v3-2026-11-23.json`. A calibração repete os 8 casos de 14 de novembro com as mesmas respostas do modelo antes e depois da fusão.
+- **Anotação proposta do diagnóstico:** `anotacao-diagnostico-folha.csv` e `anotacao-diagnostico-chave.csv` (23 linhas), por rever em conjunto. Nas notas, as etiquetas `[binária]`, `[afirmação]`, `[inventa]` e `[língua]` marcam a pista com duas hipóteses, a pista que não é pergunta, a explicação que inventa factos e os erros de língua.
+- **Rascunho do prompt:** `backend/prompts/hint-v4.txt`, por rever. Muda só o prompt. Os exemplos novos não coincidem com os do teste nem do diagnóstico.
