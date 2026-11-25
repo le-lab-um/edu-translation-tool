@@ -387,3 +387,19 @@ footer a { color: inherit; }
 .versions li:first-child { border-top: none; }
 .versions li p { margin: 0.25rem 0; white-space: pre-wrap; }
 .version-meta { color: #535b53; font-size: 0.875rem; }
+.compare { margin: 0.75rem 0 1rem; padding: 0.75rem 1rem; background: #f6f7f4; border-radius: 8px; }
+.compare h3 { margin: 0 0 0.5rem; font-size: 1rem; }
+.compare-pickers { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
+.compare-pickers select { margin-left: 0.25rem; }
+.diff { margin: 0.75rem 0 0.25rem; white-space: pre-wrap; line-height: 1.7; }
+.diff ins, .diff-key ins { background: #dcfce7; color: #14532d; text-decoration: none; border-radius: 3px; padding: 0 2px; }
+.diff del, .diff-key del { background: #fee2e2; color: #7f1d1d; border-radius: 3px; padding: 0 2px; }
+.compare-justifications { margin: 0.5rem 0 0; }
+.compare-justifications dt { font-weight: 650; font-size: 0.875rem; margin-top: 0.5rem; }
+.compare-justifications dd { margin: 0.15rem 0 0; }
+.timeline { margin: 1.25rem 0; padding: 1rem 1.25rem; border: 1px solid var(--border, #d0d5dd); border-radius: 8px; }
+.timeline summary { cursor: pointer; font-weight: 650; }
+.timeline-scope { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin: 0.5rem 0; }
+.timeline-list { list-style: none; margin: 0.5rem 0 0; padding: 0; }
+.timeline-list li { padding: 0.4rem 0; border-top: 1px solid var(--border, #d0d5dd); }
+.timeline-list li:first-child { border-top: none; }

@@ -15,6 +15,8 @@ The interface is in Portuguese; button names are given below as they appear in t
 - **Translation memory:** each confirmed translation is stored as a source–target pair. When a segment is opened, similar segments are suggested (RapidFuzz, threshold 70%) with a **Usar** (Use) button.
 - **Five deterministic rules** (**Verificar**, Check): empty translation, changed or missing numbers, missing glossary terms, placeholders (`{name}`) and formatting tags (`<b>`, `<i>`, …).
 - **Hybrid hints** (**Pedir pista**, Ask for a hint): the rules are combined with a local Qwen model (`qwen3:4b-instruct-2507-q4_K_M`, served by Ollama), which adds a **meaning and context** category. Each issue shows its origin (rule or local model). Rules take priority when categories overlap, and a heuristic filter generalizes hints that seem to reveal the solution. If Ollama fails, the application returns the rule issues only.
+- **Version comparison:** in the version history, any two versions can be compared word by word (removed words in red, added words in green), next to their justifications.
+- **Activity timeline:** **O meu percurso** (My path) lists the student's actions in the exercise in chronological order, for the current segment or the whole exercise: saves, checks with the categories of the issues found, hints, memory suggestions and restored versions.
 - **Usage logs:** the interface logs usage events (start, save, check, hints, memory, restored versions) without the translation text, exportable as JSON and CSV.
 
 ## Evaluation results
@@ -36,7 +38,7 @@ The full results and discussion are in Section 5 of the paper.
 
 | Path | Contents |
 | --- | --- |
-| `frontend/` | React 19 + TypeScript + Vite interface: `src/App.tsx` (editor), `src/exercise.ts` (segmentation and glossary), `src/api.ts` (HTTP client) and Vitest tests. |
+| `frontend/` | React 19 + TypeScript + Vite interface: `src/App.tsx` (editor), `src/exercise.ts` (segmentation and glossary), `src/api.ts` (HTTP client), `src/diff.ts` (version comparison) and Vitest tests. |
 | `backend/` | FastAPI API: `main.py` (endpoints), `rules.py` (rules), `llm.py` (Ollama adapter), `hybrid.py` (merging and filter), `translation_memory.py`, `database.py` and `models.py` (SQLite). |
 | `backend/prompts/` | `hint-v4.txt` (the application's prompt, revised after the evaluation) and `hint-v3.txt` (the original prompt, kept to reproduce the evaluation). |
 | `tests/` | Backend tests: rules, API, persistence and version history, memory and logging, merging and the evaluation metrics. |
@@ -84,7 +86,7 @@ Model environment variables: `OLLAMA_URL` (default `http://localhost:11434`), `O
 cd frontend && npm test && npm run build
 ```
 
-There are 86 backend tests and 33 frontend tests. The Ollama integration is tested against a simulated server (`httpx.MockTransport`), so the model is not required.
+There are 89 backend tests and 40 frontend tests. The Ollama integration is tested against a simulated server (`httpx.MockTransport`), so the model is not required.
 
 ## API
 
@@ -94,6 +96,7 @@ There are 86 backend tests and 33 frontend tests. The Ollama integration is test
 | `POST /api/hint` | Like `/api/check`, plus `context`. Merges rule and model issues and also returns `source` for each issue, `llm_status`, `sanitized` and `elapsed_ms`. |
 | `GET` · `PUT /api/segments/{id}` | Retrieve and save the translation of a segment and the student's `justification`. Each save that changes either one adds a version. |
 | `GET /api/segments/{id}/versions` | List the saved versions of a segment, oldest first. |
+| `GET /api/exercises/{id}/events` | List the events of an exercise in chronological order (used by the activity timeline). |
 | `POST /api/memory` · `POST /api/memory/search` | Store a pair and search for similar segments. |
 | `POST /api/events` · `GET /api/events/export` · `GET /api/events/summary` | Log events, export them (JSON or CSV) and summarize them. |
 
@@ -195,5 +198,5 @@ The CSV files use `;` as separator and UTF-8 with BOM, so that they open correct
 
 - **Shared instance:** data is not separated by user, and memory and logs are shared by the whole instance. Exercises started before the per-occurrence identity keep identifiers derived only from the text.
 - **Local use only:** no authentication, permissive CORS and open export endpoints.
-- **Not yet implemented:** critical comparison of translations and a chronological view of the logs.
+- **No user accounts:** each student is separated by their browser, since exercise identifiers are random and stored there. On a shared server, memory suggestions and log exports are common to everyone.
 - **Evaluation:** internal, on small synthetic sets, and it does not measure learning effects.

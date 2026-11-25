@@ -10,7 +10,7 @@ import json
 import time
 from typing import Annotated, Any, Dict, Literal
 
-from fastapi import Depends, FastAPI, Query
+from fastapi import Depends, FastAPI, Path, Query
 from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, StringConstraints
@@ -353,6 +353,46 @@ def export_events(format: Literal["json", "csv"] = Query("json"), db: Session = 
     return Response(
         buffer.getvalue(), media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": 'attachment; filename="events.csv"'},
+    )
+
+
+ExerciseId = Annotated[str, Path(pattern=r"^e[0-9a-f]{12}$")]
+
+
+class TimelineEvent(BaseModel):
+    type: str
+    segment_id: str
+    payload: Dict[str, Any]
+    created_at: str | None
+
+
+class TimelineResponse(BaseModel):
+    exercise_id: str
+    events: list[TimelineEvent]
+
+
+@app.get("/api/exercises/{exercise_id}/events", response_model=TimelineResponse)
+def exercise_timeline(exercise_id: ExerciseId, db: Session = Depends(get_db)) -> TimelineResponse:
+    """Percurso de um exercício: os eventos dos seus segmentos, por ordem cronológica.
+
+    Os identificadores dos segmentos começam pelo identificador do exercício, que é aleatório
+    e fica no browser do aluno; por isso cada aluno vê apenas o percurso dos seus exercícios.
+    """
+    rows = (
+        db.query(Event)
+        .filter(Event.segment_id.like(f"{exercise_id}-%"))
+        .order_by(Event.id)
+        .all()
+    )
+    return TimelineResponse(
+        exercise_id=exercise_id,
+        events=[
+            TimelineEvent(
+                type=e.type, segment_id=e.segment_id, payload=json.loads(e.payload),
+                created_at=e.created_at.isoformat() if e.created_at else None,
+            )
+            for e in rows
+        ],
     )
 
 

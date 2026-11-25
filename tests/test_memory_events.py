@@ -103,6 +103,33 @@ class MemoryAndEventsApiTests(unittest.TestCase):
             with self.subTest(body=body):
                 self.assertEqual(self.client.post("/api/events", json=body).status_code, 422)
 
+    def test_exercise_timeline_returns_only_its_segments_in_order(self):
+        ex, other = "e0123456789ab", "e000000000001"
+        events = [
+            {"session_id": "s1", "type": "segment_saved", "segment_id": f"{ex}-27f61286-1", "payload": {"chars": 5}},
+            {"session_id": "s2", "type": "check_run", "segment_id": f"{other}-27f61286-1"},
+            {"session_id": "s1", "type": "session_started"},
+            {"session_id": "s1", "type": "check_run", "segment_id": f"{ex}-0a0b0c0d-1", "payload": {"categories": ["terminology"]}},
+            {"session_id": "s1", "type": "check_run", "segment_id": "custom-1"},
+        ]
+        for event in events:
+            self.client.post("/api/events", json=event)
+        body = self.client.get(f"/api/exercises/{ex}/events").json()
+        self.assertEqual(body["exercise_id"], ex)
+        self.assertEqual([(e["type"], e["segment_id"]) for e in body["events"]],
+                         [("segment_saved", f"{ex}-27f61286-1"), ("check_run", f"{ex}-0a0b0c0d-1")])
+        self.assertEqual(body["events"][1]["payload"], {"categories": ["terminology"]})
+        self.assertTrue(body["events"][0]["created_at"])
+
+    def test_exercise_timeline_rejects_invalid_ids(self):
+        for bad in ("custom", "e123", "E0123456789ab", "e0123456789a%"):
+            with self.subTest(bad=bad):
+                self.assertEqual(self.client.get(f"/api/exercises/{bad}/events").status_code, 422)
+
+    def test_version_restored_event_is_accepted(self):
+        body = {"session_id": "s", "type": "version_restored", "segment_id": "e0123456789ab-27f61286-1", "payload": {"version": 1}}
+        self.assertEqual(self.client.post("/api/events", json=body).status_code, 201)
+
     def test_invalid_export_format_is_rejected(self):
         self.assertEqual(self.client.get("/api/events/export", params={"format": "xml"}).status_code, 422)
 

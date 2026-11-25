@@ -5,7 +5,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  checkTranslation, CheckTimeoutError, getSegment, getVersions, saveSegment, RequestTimeoutError,
+  checkTranslation, CheckTimeoutError, getSegment, getTimeline, getVersions, saveSegment, RequestTimeoutError,
   requestHint, searchMemory, logEvent,
 } from './api';
 
@@ -227,6 +227,23 @@ describe('pistas híbridas, memória e registos', () => {
     expect(await searchMemory('a')).toEqual([{ source: 'a', target: 'b', score: 90 }]);
     fetchMock.mockImplementation(() => json({ matches: [{ source: 'a' }] }));
     await expect(searchMemory('a')).rejects.toThrow('inválida');
+  });
+
+  it('getTimeline lê o percurso do exercício e rejeita respostas inválidas', async () => {
+    const event = { type: 'check_run', segment_id: 'e0123456789ab-27f61286-1', payload: { categories: ['terminology'] }, created_at: '2026-11-26T10:00:00' };
+    fetchMock.mockImplementationOnce(() => json({ exercise_id: 'e0123456789ab', events: [event] }));
+    expect(await getTimeline('e0123456789ab')).toEqual([
+      { type: 'check_run', segmentId: event.segment_id, payload: event.payload, createdAt: event.created_at },
+    ]);
+    expect(fetchMock.mock.calls[0][0]).toBe('/api/exercises/e0123456789ab/events');
+    for (const data of [
+      { exercise_id: 'outro', events: [] },
+      { exercise_id: 'e0123456789ab', events: [{ ...event, type: 'desconhecido' }] },
+      { exercise_id: 'e0123456789ab', events: [{ ...event, payload: null }] },
+    ]) {
+      fetchMock.mockImplementationOnce(() => json(data));
+      await expect(getTimeline('e0123456789ab')).rejects.toThrow('percurso inválido');
+    }
   });
 
   it('logEvent usa o id de sessão e nunca lança erro', async () => {

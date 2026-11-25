@@ -9,10 +9,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import {
-  checkTranslation, CheckTimeoutError, EVENTS_EXPORT_URL, getSegment, getVersions, logEvent,
+  checkTranslation, CheckTimeoutError, EVENTS_EXPORT_URL, getSegment, getTimeline, getVersions, logEvent,
   requestHint, saveMemory, saveSegment, searchMemory,
 } from './api';
-import type { HintResult, Issue, IssueCategory, LlmStatus, MemoryMatch, SegmentVersion } from './api';
+import type {
+  EventType, HintResult, Issue, IssueCategory, LlmStatus, MemoryMatch, SegmentVersion, TimelineEvent,
+} from './api';
+import { diffWords } from './diff';
 import {
   EXAMPLES, EXERCISE_ID_PATTERN, MAX_SEGMENTS, MAX_UPLOAD_BYTES, buildSegments, newExerciseId, parseGlossary,
 } from './exercise';
@@ -99,6 +102,41 @@ function formatVersionDate(createdAt: string | null): string {
   return Number.isNaN(date.getTime()) ? '' : date.toLocaleString('pt-PT');
 }
 
+function categoryList(value: unknown): string {
+  if (!Array.isArray(value)) return '';
+  const labels = [...new Set(value.filter((c): c is IssueCategory => typeof c === 'string' && c in CATEGORY_LABELS))]
+    .map((c) => CATEGORY_LABELS[c]);
+  return labels.join(', ');
+}
+
+/** Frase do percurso para cada evento; devolve '' para eventos que não se mostram ao aluno. */
+function describeEvent(event: TimelineEvent): string {
+  const p = event.payload;
+  const n = (key: string) => (typeof p[key] === 'number' ? (p[key] as number) : 0);
+  switch (event.type) {
+    case 'segment_saved':
+      return n('justification_chars') > 0 ? 'Guardou a tradução, com justificação.' : 'Guardou a tradução.';
+    case 'check_run': {
+      const total = Array.isArray(p.categories) ? p.categories.length : n('issues');
+      if (total === 0) return 'Verificou: as regras não detetaram problemas.';
+      const labels = categoryList(p.categories);
+      return `Verificou: ${total} alerta(s)${labels ? ` (${labels})` : ''}.`;
+    }
+    case 'hint_shown': {
+      const labels = categoryList(p.categories);
+      const model = p.llm_status === 'ok' || p.llm_status === 'skipped'
+        ? `${n('llm')} do modelo` : 'modelo indisponível';
+      return `Pediu uma pista: ${n('rules')} de regras, ${model}${labels ? ` (${labels})` : ''}.`;
+    }
+    case 'memory_suggestion_used':
+      return `Usou uma sugestão da memória (${n('score')}%).`;
+    case 'version_restored':
+      return `Recuperou a versão ${n('version')} para o editor.`;
+    default:
+      return '';
+  }
+}
+
 /** Editor de segmentos com verificação e persistência local. */
 export default function App() {
   const [stored] = useState(loadStoredExercise);
@@ -122,6 +160,11 @@ export default function App() {
   const [justification, setJustification] = useState('');
   const [lastSavedJustification, setLastSavedJustification] = useState('');
   const [versions, setVersions] = useState<SegmentVersion[]>([]);
+  const [compare, setCompare] = useState<{ from: number; to: number }>({ from: 0, to: 0 });
+  const [timeline, setTimeline] = useState<TimelineEvent[] | null>(null);
+  const [timelineError, setTimelineError] = useState(false);
+  const [timelineScope, setTimelineScope] = useState<'segment' | 'exercise'>('segment');
+  const timelineOpen = useRef(false);
   const [check, setCheck] = useState<CheckState>({ status: 'idle' });
   const [saveState, setSaveState] = useState<SaveState>({ status: 'idle' });
   const [hint, setHint] = useState<HintState>({ status: 'idle' });
@@ -145,6 +188,29 @@ export default function App() {
   const segmentId = segment?.id;
   const segmentIdRef = useRef(segmentId);
   segmentIdRef.current = segmentId;
+
+  // Por omissão, compara a penúltima versão com a última.
+  useEffect(() => {
+    const last = versions[versions.length - 1]?.number ?? 0;
+    setCompare({ from: versions[versions.length - 2]?.number ?? last, to: last });
+  }, [versions]);
+
+  async function loadTimeline() {
+    if (!exerciseId) return;
+    try {
+      setTimeline(await getTimeline(exerciseId));
+      setTimelineError(false);
+    } catch {
+      setTimelineError(true);
+    }
+  }
+
+  /** Regista o evento e, com o percurso aberto, atualiza-o. */
+  function track(type: EventType, id: string | undefined, payload: Record<string, unknown> = {}) {
+    void logEvent(type, id, payload).then(() => {
+      if (timelineOpen.current) void loadTimeline();
+    });
+  }
 
   const ready = loadState.id === segmentId && loadState.status === 'ready';
   const busy = saveState.status === 'saving';
@@ -306,7 +372,7 @@ export default function App() {
       getVersions(savedId)
         .then((list) => { if (savedId === segmentIdRef.current) setVersions(list); })
         .catch(() => {});
-      void logEvent('segment_saved', segment.id, {
+      track('segment_saved', segment.id, {
         chars: translation.length, justification_chars: justification.length,
       });
       if (translation.trim()) void saveMemory(segment.source, translation).catch(() => {});
@@ -350,7 +416,9 @@ export default function App() {
       // Só o pedido mais recente, sem edições posteriores, pode atualizar o ecrã
       if (version === requestVersion.current) {
         setCheck({ status: 'success', issues });
-        void logEvent('check_run', segment.id, { issues: issues.length });
+        track('check_run', segment.id, {
+          issues: issues.length, categories: issues.map((issue) => issue.category),
+        });
       }
     } catch (error) {
       if (version === requestVersion.current) {
@@ -368,7 +436,8 @@ export default function App() {
       const result = await requestHint(translation, segment.source, glossary, draft.context);
       if (version === requestVersion.current) {
         setHint({ status: 'success', result });
-        void logEvent('hint_shown', segment.id, {
+        track('hint_shown', segment.id, {
+          categories: result.issues.map((issue) => issue.category),
           llm_status: result.llmStatus,
           rules: result.issues.filter((i) => i.source === 'rules').length,
           llm: result.issues.filter((i) => i.source === 'llm').length,
@@ -386,12 +455,12 @@ export default function App() {
     if (!ready || saving.current) return;
     updateTranslation(version.target);
     setJustification(version.justification);
-    void logEvent('version_restored', segmentId, { version: version.number });
+    track('version_restored', segmentId, { version: version.number });
   }
 
   function useMemorySuggestion(match: MemoryMatch) {
     updateTranslation(match.target);
-    void logEvent('memory_suggestion_used', segmentId, { score: match.score });
+    track('memory_suggestion_used', segmentId, { score: match.score });
   }
 
   const glossaryEntries = Object.entries(glossary);
@@ -614,6 +683,42 @@ export default function App() {
               <details className="versions">
                 <summary>Histórico de versões ({versions.length})</summary>
                 <p>Cada gravação que altera a tradução ou a justificação fica registada. «Recuperar» copia a versão para o editor; guarde para a confirmar.</p>
+                {versions.length > 1 && (() => {
+                  const from = versions.find((v) => v.number === compare.from) ?? versions[0];
+                  const to = versions.find((v) => v.number === compare.to) ?? versions[versions.length - 1];
+                  const picker = (label: string, value: number, key: 'from' | 'to') => (
+                    <label>
+                      {label}{' '}
+                      <select value={value} onChange={(event) => setCompare((c) => ({ ...c, [key]: Number(event.target.value) }))}>
+                        {versions.map((v) => <option key={v.number} value={v.number}>Versão {v.number}</option>)}
+                      </select>
+                    </label>
+                  );
+                  return (
+                    <div className="compare">
+                      <h3>Comparar versões</h3>
+                      <div className="compare-pickers">
+                        {picker('De', from.number, 'from')}
+                        {picker('para', to.number, 'to')}
+                      </div>
+                      <p className="diff" lang="pt-PT">
+                        {diffWords(from.target, to.target).map((part, i) =>
+                          part.kind === 'same' ? <span key={i}>{part.text}</span>
+                            : part.kind === 'added' ? <ins key={i}>{part.text}</ins>
+                              : <del key={i}>{part.text}</del>)}
+                      </p>
+                      <p className="hint">
+                        <span className="diff-key"><del>removido</del> · <ins>acrescentado</ins></span>
+                      </p>
+                      <dl className="compare-justifications">
+                        <dt>Justificação da versão {from.number}</dt>
+                        <dd>{from.justification || <em>(sem justificação)</em>}</dd>
+                        <dt>Justificação da versão {to.number}</dt>
+                        <dd>{to.justification || <em>(sem justificação)</em>}</dd>
+                      </dl>
+                    </div>
+                  );
+                })()}
                 <ol reversed>
                   {[...versions].reverse().map((version) => (
                     <li key={version.number}>
@@ -629,6 +734,54 @@ export default function App() {
                     </li>
                   ))}
                 </ol>
+              </details>
+            )}
+
+            {exerciseId && (
+              <details
+                className="timeline"
+                onToggle={(event) => {
+                  timelineOpen.current = event.currentTarget.open;
+                  if (event.currentTarget.open) void loadTimeline();
+                }}
+              >
+                <summary>O meu percurso</summary>
+                <p>As ações que fez neste exercício, por ordem: gravações, verificações, pistas, sugestões da memória e versões recuperadas.</p>
+                <div className="timeline-scope" role="group" aria-label="Mostrar">
+                  <button type="button" className={timelineScope === 'segment' ? '' : 'secondary'}
+                    aria-pressed={timelineScope === 'segment'} onClick={() => setTimelineScope('segment')}>
+                    Este segmento
+                  </button>
+                  <button type="button" className={timelineScope === 'exercise' ? '' : 'secondary'}
+                    aria-pressed={timelineScope === 'exercise'} onClick={() => setTimelineScope('exercise')}>
+                    Todo o exercício
+                  </button>
+                  <button type="button" className="link" onClick={() => void loadTimeline()}>Atualizar</button>
+                </div>
+                {timelineError && <p className="check-error" role="alert">Não foi possível carregar o percurso.</p>}
+                {timeline && (() => {
+                  const entries = timeline
+                    .filter((event) => timelineScope === 'exercise' || event.segmentId === segmentId)
+                    .map((event) => ({ event, text: describeEvent(event) }))
+                    .filter((entry) => entry.text);
+                  if (entries.length === 0) return <p className="hint">Ainda não há ações registadas{timelineScope === 'segment' ? ' neste segmento' : ''}.</p>;
+                  return (
+                    <ol className="timeline-list">
+                      {entries.map(({ event, text }, i) => {
+                        const position = segments.findIndex((s) => s.id === event.segmentId);
+                        return (
+                          <li key={i}>
+                            <span className="version-meta">
+                              {formatVersionDate(event.createdAt)}
+                              {timelineScope === 'exercise' && (position >= 0 ? ` · Segmento ${position + 1}` : ' · Segmento já removido')}
+                            </span>{' '}
+                            {text}
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  );
+                })()}
               </details>
             )}
 

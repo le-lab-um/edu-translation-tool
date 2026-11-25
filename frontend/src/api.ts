@@ -259,4 +259,32 @@ export async function logEvent(
   }
 }
 
+export type TimelineEvent = {
+  type: EventType;
+  segmentId: string;
+  payload: Record<string, unknown>;
+  createdAt: string | null;
+};
+
+const EVENT_TYPES: EventType[] = [
+  'session_started', 'segment_saved', 'check_run', 'hint_requested', 'hint_shown',
+  'memory_suggestion_used', 'version_restored',
+];
+
+/** Percurso do exercício: eventos dos seus segmentos, por ordem cronológica. */
+export async function getTimeline(exerciseId: string): Promise<TimelineEvent[]> {
+  const data = (await requestJson(`/api/exercises/${encodeURIComponent(exerciseId)}/events`)) as
+    { exercise_id?: unknown; events?: unknown } | null;
+  const events = data?.events;
+  if (data?.exercise_id !== exerciseId || !Array.isArray(events) || !events.every((e) =>
+    EVENT_TYPES.includes(e?.type) && typeof e?.segment_id === 'string' &&
+    typeof e?.payload === 'object' && e?.payload !== null && !Array.isArray(e?.payload) &&
+    (e?.created_at === null || typeof e?.created_at === 'string'))) {
+    throw new Error('A API devolveu um percurso inválido.');
+  }
+  return events.map((e) => ({
+    type: e.type, segmentId: e.segment_id, payload: e.payload, createdAt: e.created_at,
+  }));
+}
+
 export const EVENTS_EXPORT_URL = (format: 'json' | 'csv') => `/api/events/export?format=${format}`;
