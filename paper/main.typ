@@ -215,7 +215,7 @@ The use of language models in translation evaluation is illustrated by GEMBA-MQM
 
 The study by #citet("dogru2026") examines justifications in comparison and post-editing tasks, while Translog-II #cite("carl2012") provides a reference for logging reading and writing activity for empirical research. In our prototype, instrumentation focuses on discrete events, such as saving a translation, running a check or requesting a hint. Each save that changes a translation or its justification is also kept as a version, so the saved states of a segment can be reviewed, although edits between saves are not recorded. The editor orders these events chronologically to show the student the path followed in each exercise.
 
-@tab-tools summarizes components that already exist in different systems and helps position our implementation choices, in particular relative to a close reference such as LoopCAT. What this project adds is the combination of explicit rules, model hints with control of possible disclosure and exportable logging of actions in an inspectable EN–PT-PT application. We therefore assess the contribution within the prototype developed, without claiming that this combination is unique among existing systems.
+@tab-tools summarizes components that already exist in different systems and helps position our implementation choices, in particular relative to a close reference such as LoopCAT. What this project adds is the combination of explicit rules, model hints with control of possible disclosure, student justifications, a version history with word-level comparison and a chronological view of the student's actions, in an inspectable EN–PT-PT application. Unlike the per-segment history of LoopCAT, the history here keeps the reasons the student gives for each version next to the text. We therefore assess the contribution within the prototype developed, without claiming that this combination is unique among existing systems.
 
 = Architecture and Implementation
 
@@ -268,7 +268,7 @@ The application is organized into three interrelated levels (@fig-architecture):
   scope: "parent",
 ) <fig-architecture>
 
-The workflow starts with loading the source text and optionally providing context and a glossary, after which the student writes the translation of each segment. The _Guardar_ (Save) action persists the text, _Verificar_ (Check) applies the rules, and _Pedir pista_ (Ask for a hint) combines the same rules with the model. Both revision operations act on the current text, including unsaved changes, but only the model receives the context as additional input. Alongside each translation, the student can write an optional justification of their choices, and the editor lists the saved versions of the segment, which can be compared word by word or brought back into the editor. A further panel lists the student's actions in the exercise in chronological order. @fig-editor shows the editor after a hint request. The exercise context states that restarting is mandatory, but the translation turns the obligation into a permission (_Podes reiniciar_, 'You may restart') and changes the number of updates. The number rule flags the missing value, while the model adds a meaning issue; because the model's original wording revealed the solution, the disclosure filter described in @sec-hints replaced it with the generic message shown.
+The workflow starts with loading the source text and optionally providing context and a glossary, after which the student writes the translation of each segment. The _Guardar_ (Save) action persists the text, _Verificar_ (Check) applies the rules, and _Pedir pista_ (Ask for a hint) combines the same rules with the model. Both revision operations act on the current text, including unsaved changes, but only the model receives the context as additional input. Alongside each translation, the student can write an optional justification of their choices, and the editor lists the saved versions of the segment, which can be compared word by word or brought back into the editor. A further panel lists the student's actions in the exercise in chronological order. @fig-editor shows the editor after a hint request. The exercise context states that restarting is mandatory, but the translation turns the obligation into a permission (_Podes reiniciar_, 'You may restart') and keeps the English _updates_, although the glossary prescribes _atualizações_. The glossary rule flags the missing term, while the model adds a meaning issue whose question points to the degree of obligation without giving the answer. The student's justification of this first version appears below the translation. @fig-history shows the same segment after revision: the comparison highlights the words changed between the two versions, next to their justifications, and the timeline lists the hint request, the saves and the final check.
 
 #figure(
   {
@@ -283,10 +283,28 @@ The workflow starts with loading the source text and optionally providing contex
       [(b)], shot("figures/editor-hint.png"),
     )
   },
-  caption: [The editor after a hint request: (a) source segment and student translation; (b) actions and issues, each labeled with its origin.],
+  caption: [The editor after a hint request: (a) source segment, student translation and justification; (b) actions and issues, each labeled with its origin.],
   placement: top,
   scope: "parent",
 ) <fig-editor>
+
+#figure(
+  {
+    set text(size: 8pt)
+    let shot(path) = box(stroke: 0.4pt + luma(80%), image(path, width: 100%))
+    grid(
+      columns: (auto, 1fr),
+      column-gutter: 6pt,
+      row-gutter: 6pt,
+      align: (right + top, left),
+      [(a)], shot("figures/editor-compare.png"),
+      [(b)], shot("figures/editor-timeline.png"),
+    )
+  },
+  caption: [The segment of @fig-editor after revision: (a) comparison of the two saved versions, with their justifications; (b) the student's path in the segment.],
+  placement: top,
+  scope: "parent",
+) <fig-history>
 
 In the backend, the rules, memory search, Ollama adapter and merging are kept in separate functions. This organization allows the checks to run without the interface and lets tests replace the network with simulated responses. The configuration studied uses Ollama on _localhost_ and the model `qwen3:4b-instruct-2507-q4_K_M`, with about four billion parameters and Q4\_K\_M quantization.#footnote[Ollama model card, _Qwen3: 4b-instruct-2507-q4\_K\_M_: #link("https://ollama.com/library/qwen3:4b-instruct-2507-q4_K_M").] Although the endpoint and the model are configurable, the observations in this paper refer to the local runs described.
 
