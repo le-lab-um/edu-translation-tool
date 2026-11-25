@@ -251,7 +251,7 @@ The application is organized into three interrelated levels (@fig-architecture):
       node((2, 1), [*Local database* \ (SQLite) \ translations, versions, \ memory and usage events], fill: c-ext, width: 34mm, name: <db>),
       node((2, 4.7), [*Local language model* \ Qwen3 4B, \ served by Ollama], fill: c-ext, width: 34mm, name: <llm>),
 
-      edge(<client>, <store>, "-|>"),
+      edge(<client>, (0, 0), <store>, "-|>"),
       edge(<client>, <tm>, "-|>"),
       edge(<client>, <log>, "-|>"),
       edge(<client>, <rules>, "-|>"),
