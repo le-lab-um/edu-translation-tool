@@ -12,7 +12,7 @@ The interface is in Portuguese; button names are given below as they appear in t
 - **Persistence:** the translation is saved in SQLite when the student clicks **Guardar** (Save), moves to another segment or returns to the exercise setup, and it is restored when the segment is reopened. A failed save keeps the text on screen and blocks navigation.
 - **Segment identity:** each occurrence of a segment has its own identity within its exercise, so identical lines, in the same exercise or in different ones, keep independent translations. Choosing an example, loading a file or clicking **Novo exercício** (New exercise) starts a new exercise.
 - **Justification and version history:** the student can write an optional justification for each translation. Every save that changes the translation or the justification is kept as a version, and the **Histórico de versões** (Version history) button opens a side panel that lists them, newest first, with a **Recuperar** (Restore) button that brings a version back into the editor. Long lists show ten items at a time.
-- **Translation memory:** each confirmed translation is stored as a source–target pair. When a segment is opened, similar segments are suggested (RapidFuzz, threshold 70%) with a **Usar** (Use) button.
+- **Translation memory:** each confirmed translation is stored as a source–target pair. When a segment is opened, similar segments are suggested (RapidFuzz, threshold 70%) with a **Usar** (Use) button. A **Remover** (Remove) button, after confirmation, deletes a wrong or test pair from the memory without changing any saved translation.
 - **Five deterministic rules** (**Verificar**, Check): empty translation, changed or missing numbers, missing glossary terms, placeholders (`{name}`) and formatting tags (`<b>`, `<i>`, …).
 - **Hybrid hints** (**Pedir pista**, Ask for a hint): the rules are combined with a local Qwen model (`qwen3:4b-instruct-2507-q4_K_M`, served by Ollama), which adds a **meaning and context** category. Each issue shows its origin (rule or local model). Rules take priority when categories overlap, and a heuristic filter generalizes hints that seem to reveal the solution. If Ollama fails, the application returns the rule issues only.
 - **Version comparison:** in the version history, any two versions can be compared word by word (removed words in red, added words in green), next to their justifications.
@@ -86,7 +86,7 @@ Model environment variables: `OLLAMA_URL` (default `http://localhost:11434`), `O
 cd frontend && npm test && npm run build
 ```
 
-There are 89 backend tests and 40 frontend tests. The Ollama integration is tested against a simulated server (`httpx.MockTransport`), so the model is not required.
+There are 90 backend tests and 41 frontend tests. The Ollama integration is tested against a simulated server (`httpx.MockTransport`), so the model is not required.
 
 ## API
 
@@ -97,7 +97,7 @@ There are 89 backend tests and 40 frontend tests. The Ollama integration is test
 | `GET` · `PUT /api/segments/{id}` | Retrieve and save the translation of a segment and the student's `justification`. Each save that changes either one adds a version. |
 | `GET /api/segments/{id}/versions` | List the saved versions of a segment, oldest first. |
 | `GET /api/exercises/{id}/events` | List the events of an exercise in chronological order (used by the activity timeline). |
-| `POST /api/memory` · `POST /api/memory/search` | Store a pair and search for similar segments. |
+| `POST /api/memory` · `POST /api/memory/search` · `POST /api/memory/remove` | Store a pair, search for similar segments and remove a pair. |
 | `POST /api/events` · `GET /api/events/export` · `GET /api/events/summary` | Log events, export them (JSON or CSV) and summarize them. |
 
 The glossary uses the format `{"folder": {"target": "pasta", "variants": ["diretório"]}}`.

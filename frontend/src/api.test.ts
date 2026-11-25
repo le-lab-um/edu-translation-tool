@@ -6,7 +6,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   checkTranslation, CheckTimeoutError, getSegment, getTimeline, getVersions, saveSegment, RequestTimeoutError,
-  requestHint, searchMemory, logEvent,
+  requestHint, searchMemory, logEvent, removeMemory,
 } from './api';
 
 // Simula uma operação de rede que só termina quando o pedido é cancelado.
@@ -244,6 +244,15 @@ describe('pistas híbridas, memória e registos', () => {
       fetchMock.mockImplementationOnce(() => json(data));
       await expect(getTimeline('e0123456789ab')).rejects.toThrow('percurso inválido');
     }
+  });
+
+  it('removeMemory envia o par e valida a resposta', async () => {
+    fetchMock.mockImplementationOnce(() => json({ removed: true }));
+    expect(await removeMemory('Open the file.', 'mamsdmade')).toBe(true);
+    expect(fetchMock.mock.calls[0][0]).toBe('/api/memory/remove');
+    expect(JSON.parse(fetchMock.mock.calls[0][1]!.body as string)).toEqual({ source: 'Open the file.', target: 'mamsdmade' });
+    fetchMock.mockImplementationOnce(() => json({}));
+    await expect(removeMemory('a', 'b')).rejects.toThrow('inválida');
   });
 
   it('logEvent usa o id de sessão e nunca lança erro', async () => {

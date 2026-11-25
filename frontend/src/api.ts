@@ -220,6 +220,17 @@ export async function saveMemory(source: string, target: string): Promise<void> 
   });
 }
 
+/** Remove um par da memória; devolve se existia. */
+export async function removeMemory(source: string, target: string): Promise<boolean> {
+  const data = (await requestJson('/api/memory/remove', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ source, target }),
+  })) as { removed?: unknown } | null;
+  if (typeof data?.removed !== 'boolean') throw new Error('A API devolveu uma resposta inválida.');
+  return data.removed;
+}
+
 export type EventType =
   | 'session_started' | 'segment_saved' | 'check_run'
   | 'hint_requested' | 'hint_shown' | 'memory_suggestion_used' | 'version_restored';

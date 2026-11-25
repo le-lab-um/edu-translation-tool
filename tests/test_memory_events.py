@@ -65,6 +65,19 @@ class MemoryAndEventsApiTests(unittest.TestCase):
         self.assertEqual(len(found), 1)
         self.assertEqual(found[0]["target"], "Abra o ficheiro.")
 
+    def test_memory_pair_can_be_removed_without_touching_others(self):
+        keep = {"source": "Open the file.", "target": "Abra o ficheiro."}
+        wrong = {"source": "Open the file.", "target": "mamsdmade"}
+        for pair in (keep, wrong):
+            self.client.post("/api/memory", json=pair)
+        self.client.put("/api/segments/e0123456789ab-27f61286-1", json={"target": "mamsdmade"})
+        self.assertEqual(self.client.post("/api/memory/remove", json=wrong).json(), {"removed": True})
+        self.assertEqual(self.client.post("/api/memory/remove", json=wrong).json(), {"removed": False})
+        found = self.client.post("/api/memory/search", json={"source": "Open the file."}).json()["matches"]
+        self.assertEqual([m["target"] for m in found], ["Abra o ficheiro."])
+        self.assertEqual(self.client.get("/api/segments/e0123456789ab-27f61286-1").json()["target"], "mamsdmade")
+        self.assertEqual(self.client.post("/api/memory/remove", json={"source": "x"}).status_code, 422)
+
     def test_memory_rejects_blank_or_unknown_fields(self):
         for body in ({"source": " ", "target": "x"}, {"source": "x", "target": ""}, {"source": "x", "target": "y", "z": 1}):
             with self.subTest(body=body):

@@ -281,6 +281,22 @@ def save_memory(request: MemorySaveRequest, db: Session = Depends(get_db)) -> di
     return {"created": exists is None}
 
 
+class MemoryRemoveRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    source: StrictStr
+    target: StrictStr
+
+
+@app.post("/api/memory/remove")
+def remove_memory(request: MemoryRemoveRequest, db: Session = Depends(get_db)) -> dict[str, bool]:
+    """Remove um par da memória (por exemplo, uma tradução de teste ou errada); não toca nos segmentos."""
+    entry = db.query(MemoryEntry).filter_by(source=request.source, target=request.target).first()
+    if entry:
+        db.delete(entry)
+        db.commit()
+    return {"removed": entry is not None}
+
+
 @app.post("/api/memory/search", response_model=MemorySearchResponse)
 def search_memory(request: MemorySearchRequest, db: Session = Depends(get_db)) -> MemorySearchResponse:
     """Procura traduções anteriores de segmentos iguais ou parecidos (correspondência difusa)."""

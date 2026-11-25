@@ -10,7 +10,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import {
   checkTranslation, CheckTimeoutError, EVENTS_EXPORT_URL, getSegment, getTimeline, getVersions, logEvent,
-  requestHint, saveMemory, saveSegment, searchMemory,
+  removeMemory, requestHint, saveMemory, saveSegment, searchMemory,
 } from './api';
 import type {
   EventType, HintResult, Issue, IssueCategory, LlmStatus, MemoryMatch, SegmentVersion, TimelineEvent,
@@ -178,6 +178,7 @@ export default function App() {
   const [saveState, setSaveState] = useState<SaveState>({ status: 'idle' });
   const [hint, setHint] = useState<HintState>({ status: 'idle' });
   const [memoryMatches, setMemoryMatches] = useState<MemoryMatch[]>([]);
+  const [memoryError, setMemoryError] = useState(false);
   const requestVersion = useRef(0);
   const [lastSaved, setLastSaved] = useState('');
   const [loadState, setLoadState] = useState<LoadState>({ status: 'loading' });
@@ -274,6 +275,7 @@ export default function App() {
     setCheck({ status: 'idle' });
     setHint({ status: 'idle' });
     setMemoryMatches([]);
+    setMemoryError(false);
     setSaveState({ status: 'idle' });
     setSaveUnconfirmed(false);
     // A memória é uma ajuda opcional: se falhar, o exercício continua sem sugestões.
@@ -497,6 +499,22 @@ export default function App() {
     if (panel) closePanel();
   }
 
+  /** Remove da memória um par errado ou de teste, depois de confirmação; os segmentos não mudam. */
+  async function removeMemorySuggestion(match: MemoryMatch) {
+    const ok = window.confirm(
+      `Remover esta sugestão da memória?\n\n${match.source} → ${match.target}\n\n`
+      + 'Deixa de aparecer em todos os exercícios. As traduções guardadas não são alteradas. Esta ação não pode ser desfeita.',
+    );
+    if (!ok) return;
+    try {
+      await removeMemory(match.source, match.target);
+      setMemoryMatches((list) => list.filter((m) => m.source !== match.source || m.target !== match.target));
+      setMemoryError(false);
+    } catch {
+      setMemoryError(true);
+    }
+  }
+
   function useMemorySuggestion(match: MemoryMatch) {
     updateTranslation(match.target);
     track('memory_suggestion_used', segmentId, { score: match.score });
@@ -714,7 +732,8 @@ export default function App() {
             {memoryMatches.length > 0 && (
               <section className="memory" aria-labelledby="memory-heading">
                 <h2 id="memory-heading">Memória de tradução</h2>
-                <p>Estas sugestões vêm de traduções guardadas nesta instância. Reveja-as antes de as usar.</p>
+                <p>Estas sugestões vêm de traduções guardadas nesta instância. Reveja-as antes de as usar. «Remover» apaga da memória uma sugestão errada, sem alterar as traduções guardadas.</p>
+                {memoryError && <p className="check-error" role="alert">Não foi possível remover a sugestão. Tente novamente.</p>}
                 <ul>
                   {memoryMatches.map((match) => (
                     <li key={`${match.source}|${match.target}`}>
@@ -723,6 +742,10 @@ export default function App() {
                       <button type="button" className="secondary" onClick={() => useMemorySuggestion(match)}
                         disabled={!ready || busy}>
                         Usar
+                      </button>
+                      <button type="button" className="link" onClick={() => void removeMemorySuggestion(match)}
+                        aria-label={`Remover da memória: ${match.target}`}>
+                        Remover
                       </button>
                     </li>
                   ))}
