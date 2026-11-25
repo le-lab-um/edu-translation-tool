@@ -8,7 +8,7 @@ Esta experiência verifica a viabilidade inicial de obter alertas e pistas em JS
 * `prompt-v1.txt` e `prompt-v2.txt`: textos exatos dos dois prompts usados. A segunda versão explicita as definições das categorias e aplica a restrição de revelar soluções tanto à explicação como à pista.
 * `v1-run1.json`, `v1-run2.json` e `v2-run1.json`: cópias integrais dos relatórios originais, incluindo respostas, tempos, configuração, metadados do modelo e hash do conjunto. Os caminhos absolutos nos metadados referem-se à execução original.
 
-Os prompts v1 e v2 estão arquivados nesta pasta. A aplicação usa [o prompt v3](../../backend/prompts/hint-v3.txt), também utilizado na avaliação descrita no [README principal](../../README.md#avaliação).
+Os prompts v1 e v2 estão arquivados nesta pasta. A aplicação usou depois [o prompt v3](../../backend/prompts/hint-v3.txt) e, após a avaliação descrita no [README principal](../../README.md#avaliação), [o prompt v4](../../backend/prompts/hint-v4.txt).
 
 Os relatórios provêm, respetivamente, de `translation-ollama-results-x7uk5n4t.json`, `translation-ollama-results-b54nfjkn.json` e `translation-ollama-results-e42m7hd1.json`. Não foram gerados novamente ao integrar a experiência no repositório.
 

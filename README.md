@@ -15,7 +15,7 @@ Projeto de Diogo Pinto (PG61515) e Mariana Pinto (PG61534), Mestrado em Engenhar
 
 ## Resultados da avaliação
 
-Avaliámos a ferramenta em 40 casos de teste (21 originais) que não foram usados no desenvolvimento, com dois prompts: o v3, usado pela aplicação, e o v4, revisto depois de uma fase de diagnóstico.
+Avaliámos a ferramenta em 40 casos de teste (21 originais) que não foram usados no desenvolvimento, com dois prompts: o v3, o prompt original da aplicação, e o v4, revisto depois de uma fase de diagnóstico. Com base nestes resultados, a aplicação passou a usar o v4.
 
 | Método (âmbito principal, 18 casos) | VP/FP/FN v3 | F1 v3 | VP/FP/FN v4 | F1 v4 |
 | --- | --- | --- | --- | --- |
@@ -34,7 +34,7 @@ Os resultados completos e a discussão estão na secção 5 do artigo.
 | --- | --- |
 | `frontend/` | Interface em React 19 + TypeScript + Vite. `src/App.tsx` (editor), `src/exercise.ts` (segmentação e glossário), `src/api.ts` (cliente HTTP) e testes Vitest. |
 | `backend/` | API em FastAPI. `main.py` (endpoints), `rules.py` (regras), `llm.py` (adaptador Ollama), `hybrid.py` (fusão e filtro), `translation_memory.py`, `database.py` e `models.py` (SQLite). |
-| `backend/prompts/` | `hint-v3.txt` (prompt da aplicação) e `hint-v4.txt` (prompt revisto e avaliado). |
+| `backend/prompts/` | `hint-v4.txt` (prompt da aplicação, revisto depois da avaliação) e `hint-v3.txt` (prompt original, guardado para reproduzir a avaliação). |
 | `tests/` | Testes do backend: regras, API, persistência, memória e registos, fusão e cálculo das métricas. |
 | `data/development.json` | Dez exemplos de desenvolvimento usados no piloto. |
 | `experiments/ollama-pilot/` | Piloto de 23 de outubro com os prompts v1 e v2 (script, prompts, relatórios e notas). |
@@ -127,7 +127,7 @@ Cada caso tem `input` (original, tradução, contexto e glossário), `expected_c
 2. **Recolher as respostas,** com o v3 e com o v4, uma a seguir à outra, na mesma máquina:
 
    ```bash
-   .venv/bin/python -m experiments.evaluation.run --cases experiments/evaluation/test.json --output output/teste-v3.json
+   .venv/bin/python -m experiments.evaluation.run --cases experiments/evaluation/test.json --prompt backend/prompts/hint-v3.txt --output output/teste-v3.json
    .venv/bin/python -m experiments.evaluation.run --cases experiments/evaluation/test.json --prompt backend/prompts/hint-v4.txt --output output/teste-v4.json
    ```
 

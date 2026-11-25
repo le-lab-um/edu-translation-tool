@@ -2,7 +2,7 @@
 
 Uso (na raiz do repositório, com o Ollama a correr):
     .venv/bin/python -m experiments.evaluation.run --output output/calibracao.json
-    .venv/bin/python -m experiments.evaluation.run --cases experiments/evaluation/test.json --output output/teste.json
+    .venv/bin/python -m experiments.evaluation.run --cases experiments/evaluation/test.json --prompt backend/prompts/hint-v3.txt --output output/teste-v3.json
     .venv/bin/python -m experiments.evaluation.run --cases experiments/evaluation/test.json --prompt backend/prompts/hint-v4.txt --output output/teste-v4.json
 
 Sem --cases usa o conjunto de calibração e, sem --prompt, o prompt da aplicação. Faz um pedido de aquecimento antes do primeiro caso

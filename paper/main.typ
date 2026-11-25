@@ -320,7 +320,7 @@ For example, `The total is €1,000.50 today.` retrieves the pair for `The total
 
 == Model Hints and Hybrid Merging <sec-hints>
 
-The `POST /api/hint` endpoint first runs the rules and queries the model when the translation contains text (@fig-hint). The adapter sends the source, the current translation, the context and the glossary, without conversation history or the student's previous attempts. These contents are presented as data in the versioned prompt `hint-v3.txt`, which requests an explanation and a revision question in European Portuguese.
+The `POST /api/hint` endpoint first runs the rules and queries the model when the translation contains text (@fig-hint). The adapter sends the source, the current translation, the context and the glossary, without conversation history or the student's previous attempts. These contents are presented as data in a versioned prompt, which requests an explanation and a revision question in European Portuguese. The application used prompt v3 until the evaluation and now uses prompt v4 (@sec-diagnostic).
 
 As @fig-hint shows, the rule checks always run, so their issues reach the student even when the model is not called or fails. The model's issues are then merged with the rule issues, and any model issue that appears to reveal the solution has its explanation and hint replaced with a generic message. A model issue is treated as revealing when it contains quoted text, a glossary equivalent or, for numbers, a value from the source text.
 

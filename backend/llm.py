@@ -13,7 +13,7 @@ from typing import Any
 import httpx
 
 CATEGORIES = ("empty_translation", "numeric_mismatch", "terminology", "meaning_context")
-PROMPT_PATH = Path(__file__).with_name("prompts") / "hint-v3.txt"
+PROMPT_PATH = Path(__file__).with_name("prompts") / "hint-v4.txt"
 
 # Configuração de geração herdada do piloto (experiments/ollama-pilot).
 DEFAULT_MODEL = "qwen3:4b-instruct-2507-q4_K_M"
