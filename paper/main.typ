@@ -268,7 +268,7 @@ The application is organized into three interrelated levels (@fig-architecture):
   scope: "parent",
 ) <fig-architecture>
 
-The workflow starts with loading the source text and optionally providing context and a glossary, after which the student writes the translation of each segment. The _Guardar_ (Save) action persists the text, _Verificar_ (Check) applies the rules, and _Pedir pista_ (Ask for a hint) combines the same rules with the model. Both revision operations act on the current text, including unsaved changes, but only the model receives the context as additional input. Alongside each translation, the student can write an optional justification of their choices, and the editor lists the saved versions of the segment, which can be compared word by word or brought back into the editor. A further panel lists the student's actions in the exercise in chronological order. @fig-editor shows the editor after a hint request. The exercise context states that restarting is mandatory, but the translation turns the obligation into a permission (_Podes reiniciar_, 'You may restart') and keeps the English _updates_, although the glossary prescribes _atualizações_. The glossary rule flags the missing term, while the model adds a meaning issue whose question points to the degree of obligation without giving the answer. The student's justification of this first version appears below the translation. @fig-history shows the same segment after revision: the comparison highlights the words changed between the two versions, next to their justifications, and the timeline lists the hint request, the saves and the final check.
+The workflow starts with loading the source text and optionally providing context and a glossary, after which the student writes the translation of each segment. The _Guardar_ (Save) action persists the text, _Verificar_ (Check) applies the rules, and _Pedir pista_ (Ask for a hint) combines the same rules with the model. Both revision operations act on the current text, including unsaved changes, but only the model receives the context as additional input. Alongside each translation, the student can write an optional justification of their choices, and the editor lists the saved versions of the segment, which can be compared word by word or brought back into the editor. A further panel lists the student's actions in the exercise in chronological order. Both open in a side panel, so the editor page does not grow with long histories. @fig-editor shows the editor after a hint request. The exercise context states that restarting is mandatory, but the translation turns the obligation into a permission (_Podes reiniciar_, 'You may restart') and keeps the English _updates_, although the glossary prescribes _atualizações_. The glossary rule flags the missing term, while the model adds a meaning issue whose question points to the degree of obligation without giving the answer. The student's justification of this first version appears below the translation. @fig-history shows the same segment after revision: the comparison highlights the words changed between the two versions, next to their justifications, and the timeline lists the hint request, the saves and the final check.
 
 #figure(
   {
@@ -293,15 +293,14 @@ The workflow starts with loading the source text and optionally providing contex
     set text(size: 8pt)
     let shot(path) = box(stroke: 0.4pt + luma(80%), image(path, width: 100%))
     grid(
-      columns: (auto, 1fr),
+      columns: (auto, 1fr, auto, 1fr),
       column-gutter: 6pt,
-      row-gutter: 6pt,
-      align: (right + top, left),
+      align: (right + top, left + top, right + top, left + top),
       [(a)], shot("figures/editor-compare.png"),
       [(b)], shot("figures/editor-timeline.png"),
     )
   },
-  caption: [The segment of @fig-editor after revision: (a) comparison of the two saved versions, with their justifications; (b) the student's path in the segment.],
+  caption: [The segment of @fig-editor after revision, in the side panel: (a) comparison of the two saved versions, with their justifications; (b) the student's path in the segment.],
   placement: top,
   scope: "parent",
 ) <fig-history>

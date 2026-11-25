@@ -22,6 +22,9 @@ import {
 
 const STORAGE_KEY = 'ett.exercise.v1';
 
+/** Número de versões ou ações mostradas de cada vez no painel lateral. */
+const PAGE_SIZE = 10;
+
 /** Nomes legíveis das categorias de alerta. */
 const CATEGORY_LABELS: Record<IssueCategory, string> = {
   empty_translation: 'Tradução vazia',
@@ -165,6 +168,12 @@ export default function App() {
   const [timelineError, setTimelineError] = useState(false);
   const [timelineScope, setTimelineScope] = useState<'segment' | 'exercise'>('segment');
   const timelineOpen = useRef(false);
+  const [panel, setPanel] = useState<'versions' | 'timeline' | null>(null);
+  const [versionsShown, setVersionsShown] = useState(PAGE_SIZE);
+  const [timelineShown, setTimelineShown] = useState(PAGE_SIZE);
+  const drawerRef = useRef<HTMLElement>(null);
+  const versionsButton = useRef<HTMLButtonElement>(null);
+  const timelineButton = useRef<HTMLButtonElement>(null);
   const [check, setCheck] = useState<CheckState>({ status: 'idle' });
   const [saveState, setSaveState] = useState<SaveState>({ status: 'idle' });
   const [hint, setHint] = useState<HintState>({ status: 'idle' });
@@ -204,6 +213,35 @@ export default function App() {
       setTimelineError(true);
     }
   }
+
+  /** O histórico e o percurso abrem num painel lateral, para não alongar a página do editor. */
+  function openPanel(which: 'versions' | 'timeline') {
+    setPanel(which);
+    setVersionsShown(PAGE_SIZE);
+    setTimelineShown(PAGE_SIZE);
+    timelineOpen.current = which === 'timeline';
+    if (which === 'timeline') void loadTimeline();
+  }
+
+  function closePanel() {
+    const trigger = panel === 'versions' ? versionsButton.current : timelineButton.current;
+    setPanel(null);
+    timelineOpen.current = false;
+    trigger?.focus();
+  }
+
+  // O painel recebe o foco quando abre.
+  useEffect(() => {
+    if (panel) drawerRef.current?.focus();
+  }, [panel]);
+
+  // Fecha com a tecla Esc.
+  useEffect(() => {
+    if (!panel) return;
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') closePanel(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
 
   /** Regista o evento e, com o percurso aberto, atualiza-o. */
   function track(type: EventType, id: string | undefined, payload: Record<string, unknown> = {}) {
@@ -456,6 +494,7 @@ export default function App() {
     updateTranslation(version.target);
     setJustification(version.justification);
     track('version_restored', segmentId, { version: version.number });
+    if (panel) closePanel();
   }
 
   function useMemorySuggestion(match: MemoryMatch) {
@@ -660,6 +699,18 @@ export default function App() {
               </section>
             </div>
 
+            <div className="segment-tools" role="group" aria-label="Revisão do segmento">
+              <button type="button" className="secondary" ref={versionsButton}
+                onClick={() => openPanel('versions')} disabled={versions.length === 0}>
+                Histórico de versões ({versions.length})
+              </button>
+              {exerciseId && (
+                <button type="button" className="secondary" ref={timelineButton} onClick={() => openPanel('timeline')}>
+                  O meu percurso
+                </button>
+              )}
+            </div>
+
             {memoryMatches.length > 0 && (
               <section className="memory" aria-labelledby="memory-heading">
                 <h2 id="memory-heading">Memória de tradução</h2>
@@ -679,110 +730,132 @@ export default function App() {
               </section>
             )}
 
-            {versions.length > 0 && (
-              <details className="versions">
-                <summary>Histórico de versões ({versions.length})</summary>
-                <p>Cada gravação que altera a tradução ou a justificação fica registada. «Recuperar» copia a versão para o editor; guarde para a confirmar.</p>
-                {versions.length > 1 && (() => {
-                  const from = versions.find((v) => v.number === compare.from) ?? versions[0];
-                  const to = versions.find((v) => v.number === compare.to) ?? versions[versions.length - 1];
-                  const picker = (label: string, value: number, key: 'from' | 'to') => (
-                    <label>
-                      {label}{' '}
-                      <select value={value} onChange={(event) => setCompare((c) => ({ ...c, [key]: Number(event.target.value) }))}>
-                        {versions.map((v) => <option key={v.number} value={v.number}>Versão {v.number}</option>)}
-                      </select>
-                    </label>
-                  );
-                  return (
-                    <div className="compare">
-                      <h3>Comparar versões</h3>
-                      <div className="compare-pickers">
-                        {picker('De', from.number, 'from')}
-                        {picker('para', to.number, 'to')}
-                      </div>
-                      <p className="diff" lang="pt-PT">
-                        {diffWords(from.target, to.target).map((part, i) =>
-                          part.kind === 'same' ? <span key={i}>{part.text}</span>
-                            : part.kind === 'added' ? <ins key={i}>{part.text}</ins>
-                              : <del key={i}>{part.text}</del>)}
-                      </p>
-                      <p className="hint">
-                        <span className="diff-key"><del>removido</del> · <ins>acrescentado</ins></span>
-                      </p>
-                      <dl className="compare-justifications">
-                        <dt>Justificação da versão {from.number}</dt>
-                        <dd>{from.justification || <em>(sem justificação)</em>}</dd>
-                        <dt>Justificação da versão {to.number}</dt>
-                        <dd>{to.justification || <em>(sem justificação)</em>}</dd>
-                      </dl>
+            {panel && (
+              <>
+                <div className="drawer-backdrop" onClick={closePanel} aria-hidden="true" />
+                <aside className="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title"
+                  ref={drawerRef} tabIndex={-1}>
+                  <header className="drawer-header">
+                    <div>
+                      <h2 id="drawer-title">{panel === 'versions' ? 'Histórico de versões' : 'O meu percurso'}</h2>
+                      <p className="hint">Segmento {segmentIndex + 1} de {segments.length}</p>
                     </div>
-                  );
-                })()}
-                <ol reversed>
-                  {[...versions].reverse().map((version) => (
-                    <li key={version.number}>
-                      <p className="version-meta">
-                        Versão {version.number}{formatVersionDate(version.createdAt) && ` · ${formatVersionDate(version.createdAt)}`}
-                      </p>
-                      <p lang="pt-PT">{version.target || <em>(vazia)</em>}</p>
-                      {version.justification && <p className="hint">Justificação: {version.justification}</p>}
-                      <button type="button" className="secondary" onClick={() => restoreVersion(version)}
-                        disabled={!ready || busy}>
-                        Recuperar
-                      </button>
-                    </li>
-                  ))}
-                </ol>
-              </details>
-            )}
-
-            {exerciseId && (
-              <details
-                className="timeline"
-                onToggle={(event) => {
-                  timelineOpen.current = event.currentTarget.open;
-                  if (event.currentTarget.open) void loadTimeline();
-                }}
-              >
-                <summary>O meu percurso</summary>
-                <p>As ações que fez neste exercício, por ordem: gravações, verificações, pistas, sugestões da memória e versões recuperadas.</p>
-                <div className="timeline-scope" role="group" aria-label="Mostrar">
-                  <button type="button" className={timelineScope === 'segment' ? '' : 'secondary'}
-                    aria-pressed={timelineScope === 'segment'} onClick={() => setTimelineScope('segment')}>
-                    Este segmento
-                  </button>
-                  <button type="button" className={timelineScope === 'exercise' ? '' : 'secondary'}
-                    aria-pressed={timelineScope === 'exercise'} onClick={() => setTimelineScope('exercise')}>
-                    Todo o exercício
-                  </button>
-                  <button type="button" className="link" onClick={() => void loadTimeline()}>Atualizar</button>
-                </div>
-                {timelineError && <p className="check-error" role="alert">Não foi possível carregar o percurso.</p>}
-                {timeline && (() => {
-                  const entries = timeline
-                    .filter((event) => timelineScope === 'exercise' || event.segmentId === segmentId)
-                    .map((event) => ({ event, text: describeEvent(event) }))
-                    .filter((entry) => entry.text);
-                  if (entries.length === 0) return <p className="hint">Ainda não há ações registadas{timelineScope === 'segment' ? ' neste segmento' : ''}.</p>;
-                  return (
-                    <ol className="timeline-list">
-                      {entries.map(({ event, text }, i) => {
-                        const position = segments.findIndex((s) => s.id === event.segmentId);
-                        return (
-                          <li key={i}>
-                            <span className="version-meta">
-                              {formatVersionDate(event.createdAt)}
-                              {timelineScope === 'exercise' && (position >= 0 ? ` · Segmento ${position + 1}` : ' · Segmento já removido')}
-                            </span>{' '}
-                            {text}
-                          </li>
-                        );
-                      })}
-                    </ol>
-                  );
-                })()}
-              </details>
+                    <button type="button" className="secondary" onClick={closePanel}>Fechar</button>
+                  </header>
+                  <div className="drawer-body">
+                    {panel === 'versions' && (
+                      <>
+                        <p>Cada gravação que altera a tradução ou a justificação fica registada. «Recuperar» copia a versão para o editor; guarde para a confirmar.</p>
+                        {versions.length === 0 && <p className="hint">Ainda não há versões guardadas deste segmento.</p>}
+                        {versions.length > 1 && (() => {
+                          const from = versions.find((v) => v.number === compare.from) ?? versions[0];
+                          const to = versions.find((v) => v.number === compare.to) ?? versions[versions.length - 1];
+                          const picker = (label: string, value: number, key: 'from' | 'to') => (
+                            <label>
+                              {label}{' '}
+                              <select value={value} onChange={(event) => setCompare((c) => ({ ...c, [key]: Number(event.target.value) }))}>
+                                {versions.map((v) => <option key={v.number} value={v.number}>Versão {v.number}</option>)}
+                              </select>
+                            </label>
+                          );
+                          return (
+                            <div className="compare">
+                              <h3>Comparar versões</h3>
+                              <div className="compare-pickers">
+                                {picker('De', from.number, 'from')}
+                                {picker('para', to.number, 'to')}
+                              </div>
+                              <p className="diff" lang="pt-PT">
+                                {diffWords(from.target, to.target).map((part, i) =>
+                                  part.kind === 'same' ? <span key={i}>{part.text}</span>
+                                    : part.kind === 'added' ? <ins key={i}>{part.text}</ins>
+                                      : <del key={i}>{part.text}</del>)}
+                              </p>
+                              <p className="hint">
+                                <span className="diff-key"><del>removido</del> · <ins>acrescentado</ins></span>
+                              </p>
+                              <dl className="compare-justifications">
+                                <dt>Justificação da versão {from.number}</dt>
+                                <dd>{from.justification || <em>(sem justificação)</em>}</dd>
+                                <dt>Justificação da versão {to.number}</dt>
+                                <dd>{to.justification || <em>(sem justificação)</em>}</dd>
+                              </dl>
+                            </div>
+                          );
+                        })()}
+                        <ol className="version-list">
+                          {[...versions].reverse().slice(0, versionsShown).map((version) => (
+                            <li key={version.number}>
+                              <p className="version-meta">
+                                Versão {version.number}{formatVersionDate(version.createdAt) && ` · ${formatVersionDate(version.createdAt)}`}
+                              </p>
+                              <p lang="pt-PT">{version.target || <em>(vazia)</em>}</p>
+                              {version.justification && <p className="hint">Justificação: {version.justification}</p>}
+                              <button type="button" className="secondary" onClick={() => restoreVersion(version)}
+                                disabled={!ready || busy}>
+                                Recuperar
+                              </button>
+                            </li>
+                          ))}
+                        </ol>
+                        {versions.length > versionsShown && (
+                          <button type="button" className="link" onClick={() => setVersionsShown((n) => n + PAGE_SIZE)}>
+                            Mostrar versões anteriores ({versions.length - versionsShown})
+                          </button>
+                        )}
+                      </>
+                    )}
+                    {panel === 'timeline' && (
+                      <>
+                        <p>As ações que fez neste exercício, por ordem: gravações, verificações, pistas, sugestões da memória e versões recuperadas.</p>
+                        <div className="timeline-scope" role="group" aria-label="Mostrar">
+                          <button type="button" className={timelineScope === 'segment' ? '' : 'secondary'}
+                            aria-pressed={timelineScope === 'segment'} onClick={() => setTimelineScope('segment')}>
+                            Este segmento
+                          </button>
+                          <button type="button" className={timelineScope === 'exercise' ? '' : 'secondary'}
+                            aria-pressed={timelineScope === 'exercise'} onClick={() => setTimelineScope('exercise')}>
+                            Todo o exercício
+                          </button>
+                          <button type="button" className="link" onClick={() => void loadTimeline()}>Atualizar</button>
+                        </div>
+                        {timelineError && <p className="check-error" role="alert">Não foi possível carregar o percurso.</p>}
+                        {timeline && (() => {
+                          const entries = timeline
+                            .filter((event) => timelineScope === 'exercise' || event.segmentId === segmentId)
+                            .map((event) => ({ event, text: describeEvent(event) }))
+                            .filter((entry) => entry.text);
+                          if (entries.length === 0) return <p className="hint">Ainda não há ações registadas{timelineScope === 'segment' ? ' neste segmento' : ''}.</p>;
+                          const hidden = Math.max(entries.length - timelineShown, 0);
+                          return (
+                            <>
+                              {hidden > 0 && (
+                                <button type="button" className="link" onClick={() => setTimelineShown((n) => n + PAGE_SIZE)}>
+                                  Mostrar ações anteriores ({hidden})
+                                </button>
+                              )}
+                              <ol className="timeline-list">
+                                {entries.slice(hidden).map(({ event, text }, i) => {
+                                  const position = segments.findIndex((s) => s.id === event.segmentId);
+                                  return (
+                                    <li key={hidden + i}>
+                                      <span className="version-meta">
+                                        {formatVersionDate(event.createdAt)}
+                                        {timelineScope === 'exercise' && (position >= 0 ? ` · Segmento ${position + 1}` : ' · Segmento já removido')}
+                                      </span>{' '}
+                                      {text}
+                                    </li>
+                                  );
+                                })}
+                              </ol>
+                            </>
+                          );
+                        })()}
+                      </>
+                    )}
+                  </div>
+                </aside>
+              </>
             )}
 
             <section className="verification" aria-labelledby="actions-heading">

@@ -380,12 +380,6 @@ button.link:hover:not(:disabled) {
 .hints { margin-top: 0.75rem; }
 footer a { color: inherit; }
 .justification-label { margin-top: 1rem; }
-.versions { margin: 1.25rem 0; padding: 1rem 1.25rem; border: 1px solid var(--border, #d0d5dd); border-radius: 8px; }
-.versions summary { cursor: pointer; font-weight: 650; }
-.versions ol { list-style: none; margin: 0.5rem 0 0; padding: 0; }
-.versions li { padding: 0.5rem 0; border-top: 1px solid var(--border, #d0d5dd); }
-.versions li:first-child { border-top: none; }
-.versions li p { margin: 0.25rem 0; white-space: pre-wrap; }
 .version-meta { color: #535b53; font-size: 0.875rem; }
 .compare { margin: 0.75rem 0 1rem; padding: 0.75rem 1rem; background: #f6f7f4; border-radius: 8px; }
 .compare h3 { margin: 0 0 0.5rem; font-size: 1rem; }
@@ -397,9 +391,27 @@ footer a { color: inherit; }
 .compare-justifications { margin: 0.5rem 0 0; }
 .compare-justifications dt { font-weight: 650; font-size: 0.875rem; margin-top: 0.5rem; }
 .compare-justifications dd { margin: 0.15rem 0 0; }
-.timeline { margin: 1.25rem 0; padding: 1rem 1.25rem; border: 1px solid var(--border, #d0d5dd); border-radius: 8px; }
-.timeline summary { cursor: pointer; font-weight: 650; }
 .timeline-scope { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin: 0.5rem 0; }
 .timeline-list { list-style: none; margin: 0.5rem 0 0; padding: 0; }
 .timeline-list li { padding: 0.4rem 0; border-top: 1px solid var(--border, #d0d5dd); }
 .timeline-list li:first-child { border-top: none; }
+.segment-tools { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
+.drawer-backdrop { position: fixed; inset: 0; background: rgba(20, 28, 24, 0.35); z-index: 20; }
+.drawer {
+  position: fixed; top: 0; right: 0; z-index: 21;
+  display: flex; flex-direction: column;
+  width: min(600px, 100%); height: 100vh;
+  background: #fff; box-shadow: -8px 0 24px rgba(0, 0, 0, 0.15);
+}
+.drawer:focus { outline: none; }
+.drawer-header {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
+  padding: 1.25rem 1.5rem 0.75rem; border-bottom: 1px solid #d8dbd2;
+}
+.drawer-header h2 { margin: 0; font-size: 1.15rem; }
+.drawer-header p { margin: 0.15rem 0 0; }
+.drawer-body { flex: 1; overflow-y: auto; padding: 1rem 1.5rem 1.5rem; }
+.version-list { list-style: none; margin: 0.5rem 0 0; padding: 0; }
+.version-list li { padding: 0.6rem 0; border-top: 1px solid #d8dbd2; }
+.version-list li:first-child { border-top: none; }
+.version-list li p { margin: 0.25rem 0; white-space: pre-wrap; }
