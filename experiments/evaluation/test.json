@@ -3,7 +3,7 @@
   "annotation_status": "reviewed",
   "source_language": "en",
   "target_language": "pt-PT",
-  "provenance": "Exemplos sintéticos redigidos com assistência de uma ferramenta de IA generativa, a rever pelos autores. Não são traduções recolhidas de participantes.",
+  "provenance": "Exemplos sintéticos preparados pelos autores para a avaliação. Não são traduções recolhidas de participantes.",
   "analysis_scopes": {
     "rq1_main": "Análise principal da RQ1: tradução vazia, valores em algarismos e glossário, com controlos aceitáveis.",
     "rq2_meaning": "Significado e contexto: categoria exclusiva do modelo, apreciada na RQ2 e contada nos falsos alertas.",

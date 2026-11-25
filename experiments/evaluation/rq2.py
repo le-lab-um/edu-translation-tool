@@ -45,6 +45,8 @@ def summarise(rows):
 def run(sheet_path, key_path):
     sheet = {r["row_id"]: r for r in read(sheet_path)}
     key = read(key_path)
+    for k in key:
+        k.setdefault("prompt", "")
     prompts = sorted({k["prompt"] for k in key})
     result = {}
     for prompt in prompts:

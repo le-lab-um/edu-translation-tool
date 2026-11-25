@@ -151,101 +151,6 @@ main {
   margin-bottom: 1.5rem;
 }
 
-.editor-mock {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  background: #fbfbf9;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.5rem;
-}
-
-@media (max-width: 760px) {
-  .editor-mock {
-    grid-template-columns: 1fr;
-  }
-}
-
-.mock-label {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 0.25rem;
-}
-
-.source-text {
-  font-size: 1.05rem;
-  font-weight: 500;
-  margin: 0 0 1rem;
-}
-
-.context-text {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.95rem;
-}
-
-.mock-textarea {
-  border: 1px solid var(--border);
-  background: #fff;
-  border-radius: 4px;
-  padding: 0.75rem;
-  min-height: 5rem;
-  margin-bottom: 0.75rem;
-  font-size: 0.95rem;
-}
-
-.mock-actions {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.mock-btn {
-  font-size: 0.85rem;
-  padding: 0.4rem 0.8rem;
-  border-radius: 4px;
-  font-weight: 500;
-}
-
-.mock-btn.primary {
-  background: var(--accent);
-  color: #fff;
-}
-
-.mock-btn.secondary {
-  background: #fff;
-  border: 1px solid var(--border);
-}
-
-.mock-save-status {
-  font-size: 0.85rem;
-  color: var(--success);
-  margin-left: 0.5rem;
-}
-
-.mock-feedback {
-  background: #fff;
-  border: 1px solid #d4ded6;
-  border-left: 3px solid var(--accent);
-  padding: 0.75rem 1rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
-}
-
-.mock-feedback p {
-  margin: 0 0 0.25rem;
-}
-
-.mock-feedback .hint {
-  color: var(--muted);
-  margin: 0;
-}
-
 .levels-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -323,4 +228,44 @@ pre {
 
 .affiliation {
   font-size: 0.8rem;
+}
+.shot {
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.shot img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.results {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0 16px;
+}
+
+.results th,
+.results td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.results th {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.findings {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text);
+}
+
+.findings li + li {
+  margin-top: 6px;
 }

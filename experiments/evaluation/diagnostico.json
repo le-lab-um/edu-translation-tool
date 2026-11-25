@@ -3,7 +3,7 @@
   "annotation_status": "pending_author_review",
   "source_language": "en",
   "target_language": "pt-PT",
-  "provenance": "Exemplos sintéticos redigidos com assistência de uma ferramenta de IA generativa, a rever pelos autores. Não são traduções recolhidas de participantes.",
+  "provenance": "Exemplos sintéticos preparados pelos autores para a avaliação. Não são traduções recolhidas de participantes.",
   "purpose": "Diagnóstico do prompt v3 (primeira fase da secção «Aperfeiçoamento das Instruções» do artigo). Faz parte do desenvolvimento: as respostas podem orientar a revisão do prompt e nunca entram no teste.",
   "analysis_scopes": {
     "diagnostic_meaning": "Significado e contexto: tempo e advérbios, falsos cognatos, negação, modalidade, quantificadores, expressão idiomática e condição."

@@ -1,115 +1,64 @@
 # Educational Translation Tool
 
-Protótipo académico para apoiar a prática reflexiva de tradução de inglês para português europeu. Combina um editor com memória de tradução, verificações por regras e uma primeira integração de pistas híbridas com um modelo de linguagem local. O projeto inclui um artigo académico, com entrega a **30 de novembro de 2026**.
+Aplicação web educativa para praticar tradução de inglês para português europeu (EN → PT-PT). O aluno traduz texto segmentado, usa memória de tradução e glossário, corre verificações por regras e pede pistas a um modelo de linguagem local. As pistas procuram orientar a revisão sem entregar a solução.
 
-O objetivo é disponibilizar a ferramenta como open source. A licença do repositório ainda está por escolher pelos autores.
+Projeto de Diogo Pinto (PG61515) e Mariana Pinto (PG61534), Mestrado em Engenharia Informática da Universidade do Minho. O artigo que descreve a ferramenta e a sua avaliação está em [`paper/main.typ`](paper/main.typ). A página de apresentação está em [`docs/`](docs/index.html), publicada em <https://le-lab-um.github.io/edu-translation-tool/>.
 
-## Estado para a reunião de 17 de novembro de 2026
+## Funcionalidades
 
-- **Editor React:** permite escrever/colar texto, carregar `.txt` até 200 KiB (204 800 bytes) ou escolher um exemplo. Cada linha não vazia constitui um segmento, até 200 por exercício; não há segmentação automática por frases.
-- **Contexto e glossário:** o contexto é apresentado ao aluno. O glossário usa uma entrada por linha: `folder = pasta | diretório`. Entradas inválidas ou repetidas impedem o início até serem corrigidas.
-- **Persistência SQLite:** guarda a tradução ao clicar em **Guardar**, ao mudar de segmento ou ao regressar à configuração do exercício. Recupera o texto guardado ao abrir um segmento. Guarda apenas a versão atual, sem histórico.
-- **Proteção durante pedidos:** a edição aguarda a recuperação do segmento e fica bloqueada durante a gravação. Uma gravação não confirmada impede a navegação e mantém o texto no ecrã. Há mensagens de erro e nova tentativa de leitura. O cliente dá 40 segundos a «Pedir pista» e 10 segundos aos restantes pedidos JSON. Verificações antigas não substituem resultados associados a uma edição posterior.
-- **Aviso de alterações por guardar:** o navegador pode pedir confirmação ao fechar ou recarregar. Para recuperar o exercício, o `localStorage` guarda o original, o contexto, o glossário, o estado de arranque e a posição. A tradução é persistida pela API nas operações de gravação.
-- **Cinco regras determinísticas:** tradução vazia, números do original em falta ou alterados, termos prescritos ausentes, marcadores nomeados e etiquetas de formatação. As duas últimas foram acrescentadas depois do ensaio de 9 de novembro. **Verificar** corre as regras e devolve mensagens definidas em código.
-- **Pistas híbridas (nível 3):** o botão **Pedir pista** chama `POST /api/hint`, que combina as regras com o modelo local servido pelo Ollama. A categoria **Significado e contexto** permite ao Qwen sinalizar alterações de sentido, como uma obrigação que passa a opção. O prompt pede uma explicação breve e uma pergunta de revisão em português europeu. Cada alerta mostra a origem («Regra» ou «Sugestão do modelo local»). As regras têm prioridade em categorias repetidas. Um filtro heurístico pode generalizar a explicação e a pista quando encontra padrões suspeitos. Para as falhas do Ollama que o adaptador reconhece, o endpoint devolve as regras e indica o estado do modelo.
-- **Memória de tradução (nível 1):** após confirmar uma tradução não vazia, o editor tenta guardar o par original/tradução. A memória é partilhada pela instância local. Ao abrir um segmento, aparecem sugestões de segmentos parecidos (RapidFuzz, limiar 70 %) com o botão **Usar**.
-- **Registos e exportação:** a interface envia eventos de início de exercício, gravação, verificação, pistas e uso da memória, com um ID persistente do browser e metadados, sem texto da tradução. A API aceita dados adicionais no `payload` e permite exportar sem autenticação. O rodapé dá acesso ao JSON e ao CSV. O resumo devolve o total de eventos, o total de identificadores distintos e contagens por tipo.
-- **Prompts:** o editor usa [`hint-v3.txt`](backend/prompts/hint-v3.txt). Os prompts v1 e v2 e as três execuções originais estão na [pasta do piloto](experiments/ollama-pilot/notes.md).
-- **Calibração das pistas:** oito casos sintéticos com respostas do Qwen real antes da fusão e feedback apresentado ao aluno. A [grelha](experiments/evaluation/README.md) foi aplicada numa proposta de anotação (`experiments/evaluation/anotacao-folha.csv`), que os dois autores revêem em conjunto. A avaliação no conjunto de teste fica para depois de fechar a grelha.
+- **Editor segmentado:** escrever ou colar texto, carregar um `.txt` até 200 KiB ou escolher um exemplo. Cada linha não vazia é um segmento, até 200 por exercício. O contexto é mostrado ao aluno, e o glossário usa uma entrada por linha (`folder = pasta | diretório`).
+- **Persistência:** a tradução é guardada em SQLite ao clicar em **Guardar**, ao mudar de segmento ou ao voltar à configuração, e é recuperada ao reabrir o segmento. Uma gravação falhada mantém o texto no ecrã e impede a navegação.
+- **Memória de tradução:** cada tradução confirmada é guardada como par original/tradução. Ao abrir um segmento, surgem sugestões de segmentos parecidos (RapidFuzz, limiar 70 %) com o botão **Usar**.
+- **Cinco regras determinísticas** (botão **Verificar**): tradução vazia, números alterados ou em falta, termos do glossário em falta, marcadores (`{name}`) e etiquetas de formatação (`<b>`, `<i>`, …).
+- **Pistas híbridas** (botão **Pedir pista**): junta as regras com um Qwen local (`qwen3:4b-instruct-2507-q4_K_M`, via Ollama). O modelo acrescenta a categoria **Significado e contexto**. Cada alerta indica a origem («Regra» ou «Sugestão do modelo local»). As regras têm prioridade em categorias repetidas, e um filtro heurístico generaliza as pistas que parecem revelar a solução. Se o Ollama falhar, a aplicação devolve só as regras.
+- **Registos:** a interface regista eventos de uso (início, gravação, verificação, pistas, memória), sem o texto da tradução, exportáveis em JSON e CSV.
 
-Ainda por implementar: histórico de versões, justificações do aluno, comparação crítica, avaliação comparativa regras/LLM/híbrido e identidade de exercício (ver limitação abaixo).
+## Resultados da avaliação
 
-## Arquitetura e ficheiros
+Avaliámos a ferramenta em 40 casos de teste (21 originais) que não foram usados no desenvolvimento, com dois prompts: o v3, usado pela aplicação, e o v4, revisto depois de uma fase de diagnóstico.
 
-| Local | Função |
+| Método (âmbito principal, 18 casos) | VP/FP/FN v3 | F1 v3 | VP/FP/FN v4 | F1 v4 |
+| --- | --- | --- | --- | --- |
+| Regras | 10/0/0 | 100 % | 10/0/0 | 100 % |
+| LLM isolado | 6/2/4 | 66,7 % | 6/1/4 | 70,6 % |
+| Híbrido | 10/2/0 | 90,9 % | 10/1/0 | 95,2 % |
+
+- **Deteção (RQ1):** as regras detetam tudo no seu âmbito. O modelo isolado não assinala nenhum dos erros de glossário, mas complementa as regras em unidades e números acrescentados. O híbrido mantém o recall das regras.
+- **Qualidade das pistas (RQ2):** com o v3, 15 das 20 pistas do modelo revelavam parte ou toda a correção. Com o v4, só 1 de 19 o fazia, com a mesma correção e mais clareza. Nenhuma pista mostrada ao aluno com o v4 revelava a solução.
+
+Os resultados completos e a discussão estão na secção 5 do artigo.
+
+## Estrutura do repositório
+
+| Local | Conteúdo |
 | --- | --- |
-| `frontend/src/App.tsx` | Formulário do exercício, edição, navegação e estados de leitura/gravação/verificação. |
-| `frontend/src/exercise.ts` | Segmentação por linhas, identificadores, leitura do glossário e exemplos. |
-| `frontend/src/api.ts` | Cliente HTTP, validação das respostas e tempos limite. |
-| `frontend/src/*.test.ts` | Testes da lógica do exercício e do cliente HTTP com rede simulada. |
-| `frontend/src/styles.css`, `main.tsx`, `index.html` | Apresentação visual e arranque do React. |
-| `frontend/package.json`, `package-lock.json` | Dependências e comandos; o lockfile fixa a instalação feita com `npm ci`. |
-| `frontend/tsconfig.json`, `vite.config.ts` | TypeScript e servidor de desenvolvimento; `/api` é encaminhado para a porta 8000. |
-| `backend/main.py` | API FastAPI, validação Pydantic e endpoints. |
-| `backend/rules.py` | Regras em Python, independentes da interface e do LLM. |
-| `backend/llm.py`, `backend/prompts/hint-v3.txt` | Adaptador Ollama, instruções de revisão, esquema JSON e validação da resposta. |
-| `backend/hybrid.py` | Fusão regras + LLM, deduplicação por categoria e filtro anti-solução. |
-| `backend/translation_memory.py` | Pesquisa difusa de segmentos parecidos (RapidFuzz). |
-| `backend/database.py`, `models.py`, `__init__.py` | Ligação SQLite, tabelas (segmentos, memória, eventos) e pacote Python. |
-| `backend/requirements.txt` | Dependências Python com versões mínimas; ainda não é um lockfile. |
-| `tests/` | Testes das regras, API e persistência; esta última usa SQLite em memória. |
-| `data/development.json` | Dez exemplos sintéticos, com anotações pendentes de revisão pelos autores. |
-| `experiments/ollama-pilot/` | Script, prompts, notas e relatórios históricos do piloto. |
-| `experiments/evaluation/` | Casos de calibração, diagnóstico e teste, recolha com o prompt da aplicação ou outro indicado, verificador de repetições, relatórios e grelha de apreciação. |
-| `paper/main.typ` | Artigo Typst: enquadramento, proposta, implementação e protocolo previsto. |
-| `docs/` | Página estática de apresentação no GitHub Pages; não executa o editor nem a API. |
-| `.gitignore` | Exclui ambientes, dependências, builds e base de dados local. |
-
-## Contrato e limites das regras
-
-`POST /api/check` recebe:
-
-```json
-{
-  "source": "Save the file in the folder.",
-  "target": "Guarde o ficheiro no diretório.",
-  "glossary": {
-    "file": {"target": "ficheiro"},
-    "folder": {"target": "pasta", "variants": ["diretório"]}
-  }
-}
-```
-
-A resposta contém `issues`, com `category`, `explanation` e `hint`. O glossário exige objetos neste formato, com textos não vazios; estruturas inválidas produzem HTTP 422. O campo `context` ainda não é enviado a estas regras.
-
-- **`empty_translation`:** ausência de texto após remover espaços. Quando ocorre, não se executam as outras regras.
-- **`numeric_mismatch`:** compara valores em convenções EN no original e PT-PT na tradução, usando `Decimal`, sinais e contagem de ocorrências. `1,000.50` e `1 000,50` são equivalentes; `0.125` e `125` não são. Só procura valores do original ausentes/alterados; não assinala valores exclusivamente acrescentados. Não interpreta unidades, números por extenso, datas ou intervalos; sequências como `5 100` são ambíguas.
-- **`terminology`:** procura termos completos, ignorando maiúsculas/minúsculas; basta um equivalente aceite. Flexões têm de ser indicadas nas variantes. É uma verificação de cumprimento do glossário do exercício, não um juízo geral de correção linguística.
-- **`placeholder_mismatch`:** compara nomes e contagens dos marcadores simples entre chavetas, como `{name}` e `{file_name}`. A ordem pode mudar. Chavetas duplas, índices como `{0}` e formatos como `%s` ficam fora desta regra.
-- **`inline_tag_mismatch`:** compara o número de ocorrências de cada etiqueta simples de abertura e fecho (`b`, `i`, `em`, `strong`, `u`, sem atributos), ignorando maiúsculas e ordem. A regra cobre a preservação desses tokens, deixando a posição, o aninhamento e os restantes formatos de marcação fora do âmbito.
-
-Ausência de alertas **não certifica a qualidade da tradução**. Os dois alertas técnicos aparecem em **Verificar** e em **Pedir pista** com origem «Regra» neste último. **Significado e contexto** aparece em **Pedir pista** com origem no modelo. A RQ1 continua a comparar os métodos nas categorias em comum. As pistas de significado e contexto podem integrar a apreciação da RQ2.
-
-### Novos endpoints (8 nov.)
-
-| Endpoint | Função |
-| --- | --- |
-| `POST /api/hint` | Como `/api/check`, mais `context` opcional. Devolve `issues` (com `source`: `rules` ou `llm`), `llm_status` (`ok`, `skipped`, `disabled`, `unavailable`, `timeout`, `invalid`), `sanitized` e `elapsed_ms`. |
-| `POST /api/memory` · `POST /api/memory/search` | Guardar um par; procurar segmentos parecidos (`threshold` 0–100, `limit` 1–10). |
-| `POST /api/events` | Registar um evento (`session_id`, `type`, `segment_id`, `payload`). |
-| `GET /api/events/export?format=json\|csv` · `GET /api/events/summary` | Exportação e resumo agregado. |
-
-Configuração do modelo local por variáveis de ambiente: `OLLAMA_URL` (por omissão `http://localhost:11434`), `OLLAMA_MODEL` (`qwen3:4b-instruct-2507-q4_K_M`), `OLLAMA_TIMEOUT` (30 s por operação de rede no cliente HTTPX) e `LLM_ENABLED=0` para desligar.
-
-`GET /api/segments/{id}` recupera uma tradução (vazia se o ID não existe); `PUT /api/segments/{id}` recebe `{"target": "..."}` e guarda o texto exato.
-
-### Limitação importante da persistência
-
-O identificador é um hash FNV-1a de 32 bits do original, após remover espaços nas extremidades. **Textos iguais partilham a mesma tradução**, mesmo em exercícios, contextos ou posições diferentes. Também são possíveis colisões entre textos distintos. A recuperação da tradução por ID é separada da pesquisa de sugestões por similaridade. A base atual é partilhada pela instância e não separa utilizadores ou projetos.
-
-Esta revisão conserva os IDs para manter acesso às traduções existentes. Antes de usar exercícios independentes ou contextos diferentes, deve introduzir-se identidade de exercício/segmento e decidir como recuperar os registos antigos. Utilizar, por agora, uma instância do editor: não há resolução de escritas concorrentes entre separadores. Um timeout do cliente não prova que o servidor tenha cancelado uma gravação.
+| `frontend/` | Interface em React 19 + TypeScript + Vite. `src/App.tsx` (editor), `src/exercise.ts` (segmentação e glossário), `src/api.ts` (cliente HTTP) e testes Vitest. |
+| `backend/` | API em FastAPI. `main.py` (endpoints), `rules.py` (regras), `llm.py` (adaptador Ollama), `hybrid.py` (fusão e filtro), `translation_memory.py`, `database.py` e `models.py` (SQLite). |
+| `backend/prompts/` | `hint-v3.txt` (prompt da aplicação) e `hint-v4.txt` (prompt revisto e avaliado). |
+| `tests/` | Testes do backend: regras, API, persistência, memória e registos, fusão e cálculo das métricas. |
+| `data/development.json` | Dez exemplos de desenvolvimento usados no piloto. |
+| `experiments/ollama-pilot/` | Piloto de 23 de outubro com os prompts v1 e v2 (script, prompts, relatórios e notas). |
+| `experiments/evaluation/` | Conjuntos de casos, scripts, relatórios e folhas de anotação da avaliação (ver abaixo). |
+| `paper/` | Artigo em Typst e figuras. |
+| `docs/` | Página estática de apresentação (GitHub Pages). |
 
 ## Executar localmente
 
-Usar Python 3.11 ou posterior e uma versão de Node compatível com `frontend/package.json` (20.19+, 22.12+ ou 24+). São necessários **dois terminais**. O Ollama é opcional. Para usar o modelo, abrir a aplicação Ollama ou iniciar `ollama serve` num terminal e, com o serviço a correr, executar `ollama pull qwen3:4b-instruct-2507-q4_K_M` noutro terminal.
+Requisitos: Python 3.11 ou posterior, Node 20.19+ (ou 22.12+, 24+) e, para as pistas do modelo, o [Ollama](https://ollama.com) com o Qwen:
 
-Terminal 1, na raiz do repositório, preparação inicial:
+```bash
+ollama pull qwen3:4b-instruct-2507-q4_K_M
+```
+
+Backend, na raiz do repositório:
 
 ```bash
 python3 -m venv .venv
 .venv/bin/python -m pip install -r backend/requirements.txt
-```
-
-Iniciar a API:
-
-```bash
 .venv/bin/python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
 ```
 
-A documentação está em `http://127.0.0.1:8000/docs`. Um GET a `/` devolve 404 porque essa rota não foi criada. A base local fica em `data/app.db`, excluída do Git.
-
-Terminal 2, a partir da raiz:
+Frontend, noutro terminal:
 
 ```bash
 cd frontend
@@ -117,42 +66,129 @@ npm ci
 npm run dev
 ```
 
-Abrir o endereço indicado pelo Vite, normalmente `http://localhost:5173`. Manter o mesmo endereço/porta ao regressar, porque o armazenamento do browser é separado por origem. Para parar cada servidor: `Ctrl+C`.
+Abrir o endereço indicado pelo Vite (normalmente `http://localhost:5173`). A documentação da API fica em `http://127.0.0.1:8000/docs` e a base de dados em `data/app.db`, fora do Git. Sem o Ollama, **Pedir pista** devolve só as regras.
 
-## Verificação
+Variáveis de ambiente do modelo: `OLLAMA_URL` (por omissão `http://localhost:11434`), `OLLAMA_MODEL`, `OLLAMA_TIMEOUT` (30 s) e `LLM_ENABLED=0` para o desligar.
 
-Na raiz:
-
-```bash
-.venv/bin/python -m unittest discover -s tests -v
-```
-
-Dentro de `frontend/`:
+## Testes
 
 ```bash
-npm test
-npm run build
+.venv/bin/python -m unittest discover -s tests
 ```
 
-Estado verificado para a reunião: **70 testes backend + 26 frontend = 96**, com build de produção. Os testes do adaptador simulam respostas do Ollama com `httpx.MockTransport`. No ensaio manual de 9 de novembro, anterior às duas regras técnicas, o Qwen real respondeu pelo editor. No exemplo `5 kg` → `5 lb`, o botão «Verificar» não gerou alertas e «Pedir pista» apresentou uma sugestão generalizada. A recolha de calibração de 14 de novembro usou o Qwen real com o prompt v3. A avaliação comparativa e a revisão da anotação das pistas pelos autores estão por fazer. Os checks do Pages referem-se à página estática.
+```bash
+cd frontend && npm test && npm run build
+```
 
-Percurso de verificação no navegador:
+São 79 testes no backend e 26 no frontend. A integração com o Ollama é testada com um servidor simulado (`httpx.MockTransport`), sem precisar do modelo.
 
-1. Escolher «Ficheiros e pastas», começar e esperar pela recuperação da tradução.
-2. Escrever `Guarde o ficheiro no arquivo.` e verificar: deve surgir terminologia. Trocar `arquivo` por `pasta`: o alerta deve desaparecer.
-3. Navegar para o segundo segmento e voltar: a tradução deve ter sido guardada. Guardar explicitamente antes de fechar o último segmento.
-4. Escolher «Preço e desconto». No primeiro segmento, `100,50 €` deve gerar um alerta e `1 000,50 €` preserva o valor. No segundo, escrever `Aplica-se um desconto de 50%.` e clicar em «Pedir pista» para mostrar um alerta de regra. `Aplica-se uma redução de 15%.` preserva a percentagem e, neste exercício sem glossário, não gera um alerta determinístico.
-5. Com a API desligada, tentar guardar: manter o texto e impedir a navegação. Voltar a ligar a API e repetir. Falhar a recuperação inicial deve mostrar erro e botão de nova tentativa, sem permitir sobrescrever uma tradução desconhecida.
-6. Confirmar rejeição de `.txt` acima de 200 KiB, mais de 200 segmentos e glossário inválido/repetido.
-7. Num exercício sem glossário, usar o original `Hello {name}, select <b>Save</b>.` e a tradução `Olá, selecione Guardar.`. «Verificar» deve apresentar Marcadores e Etiquetas de formatação. Com `Olá {name}, selecione <b>Guardar</b>.`, ambos os alertas devem desaparecer.
-8. Com o Qwen ativo, usar `You must restart your computer.` e `Podes reiniciar o computador.` com o contexto «Instruções de instalação. O reinício é obrigatório para completar a atualização.» e glossário vazio. «Verificar» deixa passar a tradução. Em «Pedir pista», procurar uma sugestão de Significado e contexto sobre a força da instrução. Repetir com «Tens de reiniciar o computador.» como controlo. O modelo pode errar em ambos os sentidos.
+## API
 
-## Próximos passos, por incrementos
+| Endpoint | Função |
+| --- | --- |
+| `POST /api/check` | Corre as regras sobre `source`, `target` e `glossary`. Devolve `issues` com `category`, `explanation` e `hint`. |
+| `POST /api/hint` | Como `/api/check`, mais `context`. Junta as regras e o modelo e devolve também `source` por alerta, `llm_status`, `sanitized` e `elapsed_ms`. |
+| `GET` · `PUT /api/segments/{id}` | Recuperar e guardar a tradução de um segmento. |
+| `POST /api/memory` · `POST /api/memory/search` | Guardar um par e procurar segmentos parecidos. |
+| `POST /api/events` · `GET /api/events/export` · `GET /api/events/summary` | Registar eventos, exportá-los (JSON ou CSV) e resumi-los. |
 
-1. **Ensaiar a demonstração e calibrar a grelha:** os autores revêem em conjunto a anotação proposta para as respostas já recolhidas e registam as alterações.
-2. **Rever o conjunto de teste e fechar o protocolo:** o rascunho está em `experiments/evaluation/test.json`, com os originais verificados por `check_overlap.py`. Rever e fixar as categorias de referência antes da recolha.
-3. **Executar a avaliação interna** (regras / LLM / híbrido) e anotar as explicações e pistas (proposta inicial revista em conjunto pelos autores). Calcular a taxa de revelação (RQ2) a partir da anotação final. Os contadores de generalização descrevem intervenções do filtro.
-4. **Corrigir a identidade dos exercícios:** separar segmentos iguais em contextos diferentes, com testes de reabertura e preservação dos registos existentes.
-5. **Consolidar o artigo até 30 de novembro** e definir com o professor o âmbito do histórico de versões, das justificações e da comparação crítica.
+O glossário segue o formato `{"folder": {"target": "pasta", "variants": ["diretório"]}}`.
 
-O README acompanha a implementação. O artigo é consolidado em marcos de revisão; os relatórios do piloto permanecem históricos.
+Limites das regras:
+- **Números:** compara valores do original com convenções EN e PT-PT (`1,000.50` = `1 000,50`). Não interpreta unidades, números por extenso, horas ou intervalos, nem assinala números acrescentados.
+- **Glossário:** procura termos completos, sem distinguir maiúsculas.
+- **Marcadores e etiquetas:** comparam nomes e contagens, sem analisar posição nem aninhamento.
+
+A ausência de alertas não certifica a qualidade da tradução.
+
+## Avaliação
+
+Todos os comandos correm na raiz do repositório, com o Ollama ativo. Os relatórios novos ficam em `output/`, fora do Git.
+
+### Conjuntos de casos
+
+| Ficheiro | Casos | Uso |
+| --- | --- | --- |
+| `data/development.json` | 10 | Piloto com os prompts v1 e v2 (desenvolvimento). |
+| `experiments/evaluation/calibration.json` | 8 | Calibração da grelha de anotação (desenvolvimento). |
+| `experiments/evaluation/diagnostico.json` | 20 | Diagnóstico do v3 e afinação do v4, só significado e contexto (desenvolvimento). |
+| `experiments/evaluation/test.json` | 40 | Teste final: 18 casos no âmbito principal da RQ1, 12 de significado e contexto e 10 de robustez. Referência revista pelos autores. |
+
+Cada caso tem `input` (original, tradução, contexto e glossário), `expected_categories` (vazio se a tradução é aceitável), `analysis_scope` e `annotation_note`. Só o `input` chega aos métodos.
+
+### Passos
+
+1. **Verificar que o teste não se repete noutros ficheiros nem nos prompts:**
+
+   ```bash
+   .venv/bin/python -m experiments.evaluation.check_overlap
+   ```
+
+2. **Recolher as respostas,** com o v3 e com o v4, uma a seguir à outra, na mesma máquina:
+
+   ```bash
+   .venv/bin/python -m experiments.evaluation.run --cases experiments/evaluation/test.json --output output/teste-v3.json
+   .venv/bin/python -m experiments.evaluation.run --cases experiments/evaluation/test.json --prompt backend/prompts/hint-v4.txt --output output/teste-v4.json
+   ```
+
+   Cada relatório guarda, por caso, os alertas das regras, os do modelo antes da fusão e os do híbrido, bem como a resposta completa do Ollama. Regista também a versão do código, o hash do conjunto e do prompt, o modelo e o seu digest e a versão do Ollama. Nas traduções vazias, a chamada ao modelo serve só para o LLM isolado.
+
+3. **RQ1, métricas de deteção:**
+
+   ```bash
+   .venv/bin/python -m experiments.evaluation.metrics output/teste-v3.json output/teste-v4.json
+   ```
+
+   Conta VP, FP e FN por par caso-categoria para Regras, LLM isolado e Híbrido. A análise principal usa o âmbito `rq1_main` e as categorias tradução vazia, números e glossário. A robustez e o significado e contexto saem à parte.
+
+4. **RQ2, folha de anotação:**
+
+   ```bash
+   .venv/bin/python -m experiments.evaluation.make_sheet output/teste-v3.json output/teste-v4.json --out output/anotacao-teste
+   ```
+
+   Junta as pistas das duas versões baralhadas numa folha (`-folha.csv`). A versão de cada linha fica só na chave (`-chave.csv`), que não se abre durante a anotação.
+
+5. **RQ2, resumo, depois de a folha estar revista:**
+
+   ```bash
+   .venv/bin/python -m experiments.evaluation.rq2 output/anotacao-teste-folha.csv output/anotacao-teste-chave.csv
+   ```
+
+### Grelha de anotação
+
+Cada linha da folha é um par explicação-pista. Usa-se `incerto` quando há uma ambiguidade concreta.
+
+| Critério | Valores |
+| --- | --- |
+| Correção | `sim` se identifica uma discrepância real; `não` se assinala uma tradução aceitável ou descreve mal o problema. |
+| Fundamentação | `sim` se se apoia no original, na tradução, no contexto ou no glossário; `parcial` se é vaga; `não` se inventa ou contradiz. |
+| Clareza | `sim` se se entende à primeira leitura; `parcial` se exige interpretação; `não` se é confusa. |
+| Utilidade | `sim` se orienta para uma comparação concreta; `parcial` se só pede uma revisão geral; `não` se aponta para o problema errado. |
+| Revelação | `nenhuma` se só orienta; `parcial` se dá um equivalente, valor ou interpretação que resolve parte do problema; `total` se dá a correção. |
+
+Nas notas, as etiquetas `[binária]`, `[afirmação]`, `[inventa]` e `[língua]` marcam, respetivamente, a pergunta com duas hipóteses, a pista que afirma o que diz o original, a explicação que inventa factos e os erros de língua. A primeira versão de cada folha no histórico do Git é a proposta inicial; os commits seguintes são a revisão por consenso dos dois autores.
+
+### Ficheiros em `experiments/evaluation/`
+
+| Ficheiro | Conteúdo |
+| --- | --- |
+| `run.py`, `check_overlap.py`, `make_sheet.py`, `metrics.py`, `rq2.py` | Scripts dos passos acima. |
+| `calibration-2026-11-14.json`, `calibration-2026-11-23.json` | Recolhas de calibração com o v3. A segunda repete as respostas da primeira noutra versão do Ollama. |
+| `anotacao-folha.csv`, `anotacao-chave.csv` | Anotação da calibração. |
+| `desenvolvimento-v3-2026-11-23.json` | Recolha com o v3 nos exemplos de desenvolvimento. |
+| `diagnostico-v3-2026-11-23.json`, `anotacao-diagnostico-*.csv` | Diagnóstico do v3 e a sua anotação revista. |
+| `diagnostico-v3-2026-11-24.json` | Repetição do v3 no diagnóstico na máquina das recolhas finais: 14 de 20 respostas iguais, com a mesma deteção. |
+| `diagnostico-v4-2026-11-24.json`, `diagnostico-v4-ajustado-2026-11-24.json`, `anotacao-diagnostico-v4-*.csv` | Diagnóstico do rascunho e da versão final do v4, e a anotação desta última. |
+| `teste-v3-2026-11-25.json`, `teste-v4-2026-11-25.json` | Recolhas finais no teste (MacBook Air M4, 16 GB, macOS 15.5, Ollama 0.14.3). |
+| `metricas-teste-2026-11-25.json` | Resultados da RQ1. |
+| `anotacao-teste-folha.csv`, `anotacao-teste-chave.csv`, `rq2-teste-2026-11-25.json` | Anotação revista da RQ2 e o seu resumo. |
+
+Os CSV usam `;` e UTF-8 com BOM, para abrir no Excel em português. Os relatórios guardam o commit em que foram feitos; o hash de `test.json` registado nas recolhas finais corresponde ao ficheiro no commit `7668938`, antes de uma alteração posterior ao campo descritivo `provenance`.
+
+## Limitações
+
+- **Identidade dos segmentos:** a tradução é associada ao texto do original, por isso segmentos iguais partilham a tradução, mesmo em exercícios diferentes. A memória e os registos são partilhados por toda a instância.
+- **Uso local:** sem autenticação, com CORS permissivo e exportação aberta.
+- **Funcionalidades por implementar:** histórico de versões, justificações do aluno e uma vista cronológica dos registos.
+- **Avaliação:** é interna, em conjuntos pequenos e sintéticos, e não mede efeitos na aprendizagem.

@@ -12,11 +12,12 @@
         <p class="eyebrow">Projeto de Engenharia Informática · Universidade do Minho</p>
         <h1>Educational Translation Tool</h1>
         <p class="lead">
-          Ferramenta aberta de apoio à aprendizagem de tradução com segmentação, persistência
-          local e verificações determinísticas. As pistas geradas por um modelo local estão previstas.
+          Ferramenta aberta para praticar tradução de inglês para português europeu, com editor segmentado,
+          memória de tradução, verificações por regras e pistas de um modelo local que orientam a revisão
+          sem entregar a solução.
         </p>
         <div class="meta-links">
-          <a class="button primary" href="https://github.com/wendy077/edu-translation-tool">Repositório GitHub</a>
+          <a class="button primary" href="https://github.com/le-lab-um/edu-translation-tool">Repositório GitHub</a>
           <a class="button secondary" href="#arquitetura">Arquitetura da solução</a>
         </div>
       </div>
@@ -32,47 +33,32 @@
             generativos pode reduzir a reflexão do estudante.
           </p>
           <p>
-            Esta ferramenta apoia a prática em segmentos curtos (EN → PT-PT), permitindo
-            guardar o trabalho e verificar algumas restrições formais. O protótipo inclui uma primeira versão de pistas
-            a pedido, concebidas para orientar a revisão sem revelar de imediato a resposta final.
+            Esta ferramenta apoia a prática em segmentos curtos (EN → PT-PT). O aluno guarda o trabalho,
+            reutiliza traduções anteriores, verifica restrições formais e pede pistas que indicam onde rever,
+            deixando-lhe a reformulação.
           </p>
         </div>
         <div class="callout">
-          <h3>Estado atual: editor, memória e cinco regras</h3>
+          <h3>O que o protótipo faz</h3>
           <p>
-            Editor segmentado com persistência SQLite/SQLAlchemy e motor determinístico de QA
-            (texto vazio, números, glossário, marcadores nomeados e etiquetas de formatação simples).
+            Editor segmentado com persistência SQLite e memória de tradução, cinco regras determinísticas
+            (tradução vazia, números, glossário, marcadores e etiquetas) e pistas híbridas que juntam as regras
+            a um Qwen local via Ollama, indicando a origem de cada alerta.
           </p>
-          <p class="tag-status">Em desenvolvimento ativo · Entrega: 30 nov. 2026</p>
+          <p class="tag-status">Protótipo concluído e avaliado · 2026</p>
         </div>
       </section>
 
       <section class="panel exercise-preview">
-        <h2>Demonstração conceptual do editor</h2>
+        <h2>O editor em funcionamento</h2>
         <p class="section-note">
-          Simulação da interface do protótipo com suporte a gravação de estado e motor de QA alargado.
+          Depois de pedir uma pista: a regra assinala o número alterado e o modelo local aponta uma
+          diferença de sentido sem dar a correção.
         </p>
-        <div class="editor-mock">
-          <div class="mock-pane">
-            <span class="mock-label">Original (EN)</span>
-            <p class="source-text">Read the instructions before you start.</p>
-            <span class="mock-label">Contexto pedagógico</span>
-            <p class="context-text">Instrução apresentada antes de um exercício educativo.</p>
-          </div>
-          <div class="mock-pane">
-            <span class="mock-label">Área de tradução (PT-PT)</span>
-            <div class="mock-textarea">Leia as instruções antes de começar.</div>
-            <div class="mock-actions">
-              <span class="mock-btn secondary">Guardar</span>
-              <span class="mock-btn primary">Verificar</span>
-              <span class="mock-save-status">Tradução guardada.</span>
-            </div>
-            <div class="mock-feedback">
-              <p><strong>Verificação:</strong> Nenhum problema detetado pelas regras aplicadas; a qualidade global requer revisão.</p>
-              <p class="hint">O protótipo também permite pedir pistas ao modelo local.</p>
-            </div>
-          </div>
-        </div>
+        <figure class="shot">
+          <img src="img/editor-segment.png" alt="Segmento de origem em inglês e tradução do aluno em português" />
+          <img src="img/editor-hint.png" alt="Ações do editor e alertas com a origem de cada um: regra e modelo local" />
+        </figure>
       </section>
 
       <section id="arquitetura" class="panel architecture-preview">
@@ -98,10 +84,33 @@
             <span class="level-badge">Nível 3</span>
             <h3>Assistência por LLM Local</h3>
             <p>
-              Primeira integração de um modelo local (Qwen via Ollama) para produzir pistas e explicações a pedido.
+              Pistas a pedido de um Qwen local (via Ollama), fundidas com as regras. As regras têm prioridade e
+              um filtro generaliza as pistas que parecem revelar a solução.
             </p>
           </article>
         </div>
+      </section>
+
+      <section class="panel results-preview">
+        <h2>Resultados da avaliação</h2>
+        <p class="section-note">
+          40 casos de teste não usados no desenvolvimento, com o prompt da aplicação (v3) e um prompt revisto (v4).
+        </p>
+        <table class="results">
+          <thead>
+            <tr><th>Método (18 casos principais)</th><th>F1 v3</th><th>F1 v4</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Regras</td><td>100%</td><td>100%</td></tr>
+            <tr><td>LLM isolado</td><td>66,7%</td><td>70,6%</td></tr>
+            <tr><td>Híbrido</td><td>90,9%</td><td>95,2%</td></tr>
+          </tbody>
+        </table>
+        <ul class="findings">
+          <li>As regras detetam todos os problemas do seu âmbito; o modelo isolado falha os erros de glossário, mas apanha unidades e números acrescentados.</li>
+          <li>Com o v3, 15 das 20 pistas do modelo revelavam parte ou toda a correção. Com o v4, só 1 de 19, com a mesma correção e mais clareza.</li>
+          <li>Nenhuma pista mostrada ao aluno com o v4 revelava a solução.</li>
+        </ul>
       </section>
 
       <section class="panel workflow-preview">
