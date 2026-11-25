@@ -1,24 +1,24 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Educational Translation Tool — Apresentação do projeto</title>
+    <title>Educational Translation Tool — Project overview</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <header class="hero">
       <div class="shell">
-        <p class="eyebrow">Projeto de Engenharia Informática · Universidade do Minho</p>
+        <p class="eyebrow">Informatics Engineering Project · University of Minho</p>
         <h1>Educational Translation Tool</h1>
         <p class="lead">
-          Ferramenta aberta para praticar tradução de inglês para português europeu, com editor segmentado,
-          memória de tradução, verificações por regras e pistas de um modelo local que orientam a revisão
-          sem entregar a solução.
+          An open tool for practicing translation from English into European Portuguese, with a segmented
+          editor, translation memory, rule-based checks and hints from a local model that guide revision
+          without giving away the solution.
         </p>
         <div class="meta-links">
-          <a class="button primary" href="https://github.com/le-lab-um/edu-translation-tool">Repositório GitHub</a>
-          <a class="button secondary" href="#arquitetura">Arquitetura da solução</a>
+          <a class="button primary" href="https://github.com/le-lab-um/edu-translation-tool">GitHub repository</a>
+          <a class="button secondary" href="#architecture">Architecture</a>
         </div>
       </div>
     </header>
@@ -26,104 +26,105 @@
     <main class="shell">
       <section class="panel intro-grid">
         <div>
-          <h2>O que resolve esta ferramenta?</h2>
+          <h2>What problem does it address?</h2>
           <p>
-            No ensino de tradução, o objetivo central não é apenas acelerar a entrega, mas
-            desenvolver autonomia crítica. A entrega direta de soluções prontas por modelos
-            generativos pode reduzir a reflexão do estudante.
+            In translator education, the goal is not only to deliver translations faster but to develop
+            critical autonomy. Ready-made solutions from generative models can reduce the student's
+            reflection.
           </p>
           <p>
-            Esta ferramenta apoia a prática em segmentos curtos (EN → PT-PT). O aluno guarda o trabalho,
-            reutiliza traduções anteriores, verifica restrições formais e pede pistas que indicam onde rever,
-            deixando-lhe a reformulação.
+            This tool supports practice on short segments (EN → PT-PT). Students save their work, reuse
+            previous translations, check formal constraints and ask for hints that point to where to revise,
+            leaving the rewording to them.
           </p>
         </div>
         <div class="callout">
-          <h3>O que o protótipo faz</h3>
+          <h3>What the prototype does</h3>
           <p>
-            Editor segmentado com persistência SQLite e memória de tradução, cinco regras determinísticas
-            (tradução vazia, números, glossário, marcadores e etiquetas) e pistas híbridas que juntam as regras
-            a um Qwen local via Ollama, indicando a origem de cada alerta.
+            A segmented editor with SQLite persistence and translation memory, five deterministic rules
+            (empty translation, numbers, glossary, placeholders and tags) and hybrid hints that combine the
+            rules with a local Qwen model served by Ollama, showing the origin of each issue.
           </p>
-          <p class="tag-status">Protótipo concluído e avaliado · 2026</p>
+          <p class="tag-status">Prototype completed and evaluated · 2026</p>
         </div>
       </section>
 
       <section class="panel exercise-preview">
-        <h2>O editor em funcionamento</h2>
+        <h2>The editor at work</h2>
         <p class="section-note">
-          Depois de pedir uma pista: a regra assinala o número alterado e o modelo local aponta uma
-          diferença de sentido sem dar a correção.
+          After a hint request, the rule flags the changed number and the local model points to a difference
+          in meaning without giving the correction. The interface is in Portuguese.
         </p>
         <figure class="shot">
-          <img src="img/editor-segment.png" alt="Segmento de origem em inglês e tradução do aluno em português" />
-          <img src="img/editor-hint.png" alt="Ações do editor e alertas com a origem de cada um: regra e modelo local" />
+          <img src="img/editor-segment.png" alt="English source segment and the student's Portuguese translation" />
+          <img src="img/editor-hint.png" alt="Editor actions and issues, each labeled with its origin: rule or local model" />
         </figure>
       </section>
 
-      <section id="arquitetura" class="panel architecture-preview">
-        <h2>Arquitetura em três níveis</h2>
+      <section id="architecture" class="panel architecture-preview">
+        <h2>Three-level architecture</h2>
         <div class="levels-grid">
           <article class="level-card">
-            <span class="level-badge">Nível 1</span>
-            <h3>CAT Básico & Persistência</h3>
+            <span class="level-badge">Level 1</span>
+            <h3>CAT core and persistence</h3>
             <p>
-              Editor segmentado reativo em React 19, persistência relacional SQLite via SQLAlchemy 2.0
-              e gravação ao mudar de segmento. Memória de tradução com pesquisa de originais semelhantes.
+              Segmented editor in React 19, SQLite persistence through SQLAlchemy 2.0, saving when the
+              student moves between segments, and a translation memory that retrieves similar sources.
             </p>
           </article>
           <article class="level-card">
-            <span class="level-badge">Nível 2</span>
-            <h3>QA Determinístico</h3>
+            <span class="level-badge">Level 2</span>
+            <h3>Deterministic QA</h3>
             <p>
-              Motor de regras reproduzíveis: validação de tradução vazia, conformidade de termos de glossário
-              com variantes, valores numéricos, marcadores e etiquetas simples.
+              Reproducible rules: empty translations, glossary compliance with variants, numeric values,
+              placeholders and simple formatting tags.
             </p>
           </article>
           <article class="level-card">
-            <span class="level-badge">Nível 3</span>
-            <h3>Assistência por LLM Local</h3>
+            <span class="level-badge">Level 3</span>
+            <h3>Local LLM hints</h3>
             <p>
-              Pistas a pedido de um Qwen local (via Ollama), fundidas com as regras. As regras têm prioridade e
-              um filtro generaliza as pistas que parecem revelar a solução.
+              On-demand hints from a local Qwen model (via Ollama), merged with the rules. Rules take priority,
+              and a filter generalizes hints that seem to reveal the solution.
             </p>
           </article>
         </div>
       </section>
 
       <section class="panel results-preview">
-        <h2>Resultados da avaliação</h2>
+        <h2>Evaluation results</h2>
         <p class="section-note">
-          40 casos de teste não usados no desenvolvimento, com o prompt original da aplicação (v3) e um prompt revisto (v4), que a aplicação passou a usar.
+          40 test cases not used during development, with the application's original prompt (v3) and a revised
+          prompt (v4), which the application now uses.
         </p>
         <table class="results">
           <thead>
-            <tr><th>Método (18 casos principais)</th><th>F1 v3</th><th>F1 v4</th></tr>
+            <tr><th>Method (18 main cases)</th><th>F1 v3</th><th>F1 v4</th></tr>
           </thead>
           <tbody>
-            <tr><td>Regras</td><td>100%</td><td>100%</td></tr>
-            <tr><td>LLM isolado</td><td>66,7%</td><td>70,6%</td></tr>
-            <tr><td>Híbrido</td><td>90,9%</td><td>95,2%</td></tr>
+            <tr><td>Rules</td><td>100%</td><td>100%</td></tr>
+            <tr><td>LLM-only</td><td>66.7%</td><td>70.6%</td></tr>
+            <tr><td>Hybrid</td><td>90.9%</td><td>95.2%</td></tr>
           </tbody>
         </table>
         <ul class="findings">
-          <li>As regras detetam todos os problemas do seu âmbito; o modelo isolado falha os erros de glossário, mas apanha unidades e números acrescentados.</li>
-          <li>Com o v3, 15 das 20 pistas do modelo revelavam parte ou toda a correção. Com o v4, só 1 de 19, com a mesma correção e mais clareza.</li>
-          <li>Nenhuma pista mostrada ao aluno com o v4 revelava a solução.</li>
+          <li>The rules detect every problem within their scope; the model alone misses glossary violations but catches unit changes and added numbers.</li>
+          <li>With v3, 15 of the 20 hints returned by the model disclosed part or all of the correction. With v4, only 1 of 19 did, with the same correctness and greater clarity.</li>
+          <li>None of the hints shown to the student with v4 disclosed the solution.</li>
         </ul>
       </section>
 
       <section class="panel workflow-preview">
-        <h2>Execução local rápida</h2>
+        <h2>Quick start</h2>
         <div class="code-columns">
           <div class="code-box">
-            <h3>Backend (API FastAPI & SQLite)</h3>
+            <h3>Backend (FastAPI and SQLite)</h3>
             <pre><code>python3 -m venv .venv
 .venv/bin/python -m pip install -r backend/requirements.txt
 .venv/bin/python -m uvicorn backend.main:app --port 8000</code></pre>
           </div>
           <div class="code-box">
-            <h3>Frontend (Editor React Vite)</h3>
+            <h3>Frontend (React and Vite)</h3>
             <pre><code>cd frontend
 npm ci
 npm run dev</code></pre>
@@ -134,8 +135,8 @@ npm run dev</code></pre>
 
     <footer class="footer">
       <div class="shell">
-        <p>Educational Translation Tool · Diogo Pinto (PG61515) & Mariana Pinto (PG61534)</p>
-        <p class="affiliation">Mestrado em Engenharia Informática · Universidade do Minho · 2026</p>
+        <p>Educational Translation Tool · Diogo Pinto (PG61515) &amp; Mariana Pinto (PG61534)</p>
+        <p class="affiliation">MSc in Informatics Engineering · University of Minho · 2026</p>
       </div>
     </footer>
   </body>
