@@ -4,9 +4,12 @@ Uso (na raiz do repositório):
     .venv/bin/python -m experiments.evaluation.make_sheet \
         experiments/evaluation/calibration-2026-11-14.json --out output/anotacao
 
+Com vários relatórios (por exemplo, v3 e v4 no teste), as linhas de todos são baralhadas numa só
+folha e o prompt de cada linha fica só na chave, para a anotação ser cega à versão.
+
 Cria dois ficheiros:
 - folha.csv: uma linha por alerta, sem indicar a versão (modelo ou apresentada). É a folha a anotar (proposta e revisão).
-- chave.csv: liga cada row_id ao caso e à versão. Não abrir durante a anotação.
+- chave.csv: liga cada row_id ao caso, à versão e ao prompt. Não abrir durante a anotação.
 """
 
 import argparse
@@ -60,13 +63,16 @@ def rows_for_case(result):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("report", type=Path)
+    parser.add_argument("reports", nargs="+", type=Path)
     parser.add_argument("--out", type=Path, required=True, help="Prefixo dos ficheiros de saída.")
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
-    report = json.loads(args.report.read_text(encoding="utf-8"))
-    entries = [row for result in report["results"] for row in rows_for_case(result)]
+    entries = []
+    for path in args.reports:
+        report = json.loads(path.read_text(encoding="utf-8"))
+        prompt = report.get("prompt", "")
+        entries += [(*row, prompt) for result in report["results"] for row in rows_for_case(result)]
     random.Random(args.seed).shuffle(entries)
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
@@ -77,8 +83,8 @@ def main():
         sheet = csv.DictWriter(f_sheet, fieldnames=sheet_fields, delimiter=";")
         key = csv.writer(f_key, delimiter=";")
         sheet.writeheader()
-        key.writerow(["row_id", "caso", "versao", "origem"])
-        for n, (base, issue, version) in enumerate(entries, start=1):
+        key.writerow(["row_id", "caso", "versao", "origem", "prompt"])
+        for n, (base, issue, version, prompt) in enumerate(entries, start=1):
             row_id = f"r{n:02d}"
             sheet.writerow({
                 "row_id": row_id, **base,
@@ -86,7 +92,7 @@ def main():
                 "explicacao": issue["explanation"] if issue else "",
                 "pista": issue["hint"] if issue else "",
             })
-            key.writerow([row_id, base["caso"], version, issue.get("source", "llm") if issue else ""])
+            key.writerow([row_id, base["caso"], version, issue.get("source", "llm") if issue else "", prompt])
     print(f"{len(entries)} linhas em {args.out}-folha.csv e {args.out}-chave.csv")
 
 

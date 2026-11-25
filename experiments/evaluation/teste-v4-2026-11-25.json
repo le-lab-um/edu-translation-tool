@@ -1,0 +1,2002 @@
+{
+  "split": "test",
+  "annotation_status": "reviewed",
+  "cases_file": "test.json",
+  "started_at": "2026-11-25T10:54:31.379613+00:00",
+  "prompt": "hint-v4.txt",
+  "prompt_sha256": "19f81d40d19663c7e25e7bf2b1a4e670a2402ca5cb132210f2ed9a0cb7416c36",
+  "dataset_sha256": "99135c801b03055fbef89828bde43d155e735e8326d2fa4cafd2784a0433e918",
+  "code_revision": {
+    "commit": "766893827512c9ce04d49ab7c6c4ec5f8e2c75d4",
+    "uncommitted_changes": false
+  },
+  "python_version": "3.13.9",
+  "dependencies": {
+    "fastapi": "0.162.2",
+    "pydantic": "2.14.3",
+    "uvicorn": "0.54.0",
+    "starlette": "1.10.0",
+    "httpx": "0.28.1",
+    "sqlalchemy": "2.1.8",
+    "rapidfuzz": "3.14.6"
+  },
+  "ollama_version": "0.14.3",
+  "model": "qwen3:4b-instruct-2507-q4_K_M",
+  "model_digest": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
+  "generation_options": {
+    "temperature": 0,
+    "seed": 42,
+    "num_ctx": 4096,
+    "num_predict": 768
+  },
+  "timeout_seconds": 30.0,
+  "platform": "macOS-15.5-arm64-arm-64bit-Mach-O",
+  "warmup": {
+    "performed": true,
+    "status": "ok",
+    "elapsed_ms": 5246
+  },
+  "results": [
+    {
+      "id": "test-01",
+      "source_id": "pkg-weight",
+      "analysis_scope": "rq1_main",
+      "input": {
+        "source": "The package weighs 2.5 kg.",
+        "target": "A embalagem pesa 2,5 kg.",
+        "context": "Descrição de um produto numa loja em linha.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "O valor mantém-se; o separador decimal segue o português.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 473,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:37.146391Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 468540834,
+        "load_duration": 41170875,
+        "prompt_eval_count": 1774,
+        "prompt_eval_duration": 240736583,
+        "eval_count": 5,
+        "eval_duration": 131742500
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-02",
+      "source_id": "pkg-weight",
+      "analysis_scope": "rq1_main",
+      "input": {
+        "source": "The package weighs 2.5 kg.",
+        "target": "A embalagem pesa 2,8 kg.",
+        "context": "Descrição de um produto numa loja em linha.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "numeric_mismatch"
+      ],
+      "annotation_note": "O valor mudou de 2,5 para 2,8.",
+      "rule_issues": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português."
+        }
+      ],
+      "llm_issues_before_fusion": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "A quantidade indicada na tradução difere do valor original.",
+          "hint": "Qual é o valor exacto mencionado no original e na tradução?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português.",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1727,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:38.873331Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"numeric_mismatch\",\"explanation\":\"A quantidade indicada na tradução difere do valor original.\",\"hint\":\"Qual é o valor exacto mencionado no original e na tradução?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1721520958,
+        "load_duration": 42776917,
+        "prompt_eval_count": 1774,
+        "prompt_eval_duration": 130717917,
+        "eval_count": 46,
+        "eval_duration": 1482834915
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-03",
+      "source_id": "course-price",
+      "analysis_scope": "rq1_main",
+      "input": {
+        "source": "The course costs €1,250 and lasts 3 days.",
+        "target": "O curso custa 1 250 € e dura 3 dias.",
+        "context": "Informação sobre um curso de formação.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "Os dois valores mantêm-se; muda a formatação do preço.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "A posição do espaço antes do símbolo da moeda altera o valor apresentado.",
+          "hint": "Em que posição está o símbolo da moeda em cada um dos textos?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "A posição do espaço antes do símbolo da moeda altera o valor apresentado.",
+          "hint": "Em que posição está o símbolo da moeda em cada um dos textos?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 2110,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:40.983642Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"numeric_mismatch\",\"explanation\":\"A posição do espaço antes do símbolo da moeda altera o valor apresentado.\",\"hint\":\"Em que posição está o símbolo da moeda em cada um dos textos?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 2104837375,
+        "load_duration": 41396208,
+        "prompt_eval_count": 1784,
+        "prompt_eval_duration": 251613541,
+        "eval_count": 54,
+        "eval_duration": 1744889792
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-04",
+      "source_id": "course-price",
+      "analysis_scope": "rq1_main",
+      "input": {
+        "source": "The course costs €1,250 and lasts 3 days.",
+        "target": "O curso custa 1 520 € e dura 3 dias.",
+        "context": "Informação sobre um curso de formação.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "numeric_mismatch"
+      ],
+      "annotation_note": "Os algarismos do preço foram trocados: 1 250 passou a 1 520.",
+      "rule_issues": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português."
+        }
+      ],
+      "llm_issues_before_fusion": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "O valor apresentado na tradução não corresponde ao original.",
+          "hint": "Qual é o valor correto do curso em euros em cada um dos textos?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português.",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1854,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:42.839528Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"numeric_mismatch\",\"explanation\":\"O valor apresentado na tradução não corresponde ao original.\",\"hint\":\"Qual é o valor correto do curso em euros em cada um dos textos?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1849809083,
+        "load_duration": 41373916,
+        "prompt_eval_count": 1784,
+        "prompt_eval_duration": 223627541,
+        "eval_count": 47,
+        "eval_duration": 1516937500
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-05",
+      "source_id": "attachment-limit",
+      "analysis_scope": "rq1_main",
+      "input": {
+        "source": "Each attachment can be up to 20 MB.",
+        "target": "Cada anexo pode ter até 20 MB.",
+        "context": "Limites de uma plataforma de envio de documentos.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "Valor e unidade mantêm-se.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 474,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:43.312962Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 469260667,
+        "load_duration": 42662875,
+        "prompt_eval_count": 1776,
+        "prompt_eval_duration": 240465083,
+        "eval_count": 5,
+        "eval_duration": 131551000
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-06",
+      "source_id": "attachment-limit",
+      "analysis_scope": "rq1_main",
+      "input": {
+        "source": "Each attachment can be up to 20 MB.",
+        "target": "Cada anexo pode ter até 200 MB.",
+        "context": "Limites de uma plataforma de envio de documentos.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "numeric_mismatch"
+      ],
+      "annotation_note": "O limite passou de 20 para 200.",
+      "rule_issues": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português."
+        }
+      ],
+      "llm_issues_before_fusion": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "A quantidade máxima de memória mencionada mudou.",
+          "hint": "Qual é o valor correto do limite em cada um dos textos?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português.",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1662,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:44.975474Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"numeric_mismatch\",\"explanation\":\"A quantidade máxima de memória mencionada mudou.\",\"hint\":\"Qual é o valor correto do limite em cada um dos textos?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1657021000,
+        "load_duration": 41865083,
+        "prompt_eval_count": 1777,
+        "prompt_eval_duration": 134800417,
+        "eval_count": 44,
+        "eval_duration": 1415242997
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-07",
+      "source_id": "form-questions",
+      "analysis_scope": "rq1_main",
+      "input": {
+        "source": "The form has 12 questions.",
+        "target": "O formulário tem 12 perguntas.",
+        "context": "Formulário de inscrição numa unidade curricular.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "O valor mantém-se.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 472,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:45.448221Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 467540083,
+        "load_duration": 44631417,
+        "prompt_eval_count": 1773,
+        "prompt_eval_duration": 239037833,
+        "eval_count": 5,
+        "eval_duration": 131381417
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-08",
+      "source_id": "form-questions",
+      "analysis_scope": "rq1_main",
+      "input": {
+        "source": "The form has 12 questions.",
+        "target": "O formulário tem 10 perguntas.",
+        "context": "Formulário de inscrição numa unidade curricular.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "numeric_mismatch"
+      ],
+      "annotation_note": "O número de perguntas passou de 12 para 10.",
+      "rule_issues": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português."
+        }
+      ],
+      "llm_issues_before_fusion": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "A quantidade de perguntas mencionada difere nos dois textos.",
+          "hint": "Qual é o número de perguntas indicado em cada um dos textos?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português.",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1889,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:47.336129Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"numeric_mismatch\",\"explanation\":\"A quantidade de perguntas mencionada difere nos dois textos.\",\"hint\":\"Qual é o número de perguntas indicado em cada um dos textos?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1883079208,
+        "load_duration": 42336125,
+        "prompt_eval_count": 1773,
+        "prompt_eval_duration": 222818917,
+        "eval_count": 48,
+        "eval_duration": 1550265128
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-09",
+      "source_id": "template-select",
+      "analysis_scope": "rq1_main",
+      "input": {
+        "source": "Select a template before you continue.",
+        "target": "Escolha um modelo predefinido antes de continuar.",
+        "context": "Mensagem numa aplicação de edição de documentos.",
+        "glossary": [
+          {
+            "source_term": "template",
+            "accepted_targets": [
+              "modelo",
+              "modelo predefinido"
+            ]
+          }
+        ]
+      },
+      "expected_categories": [],
+      "annotation_note": "Usa uma das variantes aceites do glossário.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 574,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:47.910882Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 568737000,
+        "load_duration": 42746500,
+        "prompt_eval_count": 1792,
+        "prompt_eval_duration": 333790584,
+        "eval_count": 5,
+        "eval_duration": 131690582
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-10",
+      "source_id": "template-select",
+      "analysis_scope": "rq1_main",
+      "input": {
+        "source": "Select a template before you continue.",
+        "target": "Selecione um molde antes de continuar.",
+        "context": "Mensagem numa aplicação de edição de documentos.",
+        "glossary": [
+          {
+            "source_term": "template",
+            "accepted_targets": [
+              "modelo",
+              "modelo predefinido"
+            ]
+          }
+        ]
+      },
+      "expected_categories": [
+        "terminology"
+      ],
+      "annotation_note": "«molde» não é um equivalente aceite para template.",
+      "rule_issues": [
+        {
+          "category": "terminology",
+          "explanation": "O termo prescrito para 'template' não foi identificado na tradução.",
+          "hint": "Consulte o glossário da tarefa para verificar a tradução recomendada de 'template'."
+        }
+      ],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [
+        {
+          "category": "terminology",
+          "explanation": "O termo prescrito para 'template' não foi identificado na tradução.",
+          "hint": "Consulte o glossário da tarefa para verificar a tradução recomendada de 'template'.",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 478,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:48.389329Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 472598000,
+        "load_duration": 41713584,
+        "prompt_eval_count": 1789,
+        "prompt_eval_duration": 242934792,
+        "eval_count": 5,
+        "eval_duration": 131142793
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-11",
+      "source_id": "reminder-send",
+      "analysis_scope": "rq1_main",
+      "input": {
+        "source": "The system will send a reminder.",
+        "target": "O sistema enviará um lembrete.",
+        "context": "Notificação de um sistema de marcação de consultas.",
+        "glossary": [
+          {
+            "source_term": "reminder",
+            "accepted_targets": [
+              "lembrete"
+            ]
+          }
+        ]
+      },
+      "expected_categories": [],
+      "annotation_note": "Usa o equivalente prescrito.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 481,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:48.870932Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 476079875,
+        "load_duration": 41397459,
+        "prompt_eval_count": 1785,
+        "prompt_eval_duration": 247966209,
+        "eval_count": 5,
+        "eval_duration": 133276167
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-12",
+      "source_id": "reminder-send",
+      "analysis_scope": "rq1_main",
+      "input": {
+        "source": "The system will send a reminder.",
+        "target": "O sistema enviará um aviso.",
+        "context": "Notificação de um sistema de marcação de consultas.",
+        "glossary": [
+          {
+            "source_term": "reminder",
+            "accepted_targets": [
+              "lembrete"
+            ]
+          }
+        ]
+      },
+      "expected_categories": [
+        "terminology"
+      ],
+      "annotation_note": "«aviso» não é o equivalente prescrito (lembrete).",
+      "rule_issues": [
+        {
+          "category": "terminology",
+          "explanation": "O termo prescrito para 'reminder' não foi identificado na tradução.",
+          "hint": "Consulte o glossário da tarefa para verificar a tradução recomendada de 'reminder'."
+        }
+      ],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [
+        {
+          "category": "terminology",
+          "explanation": "O termo prescrito para 'reminder' não foi identificado na tradução.",
+          "hint": "Consulte o glossário da tarefa para verificar a tradução recomendada de 'reminder'.",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 467,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:49.33894Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 462719416,
+        "load_duration": 42890750,
+        "prompt_eval_count": 1784,
+        "prompt_eval_duration": 231603958,
+        "eval_count": 5,
+        "eval_duration": 130929165
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-13",
+      "source_id": "settings-page",
+      "analysis_scope": "rq1_main",
+      "input": {
+        "source": "Check the settings page.",
+        "target": "Consulte a página de definições.",
+        "context": "Instrução num guia de utilização de uma aplicação.",
+        "glossary": [
+          {
+            "source_term": "settings",
+            "accepted_targets": [
+              "definições"
+            ]
+          }
+        ]
+      },
+      "expected_categories": [],
+      "annotation_note": "Usa o equivalente prescrito, próprio do português europeu.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 482,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:49.821082Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 477466542,
+        "load_duration": 40962584,
+        "prompt_eval_count": 1784,
+        "prompt_eval_duration": 250262459,
+        "eval_count": 5,
+        "eval_duration": 131851791
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-14",
+      "source_id": "settings-page",
+      "analysis_scope": "rq1_main",
+      "input": {
+        "source": "Check the settings page.",
+        "target": "Consulte a página de configurações.",
+        "context": "Instrução num guia de utilização de uma aplicação.",
+        "glossary": [
+          {
+            "source_term": "settings",
+            "accepted_targets": [
+              "definições"
+            ]
+          }
+        ]
+      },
+      "expected_categories": [
+        "terminology"
+      ],
+      "annotation_note": "«configurações» não é o equivalente prescrito (definições).",
+      "rule_issues": [
+        {
+          "category": "terminology",
+          "explanation": "O termo prescrito para 'settings' não foi identificado na tradução.",
+          "hint": "Consulte o glossário da tarefa para verificar a tradução recomendada de 'settings'."
+        }
+      ],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [
+        {
+          "category": "terminology",
+          "explanation": "O termo prescrito para 'settings' não foi identificado na tradução.",
+          "hint": "Consulte o glossário da tarefa para verificar a tradução recomendada de 'settings'.",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 467,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:50.288408Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 462841208,
+        "load_duration": 44258792,
+        "prompt_eval_count": 1784,
+        "prompt_eval_duration": 232829708,
+        "eval_count": 5,
+        "eval_duration": 131122125
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-15",
+      "source_id": "download-start",
+      "analysis_scope": "rq1_main",
+      "input": {
+        "source": "Start the download now.",
+        "target": "Inicie agora a transferência.",
+        "context": "Instrução numa página de apoio ao utilizador.",
+        "glossary": [
+          {
+            "source_term": "download",
+            "accepted_targets": [
+              "transferência",
+              "descarga"
+            ]
+          }
+        ]
+      },
+      "expected_categories": [],
+      "annotation_note": "Usa um equivalente aceite.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 492,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:50.780904Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 486923875,
+        "load_duration": 45445417,
+        "prompt_eval_count": 1783,
+        "prompt_eval_duration": 247872292,
+        "eval_count": 5,
+        "eval_duration": 131093374
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-16",
+      "source_id": "download-start",
+      "analysis_scope": "rq1_main",
+      "input": {
+        "source": "Start the download now.",
+        "target": "Inicie agora o download.",
+        "context": "Instrução numa página de apoio ao utilizador.",
+        "glossary": [
+          {
+            "source_term": "download",
+            "accepted_targets": [
+              "transferência",
+              "descarga"
+            ]
+          }
+        ]
+      },
+      "expected_categories": [
+        "terminology"
+      ],
+      "annotation_note": "O termo ficou por traduzir.",
+      "rule_issues": [
+        {
+          "category": "terminology",
+          "explanation": "O termo prescrito para 'download' não foi identificado na tradução.",
+          "hint": "Consulte o glossário da tarefa para verificar a tradução recomendada de 'download'."
+        }
+      ],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [
+        {
+          "category": "terminology",
+          "explanation": "O termo prescrito para 'download' não foi identificado na tradução.",
+          "hint": "Consulte o glossário da tarefa para verificar a tradução recomendada de 'download'.",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 468,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:51.249205Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 462687417,
+        "load_duration": 42112959,
+        "prompt_eval_count": 1782,
+        "prompt_eval_duration": 233977417,
+        "eval_count": 5,
+        "eval_duration": 131288959
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-17",
+      "source_id": "thanks-patience",
+      "analysis_scope": "rq1_main",
+      "input": {
+        "source": "Thank you for your patience.",
+        "target": "",
+        "context": "Mensagem final de um formulário de apoio ao cliente.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "empty_translation"
+      ],
+      "annotation_note": "Tradução vazia.",
+      "rule_issues": [
+        {
+          "category": "empty_translation",
+          "explanation": "O segmento ainda não contém uma tradução com texto.",
+          "hint": "Como traduzirias este segmento para português europeu?"
+        }
+      ],
+      "llm_issues_before_fusion": [
+        {
+          "category": "empty_translation",
+          "explanation": "A tradução está vazia após remover espaços em branco.",
+          "hint": "A mensagem original é uma declaração de gratidão — há conteúdo que deveria ser traduzido?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "empty_translation",
+          "explanation": "O segmento ainda não contém uma tradução com texto.",
+          "hint": "Como traduzirias este segmento para português europeu?",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": true,
+      "llm_elapsed_ms": 2245,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:53.494393Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\": [{\"category\": \"empty_translation\", \"explanation\": \"A tradução está vazia após remover espaços em branco.\", \"hint\": \"A mensagem original é uma declaração de gratidão — há conteúdo que deveria ser traduzido?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 2240123542,
+        "load_duration": 41279667,
+        "prompt_eval_count": 1761,
+        "prompt_eval_duration": 226463708,
+        "eval_count": 59,
+        "eval_duration": 1904488001
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-18",
+      "source_id": "try-later",
+      "analysis_scope": "rq1_main",
+      "input": {
+        "source": "Please try again later.",
+        "target": "   ",
+        "context": "Mensagem de erro numa aplicação.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "empty_translation"
+      ],
+      "annotation_note": "Tradução com apenas espaços em branco.",
+      "rule_issues": [
+        {
+          "category": "empty_translation",
+          "explanation": "O segmento ainda não contém uma tradução com texto.",
+          "hint": "Como traduzirias este segmento para português europeu?"
+        }
+      ],
+      "llm_issues_before_fusion": [
+        {
+          "category": "empty_translation",
+          "explanation": "A tradução está vazia após remover espaços em branco.",
+          "hint": "O que deveria ser dito na mensagem de erro?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "empty_translation",
+          "explanation": "O segmento ainda não contém uma tradução com texto.",
+          "hint": "Como traduzirias este segmento para português europeu?",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": true,
+      "llm_elapsed_ms": 1899,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:55.393381Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\": [{\"category\": \"empty_translation\", \"explanation\": \"A tradução está vazia após remover espaços em branco.\", \"hint\": \"O que deveria ser dito na mensagem de erro?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1893979334,
+        "load_duration": 42882834,
+        "prompt_eval_count": 1757,
+        "prompt_eval_duration": 224520208,
+        "eval_count": 48,
+        "eval_duration": 1547835955
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-19",
+      "source_id": "exam-actually",
+      "analysis_scope": "rq2_meaning",
+      "input": {
+        "source": "Actually, the exam was easy.",
+        "target": "Na verdade, o exame foi fácil.",
+        "context": "Conversa entre dois estudantes sobre um exame.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "«Na verdade» corresponde a «actually».",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 468,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:55.862328Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 463780708,
+        "load_duration": 42920916,
+        "prompt_eval_count": 1770,
+        "prompt_eval_duration": 231849667,
+        "eval_count": 5,
+        "eval_duration": 131252250
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-20",
+      "source_id": "exam-actually",
+      "analysis_scope": "rq2_meaning",
+      "input": {
+        "source": "Actually, the exam was easy.",
+        "target": "Atualmente, o exame foi fácil.",
+        "context": "Conversa entre dois estudantes sobre um exame.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "Falso cognato: «actually» não significa «atualmente».",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A palavra 'actually' altera a negação implícita do original.",
+          "hint": "Que sentido transmite a palavra 'actually' em cada um dos textos?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução pode alterar o sentido ou a intenção do original.",
+          "hint": "Que diferença encontras entre o que o original comunica neste contexto e o que se entende na tua tradução?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1886,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:57.748125Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"meaning_context\",\"explanation\":\"A palavra 'actually' altera a negação implícita do original.\",\"hint\":\"Que sentido transmite a palavra 'actually' em cada um dos textos?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1881034208,
+        "load_duration": 41031250,
+        "prompt_eval_count": 1770,
+        "prompt_eval_duration": 226738584,
+        "eval_count": 48,
+        "eval_duration": 1544916582
+      },
+      "sanitized": 1
+    },
+    {
+      "id": "test-21",
+      "source_id": "report-risks",
+      "analysis_scope": "rq2_meaning",
+      "input": {
+        "source": "The report does not mention any risks.",
+        "target": "O relatório não refere quaisquer riscos.",
+        "context": "Resumo de um relatório técnico sobre uma obra.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "A negação mantém-se.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 483,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:58.231154Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 477017000,
+        "load_duration": 44799333,
+        "prompt_eval_count": 1773,
+        "prompt_eval_duration": 240256166,
+        "eval_count": 5,
+        "eval_duration": 131113250
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-22",
+      "source_id": "report-risks",
+      "analysis_scope": "rq2_meaning",
+      "input": {
+        "source": "The report does not mention any risks.",
+        "target": "O relatório refere alguns riscos.",
+        "context": "Resumo de um relatório técnico sobre uma obra.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "A negação perdeu-se: o sentido ficou invertido.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução altera a quantidade de riscos mencionados.",
+          "hint": "Quantos riscos é que cada texto refere?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução altera a quantidade de riscos mencionados.",
+          "hint": "Quantos riscos é que cada texto refere?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1695,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:54:59.926133Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"meaning_context\",\"explanation\":\"A tradução altera a quantidade de riscos mencionados.\",\"hint\":\"Quantos riscos é que cada texto refere?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1689734459,
+        "load_duration": 40377667,
+        "prompt_eval_count": 1770,
+        "prompt_eval_duration": 225505833,
+        "eval_count": 42,
+        "eval_duration": 1355839667
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-23",
+      "source_id": "form-late",
+      "analysis_scope": "rq2_meaning",
+      "input": {
+        "source": "Students may submit the form late.",
+        "target": "Os estudantes podem entregar o formulário fora de prazo.",
+        "context": "Regras de um regulamento escolar.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "A permissão mantém-se.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução altera a natureza da ação em relação ao prazo.",
+          "hint": "Que relação tem a entrega do formulário com o prazo em cada um dos textos?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução altera a natureza da ação em relação ao prazo.",
+          "hint": "Que relação tem a entrega do formulário com o prazo em cada um dos textos?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 2039,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:55:01.964296Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"meaning_context\",\"explanation\":\"A tradução altera a natureza da ação em relação ao prazo.\",\"hint\":\"Que relação tem a entrega do formulário com o prazo em cada um dos textos?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 2032908458,
+        "load_duration": 41834708,
+        "prompt_eval_count": 1773,
+        "prompt_eval_duration": 239738792,
+        "eval_count": 52,
+        "eval_duration": 1676861163
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-24",
+      "source_id": "form-late",
+      "analysis_scope": "rq2_meaning",
+      "input": {
+        "source": "Students may submit the form late.",
+        "target": "Os estudantes têm de entregar o formulário fora de prazo.",
+        "context": "Regras de um regulamento escolar.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "A permissão passa a obrigação.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução altera a natureza da ação indicada.",
+          "hint": "Que tipo de entrega é previsto no original e na tradução?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução altera a natureza da ação indicada.",
+          "hint": "Que tipo de entrega é previsto no original e na tradução?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1744,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:55:03.709631Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"meaning_context\",\"explanation\":\"A tradução altera a natureza da ação indicada.\",\"hint\":\"Que tipo de entrega é previsto no original e na tradução?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1739569750,
+        "load_duration": 41623292,
+        "prompt_eval_count": 1774,
+        "prompt_eval_duration": 227210000,
+        "eval_count": 44,
+        "eval_duration": 1404502877
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-25",
+      "source_id": "hit-road",
+      "analysis_scope": "rq2_meaning",
+      "input": {
+        "source": "We need to hit the road before noon.",
+        "target": "Temos de partir antes do meio-dia.",
+        "context": "Conversa sobre o início de uma viagem de autocarro.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "Traduz o sentido figurado da expressão.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 482,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:55:04.19174Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 476846833,
+        "load_duration": 43337417,
+        "prompt_eval_count": 1775,
+        "prompt_eval_duration": 244155625,
+        "eval_count": 5,
+        "eval_duration": 131055792
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-26",
+      "source_id": "hit-road",
+      "analysis_scope": "rq2_meaning",
+      "input": {
+        "source": "We need to hit the road before noon.",
+        "target": "Temos de bater na estrada antes do meio-dia.",
+        "context": "Conversa sobre o início de uma viagem de autocarro.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "Tradução à letra de uma expressão idiomática.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução altera o sentido da expressão 'hit the road'.",
+          "hint": "Que significado tem 'bater na estrada' neste contexto de viagem?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução pode alterar o sentido ou a intenção do original.",
+          "hint": "Que diferença encontras entre o que o original comunica neste contexto e o que se entende na tua tradução?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1925,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:55:06.11631Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"meaning_context\",\"explanation\":\"A tradução altera o sentido da expressão 'hit the road'.\",\"hint\":\"Que significado tem 'bater na estrada' neste contexto de viagem?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1919769833,
+        "load_duration": 41568708,
+        "prompt_eval_count": 1779,
+        "prompt_eval_duration": 230612292,
+        "eval_count": 49,
+        "eval_duration": 1579331086
+      },
+      "sanitized": 1
+    },
+    {
+      "id": "test-27",
+      "source_id": "teacher-thanks",
+      "analysis_scope": "rq2_meaning",
+      "input": {
+        "source": "The teacher thanked the student after the presentation.",
+        "target": "Depois da apresentação, o professor agradeceu ao estudante.",
+        "context": "Relato de uma aula.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "Quem agradece e a quem mantém-se.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 476,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:55:06.592545Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 470966958,
+        "load_duration": 41531500,
+        "prompt_eval_count": 1773,
+        "prompt_eval_duration": 242882125,
+        "eval_count": 5,
+        "eval_duration": 132342916
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-28",
+      "source_id": "teacher-thanks",
+      "analysis_scope": "rq2_meaning",
+      "input": {
+        "source": "The teacher thanked the student after the presentation.",
+        "target": "Depois da apresentação, o estudante agradeceu ao professor.",
+        "context": "Relato de uma aula.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "Os papéis estão trocados.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução inverte o sujeito da ação.",
+          "hint": "Quem agradeceu e quem foi agradecido em cada um dos textos?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução inverte o sujeito da ação.",
+          "hint": "Quem agradeceu e quem foi agradecido em cada um dos textos?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1788,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:55:08.380533Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"meaning_context\",\"explanation\":\"A tradução inverte o sujeito da ação.\",\"hint\":\"Quem agradeceu e quem foi agradecido em cada um dos textos?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1783203333,
+        "load_duration": 41883917,
+        "prompt_eval_count": 1773,
+        "prompt_eval_duration": 135217875,
+        "eval_count": 48,
+        "eval_duration": 1542210669
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-29",
+      "source_id": "registration-opens",
+      "analysis_scope": "rq2_meaning",
+      "input": {
+        "source": "Registration opens next Monday.",
+        "target": "As inscrições abrem na próxima segunda-feira.",
+        "context": "Aviso numa página de uma escola de línguas.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "Tempo e dia mantêm-se.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 477,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:55:08.857567Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 470834083,
+        "load_duration": 41243208,
+        "prompt_eval_count": 1772,
+        "prompt_eval_duration": 241086583,
+        "eval_count": 5,
+        "eval_duration": 131372541
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-30",
+      "source_id": "registration-opens",
+      "analysis_scope": "rq2_meaning",
+      "input": {
+        "source": "Registration opens next Monday.",
+        "target": "As inscrições abriram na segunda-feira passada.",
+        "context": "Aviso numa página de uma escola de línguas.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "meaning_context"
+      ],
+      "annotation_note": "O futuro passa a passado e «next» a «passada».",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução altera o momento em que abre a inscrição.",
+          "hint": "Em que momento as inscrições abrem em cada um dos textos?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução altera o momento em que abre a inscrição.",
+          "hint": "Em que momento as inscrições abrem em cada um dos textos?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1856,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:55:10.713468Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"meaning_context\",\"explanation\":\"A tradução altera o momento em que abre a inscrição.\",\"hint\":\"Em que momento as inscrições abrem em cada um dos textos?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1850602083,
+        "load_duration": 41594042,
+        "prompt_eval_count": 1773,
+        "prompt_eval_duration": 229214209,
+        "eval_count": 47,
+        "eval_duration": 1512258585
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-31",
+      "source_id": "cable-length",
+      "analysis_scope": "robustness",
+      "input": {
+        "source": "The cable is 5 m long.",
+        "target": "O cabo tem 5 m de comprimento.",
+        "context": "Especificações de um produto elétrico.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "Valor e unidade mantêm-se.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 481,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:55:11.194585Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 476003209,
+        "load_duration": 41783250,
+        "prompt_eval_count": 1771,
+        "prompt_eval_duration": 245062916,
+        "eval_count": 5,
+        "eval_duration": 134523957
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-32",
+      "source_id": "cable-length",
+      "analysis_scope": "robustness",
+      "input": {
+        "source": "The cable is 5 m long.",
+        "target": "O cabo tem 5 km de comprimento.",
+        "context": "Especificações de um produto elétrico.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "numeric_mismatch"
+      ],
+      "annotation_note": "O número mantém-se, mas a unidade mudou de metros para quilómetros.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "A unidade de comprimento não corresponde ao valor original.",
+          "hint": "Qual é a unidade de comprimento indicada no original?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "A unidade de comprimento não corresponde ao valor original.",
+          "hint": "Qual é a unidade de comprimento indicada no original?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1633,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:55:12.828141Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"numeric_mismatch\",\"explanation\":\"A unidade de comprimento não corresponde ao valor original.\",\"hint\":\"Qual é a unidade de comprimento indicada no original?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1627928833,
+        "load_duration": 43078708,
+        "prompt_eval_count": 1771,
+        "prompt_eval_duration": 135169375,
+        "eval_count": 43,
+        "eval_duration": 1381064373
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-33",
+      "source_id": "support-contact",
+      "analysis_scope": "robustness",
+      "input": {
+        "source": "Contact the support team.",
+        "target": "Contacte a equipa de apoio.",
+        "context": "Página de contactos de um serviço de apoio.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "Sem números, como no original.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 464,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:55:13.293131Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 459827000,
+        "load_duration": 41724584,
+        "prompt_eval_count": 1768,
+        "prompt_eval_duration": 234791541,
+        "eval_count": 5,
+        "eval_duration": 129572833
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-34",
+      "source_id": "support-contact",
+      "analysis_scope": "robustness",
+      "input": {
+        "source": "Contact the support team.",
+        "target": "Contacte a equipa de apoio através do número 808 123 456.",
+        "context": "Página de contactos de um serviço de apoio.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "numeric_mismatch"
+      ],
+      "annotation_note": "Acrescenta-se um número que não existe no original.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução adiciona uma informação não presente no original.",
+          "hint": "O original menciona apenas a ação, qual é a ação no texto traduzido?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "meaning_context",
+          "explanation": "A tradução adiciona uma informação não presente no original.",
+          "hint": "O original menciona apenas a ação, qual é a ação no texto traduzido?",
+          "source": "llm"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1896,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:55:15.188613Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"meaning_context\",\"explanation\":\"A tradução adiciona uma informação não presente no original.\",\"hint\":\"O original menciona apenas a ação, qual é a ação no texto traduzido?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1891936333,
+        "load_duration": 46253458,
+        "prompt_eval_count": 1783,
+        "prompt_eval_duration": 231425333,
+        "eval_count": 48,
+        "eval_duration": 1551128918
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-35",
+      "source_id": "meeting-time",
+      "analysis_scope": "robustness",
+      "input": {
+        "source": "The meeting starts on 14 March at 9:30.",
+        "target": "A reunião começa a 14 de março às 9h30.",
+        "context": "Convocatória de uma reunião.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "Data e hora mantêm-se; a hora usa a notação portuguesa.",
+      "rule_issues": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português."
+        }
+      ],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português.",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 518,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:55:15.706772Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 512740833,
+        "load_duration": 56038791,
+        "prompt_eval_count": 1785,
+        "prompt_eval_duration": 249288042,
+        "eval_count": 5,
+        "eval_duration": 131003625
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-36",
+      "source_id": "meeting-time",
+      "analysis_scope": "robustness",
+      "input": {
+        "source": "The meeting starts on 14 March at 9:30.",
+        "target": "A reunião começa a 14 de março às 9h00.",
+        "context": "Convocatória de uma reunião.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "numeric_mismatch"
+      ],
+      "annotation_note": "A hora mudou de 9:30 para 9h00.",
+      "rule_issues": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português."
+        }
+      ],
+      "llm_issues_before_fusion": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "A hora apresentada na tradução difere do original em termos de valor.",
+          "hint": "Qual é a hora exata mencionada em cada um dos textos?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português.",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1911,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:55:17.617767Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"numeric_mismatch\",\"explanation\":\"A hora apresentada na tradução difere do original em termos de valor.\",\"hint\":\"Qual é a hora exata mencionada em cada um dos textos?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1905430041,
+        "load_duration": 41165208,
+        "prompt_eval_count": 1785,
+        "prompt_eval_duration": 134730375,
+        "eval_count": 50,
+        "eval_duration": 1661328502
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-37",
+      "source_id": "kit-cables",
+      "analysis_scope": "robustness",
+      "input": {
+        "source": "The kit contains 3 cables.",
+        "target": "O kit contém três cabos.",
+        "context": "Lista de componentes de um kit.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "O valor mantém-se, escrito por extenso.",
+      "rule_issues": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português."
+        }
+      ],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português.",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 472,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:55:18.089253Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 466225583,
+        "load_duration": 42094583,
+        "prompt_eval_count": 1765,
+        "prompt_eval_duration": 231256583,
+        "eval_count": 5,
+        "eval_duration": 135544459
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-38",
+      "source_id": "kit-cables",
+      "analysis_scope": "robustness",
+      "input": {
+        "source": "The kit contains 3 cables.",
+        "target": "O kit contém quatro cabos.",
+        "context": "Lista de componentes de um kit.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "numeric_mismatch"
+      ],
+      "annotation_note": "O valor mudou de 3 para quatro, escrito por extenso.",
+      "rule_issues": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português."
+        }
+      ],
+      "llm_issues_before_fusion": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "A quantidade mencionada no original e na tradução não corresponde.",
+          "hint": "Qual é o número de cabos mencionado no original e na tradução?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português.",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1824,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:55:19.913563Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"numeric_mismatch\",\"explanation\":\"A quantidade mencionada no original e na tradução não corresponde.\",\"hint\":\"Qual é o número de cabos mencionado no original e na tradução?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1818151292,
+        "load_duration": 42586708,
+        "prompt_eval_count": 1766,
+        "prompt_eval_duration": 134728500,
+        "eval_count": 49,
+        "eval_duration": 1574122582
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-39",
+      "source_id": "workshop-dates",
+      "analysis_scope": "robustness",
+      "input": {
+        "source": "The workshop runs from 10 to 12 June.",
+        "target": "O workshop decorre de 10 a 12 de junho.",
+        "context": "Programa de um evento de formação.",
+        "glossary": []
+      },
+      "expected_categories": [],
+      "annotation_note": "O intervalo mantém-se.",
+      "rule_issues": [],
+      "llm_issues_before_fusion": [],
+      "hybrid_issues_shown": [],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 490,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:55:20.404822Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 485527416,
+        "load_duration": 48380541,
+        "prompt_eval_count": 1780,
+        "prompt_eval_duration": 250345458,
+        "eval_count": 5,
+        "eval_duration": 130980041
+      },
+      "sanitized": 0
+    },
+    {
+      "id": "test-40",
+      "source_id": "workshop-dates",
+      "analysis_scope": "robustness",
+      "input": {
+        "source": "The workshop runs from 10 to 12 June.",
+        "target": "O workshop decorre de 10 a 21 de junho.",
+        "context": "Programa de um evento de formação.",
+        "glossary": []
+      },
+      "expected_categories": [
+        "numeric_mismatch"
+      ],
+      "annotation_note": "O fim do intervalo mudou de 12 para 21.",
+      "rule_issues": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português."
+        }
+      ],
+      "llm_issues_before_fusion": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "A data final é alterada no texto original.",
+          "hint": "Qual é a data final mencionada no original?"
+        }
+      ],
+      "hybrid_issues_shown": [
+        {
+          "category": "numeric_mismatch",
+          "explanation": "Pelo menos um valor numérico do original não foi preservado com o mesmo número de ocorrências na tradução.",
+          "hint": "Verifique se preservou todos os números e quantidades do segmento original e se adaptou o formato para português.",
+          "source": "rules"
+        }
+      ],
+      "llm_status": "ok",
+      "llm_attempts": 1,
+      "llm_experimental_call_on_empty": false,
+      "llm_elapsed_ms": 1519,
+      "ollama_response": {
+        "model": "qwen3:4b-instruct-2507-q4_K_M",
+        "created_at": "2026-11-25T10:55:21.923894Z",
+        "message": {
+          "role": "assistant",
+          "content": "{\"issues\":[{\"category\":\"numeric_mismatch\",\"explanation\":\"A data final é alterada no texto original.\",\"hint\":\"Qual é a data final mencionada no original?\"}]}"
+        },
+        "done": true,
+        "done_reason": "stop",
+        "total_duration": 1514494000,
+        "load_duration": 61834458,
+        "prompt_eval_count": 1780,
+        "prompt_eval_duration": 135526000,
+        "eval_count": 38,
+        "eval_duration": 1217852875
+      },
+      "sanitized": 0
+    }
+  ]
+}

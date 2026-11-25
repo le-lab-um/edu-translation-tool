@@ -1,0 +1,575 @@
+{
+  "relatorios": [
+    {
+      "ficheiro": "output/teste-v3-2026-11-25.json",
+      "prompt": "hint-v3.txt",
+      "prompt_sha256": "a068f761fdf156fe4d16fdb3e7136a6f6c471828c60fa444dae2b0518290dd07"
+    },
+    {
+      "ficheiro": "output/teste-v4-2026-11-25.json",
+      "prompt": "hint-v4.txt",
+      "prompt_sha256": "19f81d40d19663c7e25e7bf2b1a4e670a2402ca5cb132210f2ed9a0cb7416c36"
+    }
+  ],
+  "diferencas_no_cabecalho": [],
+  "ambito": "rq1_main",
+  "casos_excluidos": [],
+  "analises": [
+    {
+      "prompt": "hint-v3.txt",
+      "principal": {
+        "casos": 18,
+        "metodos": {
+          "Regras": {
+            "por_categoria": {
+              "empty_translation": {
+                "vp": 2,
+                "fp": 0,
+                "fn": 0,
+                "precisao": 1.0,
+                "recall": 1.0,
+                "f1": 1.0
+              },
+              "numeric_mismatch": {
+                "vp": 4,
+                "fp": 0,
+                "fn": 0,
+                "precisao": 1.0,
+                "recall": 1.0,
+                "f1": 1.0
+              },
+              "terminology": {
+                "vp": 4,
+                "fp": 0,
+                "fn": 0,
+                "precisao": 1.0,
+                "recall": 1.0,
+                "f1": 1.0
+              }
+            },
+            "micro": {
+              "vp": 10,
+              "fp": 0,
+              "fn": 0,
+              "precisao": 1.0,
+              "recall": 1.0,
+              "f1": 1.0
+            },
+            "aceitaveis": {
+              "aceitaveis": 8,
+              "com_alerta_nas_categorias": 0,
+              "com_qualquer_alerta": 0
+            }
+          },
+          "LLM isolado": {
+            "por_categoria": {
+              "empty_translation": {
+                "vp": 2,
+                "fp": 0,
+                "fn": 0,
+                "precisao": 1.0,
+                "recall": 1.0,
+                "f1": 1.0
+              },
+              "numeric_mismatch": {
+                "vp": 4,
+                "fp": 1,
+                "fn": 0,
+                "precisao": 0.8,
+                "recall": 1.0,
+                "f1": 0.888888888888889
+              },
+              "terminology": {
+                "vp": 0,
+                "fp": 1,
+                "fn": 4,
+                "precisao": 0.0,
+                "recall": 0.0,
+                "f1": 0.0
+              }
+            },
+            "micro": {
+              "vp": 6,
+              "fp": 2,
+              "fn": 4,
+              "precisao": 0.75,
+              "recall": 0.6,
+              "f1": 0.6666666666666665
+            },
+            "aceitaveis": {
+              "aceitaveis": 8,
+              "com_alerta_nas_categorias": 2,
+              "com_qualquer_alerta": 2
+            }
+          },
+          "Híbrido": {
+            "por_categoria": {
+              "empty_translation": {
+                "vp": 2,
+                "fp": 0,
+                "fn": 0,
+                "precisao": 1.0,
+                "recall": 1.0,
+                "f1": 1.0
+              },
+              "numeric_mismatch": {
+                "vp": 4,
+                "fp": 1,
+                "fn": 0,
+                "precisao": 0.8,
+                "recall": 1.0,
+                "f1": 0.888888888888889
+              },
+              "terminology": {
+                "vp": 4,
+                "fp": 1,
+                "fn": 0,
+                "precisao": 0.8,
+                "recall": 1.0,
+                "f1": 0.888888888888889
+              }
+            },
+            "micro": {
+              "vp": 10,
+              "fp": 2,
+              "fn": 0,
+              "precisao": 0.8333333333333334,
+              "recall": 1.0,
+              "f1": 0.9090909090909091
+            },
+            "aceitaveis": {
+              "aceitaveis": 8,
+              "com_alerta_nas_categorias": 2,
+              "com_qualquer_alerta": 2
+            }
+          }
+        }
+      },
+      "significado": {
+        "LLM isolado": {
+          "vp": 6,
+          "fp": 2,
+          "fn": 0,
+          "precisao": 0.75,
+          "recall": 1.0,
+          "f1": 0.8571428571428571
+        },
+        "Híbrido": {
+          "vp": 6,
+          "fp": 2,
+          "fn": 0,
+          "precisao": 0.75,
+          "recall": 1.0,
+          "f1": 0.8571428571428571
+        },
+        "alertas_sanitizados": 5
+      },
+      "robustez": {
+        "casos": 10,
+        "metodos": {
+          "Regras": {
+            "por_categoria": {
+              "empty_translation": {
+                "vp": 0,
+                "fp": 0,
+                "fn": 0,
+                "precisao": null,
+                "recall": null,
+                "f1": null
+              },
+              "numeric_mismatch": {
+                "vp": 3,
+                "fp": 2,
+                "fn": 2,
+                "precisao": 0.6,
+                "recall": 0.6,
+                "f1": 0.6
+              },
+              "terminology": {
+                "vp": 0,
+                "fp": 0,
+                "fn": 0,
+                "precisao": null,
+                "recall": null,
+                "f1": null
+              }
+            },
+            "micro": {
+              "vp": 3,
+              "fp": 2,
+              "fn": 2,
+              "precisao": 0.6,
+              "recall": 0.6,
+              "f1": 0.6
+            },
+            "aceitaveis": {
+              "aceitaveis": 5,
+              "com_alerta_nas_categorias": 2,
+              "com_qualquer_alerta": 2
+            }
+          },
+          "LLM isolado": {
+            "por_categoria": {
+              "empty_translation": {
+                "vp": 0,
+                "fp": 0,
+                "fn": 0,
+                "precisao": null,
+                "recall": null,
+                "f1": null
+              },
+              "numeric_mismatch": {
+                "vp": 4,
+                "fp": 0,
+                "fn": 1,
+                "precisao": 1.0,
+                "recall": 0.8,
+                "f1": 0.888888888888889
+              },
+              "terminology": {
+                "vp": 0,
+                "fp": 0,
+                "fn": 0,
+                "precisao": null,
+                "recall": null,
+                "f1": null
+              }
+            },
+            "micro": {
+              "vp": 4,
+              "fp": 0,
+              "fn": 1,
+              "precisao": 1.0,
+              "recall": 0.8,
+              "f1": 0.888888888888889
+            },
+            "aceitaveis": {
+              "aceitaveis": 5,
+              "com_alerta_nas_categorias": 0,
+              "com_qualquer_alerta": 0
+            }
+          },
+          "Híbrido": {
+            "por_categoria": {
+              "empty_translation": {
+                "vp": 0,
+                "fp": 0,
+                "fn": 0,
+                "precisao": null,
+                "recall": null,
+                "f1": null
+              },
+              "numeric_mismatch": {
+                "vp": 4,
+                "fp": 2,
+                "fn": 1,
+                "precisao": 0.6666666666666666,
+                "recall": 0.8,
+                "f1": 0.7272727272727272
+              },
+              "terminology": {
+                "vp": 0,
+                "fp": 0,
+                "fn": 0,
+                "precisao": null,
+                "recall": null,
+                "f1": null
+              }
+            },
+            "micro": {
+              "vp": 4,
+              "fp": 2,
+              "fn": 1,
+              "precisao": 0.6666666666666666,
+              "recall": 0.8,
+              "f1": 0.7272727272727272
+            },
+            "aceitaveis": {
+              "aceitaveis": 5,
+              "com_alerta_nas_categorias": 2,
+              "com_qualquer_alerta": 2
+            }
+          }
+        }
+      }
+    },
+    {
+      "prompt": "hint-v4.txt",
+      "principal": {
+        "casos": 18,
+        "metodos": {
+          "Regras": {
+            "por_categoria": {
+              "empty_translation": {
+                "vp": 2,
+                "fp": 0,
+                "fn": 0,
+                "precisao": 1.0,
+                "recall": 1.0,
+                "f1": 1.0
+              },
+              "numeric_mismatch": {
+                "vp": 4,
+                "fp": 0,
+                "fn": 0,
+                "precisao": 1.0,
+                "recall": 1.0,
+                "f1": 1.0
+              },
+              "terminology": {
+                "vp": 4,
+                "fp": 0,
+                "fn": 0,
+                "precisao": 1.0,
+                "recall": 1.0,
+                "f1": 1.0
+              }
+            },
+            "micro": {
+              "vp": 10,
+              "fp": 0,
+              "fn": 0,
+              "precisao": 1.0,
+              "recall": 1.0,
+              "f1": 1.0
+            },
+            "aceitaveis": {
+              "aceitaveis": 8,
+              "com_alerta_nas_categorias": 0,
+              "com_qualquer_alerta": 0
+            }
+          },
+          "LLM isolado": {
+            "por_categoria": {
+              "empty_translation": {
+                "vp": 2,
+                "fp": 0,
+                "fn": 0,
+                "precisao": 1.0,
+                "recall": 1.0,
+                "f1": 1.0
+              },
+              "numeric_mismatch": {
+                "vp": 4,
+                "fp": 1,
+                "fn": 0,
+                "precisao": 0.8,
+                "recall": 1.0,
+                "f1": 0.888888888888889
+              },
+              "terminology": {
+                "vp": 0,
+                "fp": 0,
+                "fn": 4,
+                "precisao": null,
+                "recall": 0.0,
+                "f1": null
+              }
+            },
+            "micro": {
+              "vp": 6,
+              "fp": 1,
+              "fn": 4,
+              "precisao": 0.8571428571428571,
+              "recall": 0.6,
+              "f1": 0.7058823529411764
+            },
+            "aceitaveis": {
+              "aceitaveis": 8,
+              "com_alerta_nas_categorias": 1,
+              "com_qualquer_alerta": 1
+            }
+          },
+          "Híbrido": {
+            "por_categoria": {
+              "empty_translation": {
+                "vp": 2,
+                "fp": 0,
+                "fn": 0,
+                "precisao": 1.0,
+                "recall": 1.0,
+                "f1": 1.0
+              },
+              "numeric_mismatch": {
+                "vp": 4,
+                "fp": 1,
+                "fn": 0,
+                "precisao": 0.8,
+                "recall": 1.0,
+                "f1": 0.888888888888889
+              },
+              "terminology": {
+                "vp": 4,
+                "fp": 0,
+                "fn": 0,
+                "precisao": 1.0,
+                "recall": 1.0,
+                "f1": 1.0
+              }
+            },
+            "micro": {
+              "vp": 10,
+              "fp": 1,
+              "fn": 0,
+              "precisao": 0.9090909090909091,
+              "recall": 1.0,
+              "f1": 0.9523809523809523
+            },
+            "aceitaveis": {
+              "aceitaveis": 8,
+              "com_alerta_nas_categorias": 1,
+              "com_qualquer_alerta": 1
+            }
+          }
+        }
+      },
+      "significado": {
+        "LLM isolado": {
+          "vp": 6,
+          "fp": 2,
+          "fn": 0,
+          "precisao": 0.75,
+          "recall": 1.0,
+          "f1": 0.8571428571428571
+        },
+        "Híbrido": {
+          "vp": 6,
+          "fp": 2,
+          "fn": 0,
+          "precisao": 0.75,
+          "recall": 1.0,
+          "f1": 0.8571428571428571
+        },
+        "alertas_sanitizados": 2
+      },
+      "robustez": {
+        "casos": 10,
+        "metodos": {
+          "Regras": {
+            "por_categoria": {
+              "empty_translation": {
+                "vp": 0,
+                "fp": 0,
+                "fn": 0,
+                "precisao": null,
+                "recall": null,
+                "f1": null
+              },
+              "numeric_mismatch": {
+                "vp": 3,
+                "fp": 2,
+                "fn": 2,
+                "precisao": 0.6,
+                "recall": 0.6,
+                "f1": 0.6
+              },
+              "terminology": {
+                "vp": 0,
+                "fp": 0,
+                "fn": 0,
+                "precisao": null,
+                "recall": null,
+                "f1": null
+              }
+            },
+            "micro": {
+              "vp": 3,
+              "fp": 2,
+              "fn": 2,
+              "precisao": 0.6,
+              "recall": 0.6,
+              "f1": 0.6
+            },
+            "aceitaveis": {
+              "aceitaveis": 5,
+              "com_alerta_nas_categorias": 2,
+              "com_qualquer_alerta": 2
+            }
+          },
+          "LLM isolado": {
+            "por_categoria": {
+              "empty_translation": {
+                "vp": 0,
+                "fp": 0,
+                "fn": 0,
+                "precisao": null,
+                "recall": null,
+                "f1": null
+              },
+              "numeric_mismatch": {
+                "vp": 4,
+                "fp": 0,
+                "fn": 1,
+                "precisao": 1.0,
+                "recall": 0.8,
+                "f1": 0.888888888888889
+              },
+              "terminology": {
+                "vp": 0,
+                "fp": 0,
+                "fn": 0,
+                "precisao": null,
+                "recall": null,
+                "f1": null
+              }
+            },
+            "micro": {
+              "vp": 4,
+              "fp": 0,
+              "fn": 1,
+              "precisao": 1.0,
+              "recall": 0.8,
+              "f1": 0.888888888888889
+            },
+            "aceitaveis": {
+              "aceitaveis": 5,
+              "com_alerta_nas_categorias": 0,
+              "com_qualquer_alerta": 0
+            }
+          },
+          "Híbrido": {
+            "por_categoria": {
+              "empty_translation": {
+                "vp": 0,
+                "fp": 0,
+                "fn": 0,
+                "precisao": null,
+                "recall": null,
+                "f1": null
+              },
+              "numeric_mismatch": {
+                "vp": 4,
+                "fp": 2,
+                "fn": 1,
+                "precisao": 0.6666666666666666,
+                "recall": 0.8,
+                "f1": 0.7272727272727272
+              },
+              "terminology": {
+                "vp": 0,
+                "fp": 0,
+                "fn": 0,
+                "precisao": null,
+                "recall": null,
+                "f1": null
+              }
+            },
+            "micro": {
+              "vp": 4,
+              "fp": 2,
+              "fn": 1,
+              "precisao": 0.6666666666666666,
+              "recall": 0.8,
+              "f1": 0.7272727272727272
+            },
+            "aceitaveis": {
+              "aceitaveis": 5,
+              "com_alerta_nas_categorias": 2,
+              "com_qualquer_alerta": 2
+            }
+          }
+        }
+      }
+    }
+  ]
+}
