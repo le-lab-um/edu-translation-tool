@@ -1,6 +1,6 @@
 {
   "split": "test",
-  "annotation_status": "pending_author_review",
+  "annotation_status": "reviewed",
   "source_language": "en",
   "target_language": "pt-PT",
   "provenance": "Exemplos sintéticos redigidos com assistência de uma ferramenta de IA generativa, a rever pelos autores. Não são traduções recolhidas de participantes.",
