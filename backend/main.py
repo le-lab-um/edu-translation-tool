@@ -1,7 +1,7 @@
 """
 API em FastAPI para a aplicação de tradução.
-Liga os endpoints para guardar e ler segmentos da base de dados local
-e corre as regras de verificação da tradução.
+Liga os endpoints para guardar e ler segmentos (com histórico de versões e justificação)
+na base de dados local e corre as regras de verificação da tradução.
 """
 
 import csv
@@ -16,16 +16,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, StringConstraints
 from sqlalchemy.orm import Session
 
-from backend.database import Base, engine, get_db
+from backend.database import Base, engine, get_db, upgrade_schema
 from backend.hybrid import merge_issues
 from backend.llm import LLMError, OllamaClient
-from backend.models import Event, MemoryEntry, Segment
+from backend.models import Event, MemoryEntry, Segment, SegmentVersion
 from backend.rules import run_all_rules
 from backend.translation_memory import find_matches
 
+upgrade_schema(engine)
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Educational Translation Tool API", version="0.3.0")
+app = FastAPI(title="Educational Translation Tool API", version="0.4.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -77,19 +78,38 @@ class CheckResponse(BaseModel):
     issues: list[Issue]
 
 
+SegmentId = Annotated[str, StringConstraints(min_length=1, max_length=50)]
+
+
 class SegmentUpdateRequest(BaseModel):
     """Corpo do pedido de gravação; preserva o texto exato."""
 
     model_config = ConfigDict(extra="forbid")
 
     target: StrictStr = Field(description="Texto exato da tradução a guardar.")
+    justification: Annotated[str, StringConstraints(strict=True, max_length=5000)] | None = Field(
+        default=None, description="Justificação do aluno; se omitida, mantém-se a atual."
+    )
 
 
 class SegmentResponse(BaseModel):
-    """Resposta com o identificador e o texto do segmento."""
+    """Resposta com o identificador, o texto e a justificação do segmento."""
 
     id: str
     target: str
+    justification: str = ""
+
+
+class SegmentVersionResponse(BaseModel):
+    number: int
+    target: str
+    justification: str
+    created_at: str | None
+
+
+class SegmentVersionsResponse(BaseModel):
+    id: str
+    versions: list[SegmentVersionResponse]
 
 
 @app.post("/api/check", response_model=CheckResponse)
@@ -104,31 +124,71 @@ def check_translation(request: CheckRequest) -> CheckResponse:
 
 
 @app.get("/api/segments/{segment_id}", response_model=SegmentResponse)
-def get_segment(segment_id: str, db: Session = Depends(get_db)) -> SegmentResponse:
+def get_segment(segment_id: SegmentId, db: Session = Depends(get_db)) -> SegmentResponse:
     """Recupera o texto guardado de um segmento ou devolve vazio se não existir."""
     segment = db.query(Segment).filter(Segment.id == segment_id).first()
     if not segment:
         return SegmentResponse(id=segment_id, target="")
-    return SegmentResponse(id=segment.id, target=segment.target)
+    return SegmentResponse(id=segment.id, target=segment.target, justification=segment.justification)
 
 
 @app.put("/api/segments/{segment_id}", response_model=SegmentResponse)
 def save_segment(
-    segment_id: str,
+    segment_id: SegmentId,
     request: SegmentUpdateRequest,
     db: Session = Depends(get_db),
 ) -> SegmentResponse:
-    """Guarda ou atualiza o texto de um segmento existente."""
+    """Guarda a versão atual e acrescenta-a ao histórico quando o texto ou a justificação mudam."""
     segment = db.query(Segment).filter(Segment.id == segment_id).first()
+    justification = request.justification
     if not segment:
-        segment = Segment(id=segment_id, target=request.target)
+        segment = Segment(id=segment_id, target=request.target, justification=justification or "")
         db.add(segment)
+        changed = True
     else:
+        if justification is None:
+            justification = segment.justification
+        changed = segment.target != request.target or segment.justification != justification
         segment.target = request.target
+        segment.justification = justification
+
+    if changed:
+        db.flush()
+        last = (
+            db.query(SegmentVersion.number)
+            .filter(SegmentVersion.segment_id == segment_id)
+            .order_by(SegmentVersion.number.desc())
+            .first()
+        )
+        db.add(SegmentVersion(
+            segment_id=segment_id, number=(last[0] if last else 0) + 1,
+            target=segment.target, justification=segment.justification,
+        ))
 
     db.commit()
     db.refresh(segment)
-    return SegmentResponse(id=segment.id, target=segment.target)
+    return SegmentResponse(id=segment.id, target=segment.target, justification=segment.justification)
+
+
+@app.get("/api/segments/{segment_id}/versions", response_model=SegmentVersionsResponse)
+def segment_versions(segment_id: SegmentId, db: Session = Depends(get_db)) -> SegmentVersionsResponse:
+    """Histórico das versões guardadas de um segmento, da mais antiga para a mais recente."""
+    rows = (
+        db.query(SegmentVersion)
+        .filter(SegmentVersion.segment_id == segment_id)
+        .order_by(SegmentVersion.number)
+        .all()
+    )
+    return SegmentVersionsResponse(
+        id=segment_id,
+        versions=[
+            SegmentVersionResponse(
+                number=v.number, target=v.target, justification=v.justification,
+                created_at=v.created_at.isoformat() if v.created_at else None,
+            )
+            for v in rows
+        ],
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -237,7 +297,7 @@ def search_memory(request: MemorySearchRequest, db: Session = Depends(get_db)) -
 
 EVENT_TYPES = (
     "session_started", "segment_saved", "check_run", "hint_requested",
-    "hint_shown", "memory_suggestion_used",
+    "hint_shown", "memory_suggestion_used", "version_restored",
 )
 
 

@@ -1,19 +1,35 @@
 """
-Tabela da base de dados para guardar os segmentos.
-Guarda o ID do segmento, o texto da tradução e a data da última edição.
+Tabelas da base de dados: segmentos e as suas versões, memória de tradução e registos.
 """
 
 from datetime import datetime
-from sqlalchemy import Column, DateTime, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from backend.database import Base
 
 
 class Segment(Base):
+    """Versão atual de cada segmento: tradução, justificação do aluno e data da última edição."""
+
     __tablename__ = "segments"
 
     id = Column(String(50), primary_key=True, index=True)
     target = Column(Text, nullable=False, default="")
+    justification = Column(Text, nullable=False, default="")
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class SegmentVersion(Base):
+    """Histórico: cada gravação que altera a tradução ou a justificação acrescenta uma versão."""
+
+    __tablename__ = "segment_versions"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    segment_id = Column(String(50), ForeignKey("segments.id"), nullable=False, index=True)
+    number = Column(Integer, nullable=False)
+    target = Column(Text, nullable=False, default="")
+    justification = Column(Text, nullable=False, default="")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    __table_args__ = (UniqueConstraint("segment_id", "number", name="uq_segment_version"),)
 
 class MemoryEntry(Base):
     """Memória de tradução: par original/tradução guardado pelo aluno (nível 1)."""

@@ -14,28 +14,64 @@ export type GlossaryEntry = { target: string; variants?: string[] };
 export type Glossary = Record<string, GlossaryEntry>;
 export type Segment = { id: string; source: string };
 
-/**
- * Identificador estável de um segmento, derivado do próprio texto (hash FNV-1a de 32 bits).
- * Permite recuperar a tradução por texto; não distingue exercícios ou utilizadores.
- * Este hash curto pode ter colisões: não constitui uma identidade única garantida.
- * Duas linhas idênticas partilham o mesmo identificador (e, por isso, a mesma tradução).
- */
-export function segmentId(source: string): string {
+/** Hash FNV-1a de 32 bits do texto, em 8 dígitos hexadecimais. */
+function textHash(source: string): string {
   let hash = 0x811c9dc5;
   for (let i = 0; i < source.length; i += 1) {
     hash ^= source.charCodeAt(i);
     hash = Math.imul(hash, 0x01000193);
   }
-  return `custom-${(hash >>> 0).toString(16).padStart(8, '0')}`;
+  return (hash >>> 0).toString(16).padStart(8, '0');
 }
 
-/** Divide o texto em segmentos: uma linha (ou parágrafo) não vazia por segmento. */
-export function buildSegments(text: string): Segment[] {
+/**
+ * Identificador antigo, derivado só do texto. Mantém-se para os exercícios começados antes
+ * da identidade por ocorrência: aí, linhas idênticas partilham a mesma tradução.
+ */
+export function segmentId(source: string): string {
+  return `custom-${textHash(source)}`;
+}
+
+/** Formato do identificador de um exercício: «e» seguido de 12 dígitos hexadecimais. */
+export const EXERCISE_ID_PATTERN = /^e[0-9a-f]{12}$/;
+
+/** Cria o identificador aleatório de um novo exercício. */
+export function newExerciseId(): string {
+  const bytes = new Uint8Array(6);
+  try {
+    crypto.getRandomValues(bytes);
+  } catch {
+    for (let i = 0; i < bytes.length; i += 1) bytes[i] = Math.floor(Math.random() * 256);
+  }
+  return `e${Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')}`;
+}
+
+/**
+ * Identificador de uma ocorrência dentro de um exercício: exercício, texto e número da ocorrência.
+ * Linhas iguais no mesmo exercício (1.ª, 2.ª, … ocorrência) e em exercícios diferentes ficam
+ * com traduções independentes. Editar outras linhas do texto original não muda o identificador.
+ */
+export function occurrenceId(exerciseId: string, source: string, occurrence: number): string {
+  return `${exerciseId}-${textHash(source)}-${occurrence}`;
+}
+
+/**
+ * Divide o texto em segmentos: uma linha (ou parágrafo) não vazia por segmento.
+ * Com um identificador de exercício, cada ocorrência tem identidade própria; sem ele, usa o
+ * identificador antigo, derivado só do texto.
+ */
+export function buildSegments(text: string, exerciseId?: string): Segment[] {
+  const seen = new Map<string, number>();
   return text
     .split(/\r\n|\r|\n/)
     .map((line) => line.trim())
     .filter((line) => line.length > 0)
-    .map((source) => ({ id: segmentId(source), source }));
+    .map((source) => {
+      if (!exerciseId) return { id: segmentId(source), source };
+      const occurrence = (seen.get(source) ?? 0) + 1;
+      seen.set(source, occurrence);
+      return { id: occurrenceId(exerciseId, source, occurrence), source };
+    });
 }
 
 /**

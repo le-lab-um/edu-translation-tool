@@ -4,7 +4,9 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { EXAMPLES, buildSegments, parseGlossary, segmentId } from './exercise';
+import {
+  EXAMPLES, EXERCISE_ID_PATTERN, buildSegments, newExerciseId, occurrenceId, parseGlossary, segmentId,
+} from './exercise';
 
 describe('buildSegments', () => {
   it('cria um segmento por linha não vazia, sem espaços nas pontas', () => {
@@ -30,6 +32,38 @@ describe('segmentId', () => {
 
   it('cabe no limite de 50 caracteres da coluna id', () => {
     expect(segmentId('x'.repeat(5000)).length).toBeLessThanOrEqual(50);
+  });
+});
+
+describe('identidade por ocorrência', () => {
+  it('dá identidade própria a linhas iguais no mesmo exercício', () => {
+    const ids = buildSegments('Open the file.\nClose it.\nOpen the file.', 'e0123456789ab').map((s) => s.id);
+    expect(new Set(ids).size).toBe(3);
+    expect(ids[0]).toBe(occurrenceId('e0123456789ab', 'Open the file.', 1));
+    expect(ids[2]).toBe(occurrenceId('e0123456789ab', 'Open the file.', 2));
+  });
+
+  it('separa o mesmo texto em exercícios diferentes', () => {
+    const [a] = buildSegments('Open the file.', 'e000000000001');
+    const [b] = buildSegments('Open the file.', 'e000000000002');
+    expect(a.id).not.toBe(b.id);
+  });
+
+  it('mantém o identificador quando outras linhas mudam', () => {
+    const before = buildSegments('Intro.\nOpen the file.', 'e0123456789ab');
+    const after = buildSegments('New intro.\nOpen the file.', 'e0123456789ab');
+    expect(after[1].id).toBe(before[1].id);
+  });
+
+  it('sem exercício usa o identificador antigo, para exercícios anteriores', () => {
+    expect(buildSegments('Open the file.')[0].id).toBe(segmentId('Open the file.'));
+  });
+
+  it('cria identificadores de exercício válidos e curtos', () => {
+    const id = newExerciseId();
+    expect(id).toMatch(EXERCISE_ID_PATTERN);
+    expect(newExerciseId()).not.toBe(id);
+    expect(occurrenceId(id, 'x'.repeat(5000), 200).length).toBeLessThanOrEqual(50);
   });
 });
 

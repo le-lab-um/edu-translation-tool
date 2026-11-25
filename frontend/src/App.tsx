@@ -2,17 +2,20 @@
  * Componente principal do editor de tradução.
  * O aluno cola, escreve ou carrega o texto original em inglês (ou escolhe um exemplo),
  * o texto é dividido em segmentos e cada segmento é traduzido para português europeu.
- * A tradução é guardada na base de dados e verificada pelas regras determinísticas.
+ * A tradução e a justificação são guardadas na base de dados, com histórico de versões,
+ * e a tradução é verificada pelas regras determinísticas.
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import {
-  checkTranslation, CheckTimeoutError, EVENTS_EXPORT_URL, getSegment, logEvent,
+  checkTranslation, CheckTimeoutError, EVENTS_EXPORT_URL, getSegment, getVersions, logEvent,
   requestHint, saveMemory, saveSegment, searchMemory,
 } from './api';
-import type { HintResult, Issue, IssueCategory, LlmStatus, MemoryMatch } from './api';
-import { EXAMPLES, MAX_SEGMENTS, MAX_UPLOAD_BYTES, buildSegments, parseGlossary } from './exercise';
+import type { HintResult, Issue, IssueCategory, LlmStatus, MemoryMatch, SegmentVersion } from './api';
+import {
+  EXAMPLES, EXERCISE_ID_PATTERN, MAX_SEGMENTS, MAX_UPLOAD_BYTES, buildSegments, newExerciseId, parseGlossary,
+} from './exercise';
 
 const STORAGE_KEY = 'ett.exercise.v1';
 
@@ -27,7 +30,8 @@ const CATEGORY_LABELS: Record<IssueCategory, string> = {
 };
 
 type Draft = { sourceText: string; context: string; glossaryText: string };
-type StoredExercise = Draft & { started: boolean; index: number };
+/** exerciseId vazio: exercício começado antes da identidade por ocorrência (identificadores antigos). */
+type StoredExercise = Draft & { started: boolean; index: number; exerciseId: string };
 
 type CheckState =
   | { status: 'idle' | 'loading' | 'error' | 'timeout' }
@@ -72,6 +76,8 @@ function loadStoredExercise(): StoredExercise | null {
       started: data.started === true,
       index: typeof data.index === 'number' && Number.isInteger(data.index) && data.index >= 0
         ? data.index : 0,
+      exerciseId: typeof data.exerciseId === 'string' && EXERCISE_ID_PATTERN.test(data.exerciseId)
+        ? data.exerciseId : '',
     };
   } catch {
     return null;
@@ -84,6 +90,13 @@ function storeExercise(exercise: StoredExercise) {
   } catch {
     // Sem armazenamento local, o exercício só dura até fechar a página.
   }
+}
+
+/** Data e hora de uma versão, no formato local. */
+function formatVersionDate(createdAt: string | null): string {
+  if (!createdAt) return '';
+  const date = new Date(createdAt.endsWith('Z') || createdAt.includes('+') ? createdAt : `${createdAt}Z`);
+  return Number.isNaN(date.getTime()) ? '' : date.toLocaleString('pt-PT');
 }
 
 /** Editor de segmentos com verificação e persistência local. */
@@ -101,10 +114,14 @@ export default function App() {
       && parseGlossary(stored.glossaryText).invalidLines.length === 0;
   });
   const [index, setIndex] = useState(stored?.index ?? 0);
+  const [exerciseId, setExerciseId] = useState(stored?.exerciseId ?? '');
   const [setupError, setSetupError] = useState('');
   const [navError, setNavError] = useState('');
 
   const [translation, setTranslation] = useState('');
+  const [justification, setJustification] = useState('');
+  const [lastSavedJustification, setLastSavedJustification] = useState('');
+  const [versions, setVersions] = useState<SegmentVersion[]>([]);
   const [check, setCheck] = useState<CheckState>({ status: 'idle' });
   const [saveState, setSaveState] = useState<SaveState>({ status: 'idle' });
   const [hint, setHint] = useState<HintState>({ status: 'idle' });
@@ -118,20 +135,26 @@ export default function App() {
   const saving = useRef(false);
   const fileVersion = useRef(0);
 
-  const segments = useMemo(() => (started ? buildSegments(draft.sourceText) : []), [started, draft.sourceText]);
+  const segments = useMemo(
+    () => (started ? buildSegments(draft.sourceText, exerciseId || undefined) : []),
+    [started, draft.sourceText, exerciseId],
+  );
   const { glossary, invalidLines } = useMemo(() => parseGlossary(draft.glossaryText), [draft.glossaryText]);
   const segment = segments[Math.min(index, Math.max(segments.length - 1, 0))];
   const segmentIndex = segment ? segments.indexOf(segment) : 0;
   const segmentId = segment?.id;
+  const segmentIdRef = useRef(segmentId);
+  segmentIdRef.current = segmentId;
 
   const ready = loadState.id === segmentId && loadState.status === 'ready';
   const busy = saveState.status === 'saving';
-  const dirty = ready && (translation !== lastSaved || saveUnconfirmed);
+  const dirty = ready
+    && (translation !== lastSaved || justification !== lastSavedJustification || saveUnconfirmed);
 
   // Guarda a configuração; as traduções só são persistidas após Guardar/navegar.
   useEffect(() => {
-    storeExercise({ ...draft, started, index });
-  }, [draft, started, index]);
+    storeExercise({ ...draft, started, index, exerciseId });
+  }, [draft, started, index, exerciseId]);
 
   // Não permitir editar antes da leitura: uma falha não equivale a tradução vazia.
   useEffect(() => {
@@ -141,6 +164,9 @@ export default function App() {
     setLoadState({ id: segmentId, status: 'loading' });
     setTranslation('');
     setLastSaved('');
+    setJustification('');
+    setLastSavedJustification('');
+    setVersions([]);
     setCheck({ status: 'idle' });
     setHint({ status: 'idle' });
     setMemoryMatches([]);
@@ -150,11 +176,17 @@ export default function App() {
     searchMemory(segment.source)
       .then((matches) => { if (active) setMemoryMatches(matches); })
       .catch(() => {});
+    // O histórico também é opcional: sem ele, a edição continua.
+    getVersions(segmentId)
+      .then((list) => { if (active) setVersions(list); })
+      .catch(() => {});
     getSegment(segmentId)
-      .then((text) => {
+      .then((saved) => {
         if (!active) return;
-        setTranslation(text);
-        setLastSaved(text);
+        setTranslation(saved.target);
+        setLastSaved(saved.target);
+        setJustification(saved.justification);
+        setLastSavedJustification(saved.justification);
         setLoadState({ id: segmentId, status: 'ready' });
       })
       .catch(() => {
@@ -192,6 +224,25 @@ export default function App() {
     }
   }
 
+  /** A justificação não altera a verificação nem as pistas, por isso mantém os resultados. */
+  function updateJustification(value: string) {
+    if (!ready || saving.current) return;
+    setJustification(value);
+    if (saveState.status !== 'idle') {
+      setSaveState({ status: 'idle' });
+    }
+  }
+
+  /** Um texto novo (exemplo ou ficheiro) começa um exercício novo, com traduções próprias. */
+  function replaceSource(patch: Partial<Draft>) {
+    setExerciseId('');
+    updateDraft(patch);
+  }
+
+  function newExercise() {
+    replaceSource({ sourceText: '', context: '', glossaryText: '' });
+  }
+
   async function handleFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = '';
@@ -208,7 +259,7 @@ export default function App() {
     }
     try {
       const text = await file.text();
-      if (version === fileVersion.current) updateDraft({ sourceText: text });
+      if (version === fileVersion.current) replaceSource({ sourceText: text });
     } catch {
       if (version === fileVersion.current) {
         setSetupError('Não foi possível ler o ficheiro. Use um ficheiro de texto (.txt).');
@@ -232,6 +283,7 @@ export default function App() {
       return;
     }
     setNavError('');
+    if (!exerciseId) setExerciseId(newExerciseId());
     setIndex(0);
     setStarted(true);
     void logEvent('session_started', undefined, { segments: total });
@@ -245,11 +297,18 @@ export default function App() {
     setSaveState({ status: 'saving' });
     setNavError('');
     try {
-      await saveSegment(segment.id, translation);
+      await saveSegment(segment.id, translation, justification);
       setLastSaved(translation);
+      setLastSavedJustification(justification);
       setSaveUnconfirmed(false);
       setSaveState({ status: 'success' });
-      void logEvent('segment_saved', segment.id, { chars: translation.length });
+      const savedId = segment.id;
+      getVersions(savedId)
+        .then((list) => { if (savedId === segmentIdRef.current) setVersions(list); })
+        .catch(() => {});
+      void logEvent('segment_saved', segment.id, {
+        chars: translation.length, justification_chars: justification.length,
+      });
       if (translation.trim()) void saveMemory(segment.source, translation).catch(() => {});
       return true;
     } catch {
@@ -322,6 +381,14 @@ export default function App() {
     }
   }
 
+  /** Recupera uma versão anterior para o editor; só fica guardada depois de «Guardar». */
+  function restoreVersion(version: SegmentVersion) {
+    if (!ready || saving.current) return;
+    updateTranslation(version.target);
+    setJustification(version.justification);
+    void logEvent('version_restored', segmentId, { version: version.number });
+  }
+
   function useMemorySuggestion(match: MemoryMatch) {
     updateTranslation(match.target);
     void logEvent('memory_suggestion_used', segmentId, { score: match.score });
@@ -347,7 +414,8 @@ export default function App() {
             <h2 id="setup-heading" className="visually-hidden">Texto original</h2>
             <p className="introduction">
               Cole ou escreva um texto em inglês, carregue um ficheiro de texto, ou comece por um exemplo.
-              Cada linha não vazia passa a ser um segmento.
+              Cada linha não vazia passa a ser um segmento. Escolher um exemplo ou carregar um ficheiro
+              começa um exercício novo, com traduções próprias.
             </p>
 
             <div className="chips" role="group" aria-label="Exemplos">
@@ -358,7 +426,7 @@ export default function App() {
                   type="button"
                   className="secondary"
                   onClick={() =>
-                    updateDraft({
+                    replaceSource({
                       sourceText: example.sourceText,
                       context: example.context,
                       glossaryText: example.glossaryText,
@@ -435,6 +503,9 @@ export default function App() {
 
             <div className="actions">
               <button type="button" onClick={startExercise}>Começar a traduzir</button>
+              {exerciseId && (
+                <button type="button" className="secondary" onClick={newExercise}>Novo exercício</button>
+              )}
             </div>
           </section>
         )}
@@ -504,6 +575,19 @@ export default function App() {
                   aria-describedby="verification-note"
                   placeholder="Escreva aqui a sua tradução…"
                 />
+                <label htmlFor="justification" className="field-label justification-label">
+                  Justificação <span>Opcional · porque escolheu esta tradução?</span>
+                </label>
+                <textarea
+                  id="justification"
+                  name="justification"
+                  lang="pt-PT"
+                  rows={3}
+                  disabled={!ready || busy}
+                  value={justification}
+                  onChange={(event) => updateJustification(event.target.value)}
+                  placeholder="Por exemplo: mantive o registo formal porque o texto se dirige a clientes."
+                />
               </section>
             </div>
 
@@ -524,6 +608,28 @@ export default function App() {
                   ))}
                 </ul>
               </section>
+            )}
+
+            {versions.length > 0 && (
+              <details className="versions">
+                <summary>Histórico de versões ({versions.length})</summary>
+                <p>Cada gravação que altera a tradução ou a justificação fica registada. «Recuperar» copia a versão para o editor; guarde para a confirmar.</p>
+                <ol reversed>
+                  {[...versions].reverse().map((version) => (
+                    <li key={version.number}>
+                      <p className="version-meta">
+                        Versão {version.number}{formatVersionDate(version.createdAt) && ` · ${formatVersionDate(version.createdAt)}`}
+                      </p>
+                      <p lang="pt-PT">{version.target || <em>(vazia)</em>}</p>
+                      {version.justification && <p className="hint">Justificação: {version.justification}</p>}
+                      <button type="button" className="secondary" onClick={() => restoreVersion(version)}
+                        disabled={!ready || busy}>
+                        Recuperar
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+              </details>
             )}
 
             <section className="verification" aria-labelledby="actions-heading">

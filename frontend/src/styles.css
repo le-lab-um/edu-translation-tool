@@ -379,3 +379,11 @@ button.link:hover:not(:disabled) {
 .badge.llm { background: #fdf0d5; color: #7a4b00; }
 .hints { margin-top: 0.75rem; }
 footer a { color: inherit; }
+.justification-label { margin-top: 1rem; }
+.versions { margin: 1.25rem 0; padding: 1rem 1.25rem; border: 1px solid var(--border, #d0d5dd); border-radius: 8px; }
+.versions summary { cursor: pointer; font-weight: 650; }
+.versions ol { list-style: none; margin: 0.5rem 0 0; padding: 0; }
+.versions li { padding: 0.5rem 0; border-top: 1px solid var(--border, #d0d5dd); }
+.versions li:first-child { border-top: none; }
+.versions li p { margin: 0.25rem 0; white-space: pre-wrap; }
+.version-meta { color: #535b53; font-size: 0.875rem; }

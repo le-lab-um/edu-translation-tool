@@ -4,7 +4,7 @@ Cria o ficheiro app.db na pasta data e fornece a sessão para os endpoints.
 """
 
 import os
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 # Cria o ficheiro app.db na pasta data/ ou localmente
@@ -21,6 +21,17 @@ engine = create_engine(
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
+
+def upgrade_schema(bind) -> None:
+    """Acrescenta colunas novas a bases criadas por versões anteriores (o create_all não altera tabelas)."""
+    inspector = inspect(bind)
+    if "segments" not in inspector.get_table_names():
+        return
+    columns = {column["name"] for column in inspector.get_columns("segments")}
+    if "justification" not in columns:
+        with bind.begin() as connection:
+            connection.execute(text("ALTER TABLE segments ADD COLUMN justification TEXT NOT NULL DEFAULT ''"))
 
 
 def get_db():

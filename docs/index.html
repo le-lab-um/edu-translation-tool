@@ -41,9 +41,10 @@
         <div class="callout">
           <h3>What the prototype does</h3>
           <p>
-            A segmented editor with SQLite persistence and translation memory, five deterministic rules
-            (empty translation, numbers, glossary, placeholders and tags) and hybrid hints that combine the
-            rules with a local Qwen model served by Ollama, showing the origin of each issue.
+            A segmented editor with SQLite persistence, translation memory, version history and student
+            justifications, five deterministic rules (empty translation, numbers, glossary, placeholders and
+            tags) and hybrid hints that combine the rules with a local Qwen model served by Ollama, showing
+            the origin of each issue.
           </p>
           <p class="tag-status">Prototype completed and evaluated · 2026</p>
         </div>
@@ -68,8 +69,9 @@
             <span class="level-badge">Level 1</span>
             <h3>CAT core and persistence</h3>
             <p>
-              Segmented editor in React 19, SQLite persistence through SQLAlchemy 2.0, saving when the
-              student moves between segments, and a translation memory that retrieves similar sources.
+              Segmented editor in React 19 with SQLite persistence through SQLAlchemy 2.0. Each occurrence of a
+              segment has its own identity, every saved change is kept in a version history, and the student
+              can justify each translation. A translation memory retrieves similar sources.
             </p>
           </article>
           <article class="level-card">

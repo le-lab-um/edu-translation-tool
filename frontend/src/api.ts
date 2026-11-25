@@ -1,6 +1,6 @@
 /**
  * Funções para comunicar com o backend via fetch.
- * Aplica um limite de 10 segundos à verificação, leitura e gravação de segmentos.
+ * Aplica um limite de 10 segundos à verificação, leitura e gravação de segmentos e ao histórico.
  */
 
 import type { Glossary } from './exercise';
@@ -23,9 +23,14 @@ export type Issue = {
   hint: string;
 };
 
-export type SegmentResponse = {
-  id: string;
+export type SavedSegment = {
   target: string;
+  justification: string;
+};
+
+export type SegmentVersion = SavedSegment & {
+  number: number;
+  createdAt: string | null;
 };
 
 const REQUEST_TIMEOUT_MS = 10_000;
@@ -99,28 +104,46 @@ export async function checkTranslation(
 }
 
 /** Rejeita respostas inesperadas para não substituir uma tradução por dados inválidos. */
-function readSegment(data: unknown, id: string): SegmentResponse {
+function readSegment(data: unknown, id: string): SavedSegment {
   if (typeof data !== 'object' || data === null ||
       !('id' in data) || data.id !== id || !('target' in data) || typeof data.target !== 'string') {
     throw new Error('A API devolveu um segmento inválido.');
   }
-  return { id, target: data.target };
+  const justification = 'justification' in data ? data.justification : '';
+  if (typeof justification !== 'string') throw new Error('A API devolveu um segmento inválido.');
+  return { target: data.target, justification };
 }
 
-export async function getSegment(id: string): Promise<string> {
+export async function getSegment(id: string): Promise<SavedSegment> {
   const data = await requestJson(`/api/segments/${encodeURIComponent(id)}`);
-  return readSegment(data, id).target;
+  return readSegment(data, id);
 }
 
-export async function saveSegment(id: string, target: string): Promise<void> {
+export async function saveSegment(id: string, target: string, justification: string = ''): Promise<void> {
   const data = await requestJson(`/api/segments/${encodeURIComponent(id)}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ target }),
+    body: JSON.stringify({ target, justification }),
   });
-  if (readSegment(data, id).target !== target) {
+  const saved = readSegment(data, id);
+  if (saved.target !== target || saved.justification !== justification) {
     throw new Error('A API não confirmou o texto enviado.');
   }
+}
+
+/** Versões guardadas do segmento, da mais antiga para a mais recente. */
+export async function getVersions(id: string): Promise<SegmentVersion[]> {
+  const data = (await requestJson(`/api/segments/${encodeURIComponent(id)}/versions`)) as
+    { id?: unknown; versions?: unknown } | null;
+  const versions = data?.versions;
+  if (data?.id !== id || !Array.isArray(versions) || !versions.every((v) =>
+    typeof v?.number === 'number' && typeof v?.target === 'string' &&
+    typeof v?.justification === 'string' && (v?.created_at === null || typeof v?.created_at === 'string'))) {
+    throw new Error('A API devolveu um histórico inválido.');
+  }
+  return versions.map((v) => ({
+    number: v.number, target: v.target, justification: v.justification, createdAt: v.created_at,
+  }));
 }
 
 // ---------------------------------------------------------------------------
@@ -199,7 +222,7 @@ export async function saveMemory(source: string, target: string): Promise<void> 
 
 export type EventType =
   | 'session_started' | 'segment_saved' | 'check_run'
-  | 'hint_requested' | 'hint_shown' | 'memory_suggestion_used';
+  | 'hint_requested' | 'hint_shown' | 'memory_suggestion_used' | 'version_restored';
 
 const SESSION_KEY = 'ett.session.v1';
 

@@ -5,7 +5,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  checkTranslation, CheckTimeoutError, getSegment, saveSegment, RequestTimeoutError,
+  checkTranslation, CheckTimeoutError, getSegment, getVersions, saveSegment, RequestTimeoutError,
   requestHint, searchMemory, logEvent,
 } from './api';
 
@@ -140,11 +140,37 @@ describe('checkTranslation', () => {
 
   it('preserva o texto e só aceita confirmação da mesma tradução', async () => {
     const target = ' Tradução\ncom acentos.\t';
-    fetchMock.mockResolvedValueOnce(Response.json({ id: 'one', target }));
+    fetchMock.mockResolvedValueOnce(Response.json({ id: 'one', target, justification: '' }));
     await expect(saveSegment('one', target)).resolves.toBeUndefined();
-    expect(JSON.parse(fetchMock.mock.calls[0][1]!.body as string)).toEqual({ target });
-    fetchMock.mockResolvedValueOnce(Response.json({ id: 'one', target: 'Outra' }));
+    expect(JSON.parse(fetchMock.mock.calls[0][1]!.body as string)).toEqual({ target, justification: '' });
+    fetchMock.mockResolvedValueOnce(Response.json({ id: 'one', target: 'Outra', justification: '' }));
     await expect(saveSegment('one', target)).rejects.toThrow('não confirmou');
+  });
+
+  it('lê e confirma a justificação do aluno', async () => {
+    fetchMock.mockResolvedValueOnce(Response.json({ id: 'one', target: 'Texto', justification: 'Registo formal.' }));
+    await expect(getSegment('one')).resolves.toEqual({ target: 'Texto', justification: 'Registo formal.' });
+    fetchMock.mockResolvedValueOnce(Response.json({ id: 'one', target: 'Texto' }));
+    await expect(getSegment('one')).resolves.toEqual({ target: 'Texto', justification: '' });
+    fetchMock.mockResolvedValueOnce(Response.json({ id: 'one', target: 'Texto', justification: 'Registo formal.' }));
+    await expect(saveSegment('one', 'Texto', 'Registo formal.')).resolves.toBeUndefined();
+    fetchMock.mockResolvedValueOnce(Response.json({ id: 'one', target: 'Texto', justification: 'Outra.' }));
+    await expect(saveSegment('one', 'Texto', 'Registo formal.')).rejects.toThrow('não confirmou');
+  });
+
+  it('valida o histórico de versões', async () => {
+    fetchMock.mockResolvedValueOnce(Response.json({
+      id: 'one',
+      versions: [{ number: 1, target: 'A', justification: '', created_at: '2026-11-26T10:00:00' }],
+    }));
+    await expect(getVersions('one')).resolves.toEqual([
+      { number: 1, target: 'A', justification: '', createdAt: '2026-11-26T10:00:00' },
+    ]);
+    expect(fetchMock.mock.calls[0][0]).toBe('/api/segments/one/versions');
+    for (const data of [{ id: 'outro', versions: [] }, { id: 'one', versions: [{ number: 1 }] }, {}]) {
+      fetchMock.mockResolvedValueOnce(Response.json(data));
+      await expect(getVersions('one')).rejects.toThrow('histórico inválido');
+    }
   });
 
   it('não aceita alertas com categoria ou estrutura desconhecida', async () => {

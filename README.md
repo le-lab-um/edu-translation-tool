@@ -10,10 +10,12 @@ The interface is in Portuguese; button names are given below as they appear in t
 
 - **Segmented editor:** type or paste text, upload a `.txt` file of up to 200 KiB or pick an example. Each non-empty line is a segment, up to 200 per exercise. The context is shown to the student, and the glossary takes one entry per line (`folder = pasta | diretório`).
 - **Persistence:** the translation is saved in SQLite when the student clicks **Guardar** (Save), moves to another segment or returns to the exercise setup, and it is restored when the segment is reopened. A failed save keeps the text on screen and blocks navigation.
+- **Segment identity:** each occurrence of a segment has its own identity within its exercise, so identical lines, in the same exercise or in different ones, keep independent translations. Choosing an example, loading a file or clicking **Novo exercício** (New exercise) starts a new exercise.
+- **Justification and version history:** the student can write an optional justification for each translation. Every save that changes the translation or the justification is kept as a version, and **Histórico de versões** (Version history) lists them, with a **Recuperar** (Restore) button that brings a version back into the editor.
 - **Translation memory:** each confirmed translation is stored as a source–target pair. When a segment is opened, similar segments are suggested (RapidFuzz, threshold 70%) with a **Usar** (Use) button.
 - **Five deterministic rules** (**Verificar**, Check): empty translation, changed or missing numbers, missing glossary terms, placeholders (`{name}`) and formatting tags (`<b>`, `<i>`, …).
 - **Hybrid hints** (**Pedir pista**, Ask for a hint): the rules are combined with a local Qwen model (`qwen3:4b-instruct-2507-q4_K_M`, served by Ollama), which adds a **meaning and context** category. Each issue shows its origin (rule or local model). Rules take priority when categories overlap, and a heuristic filter generalizes hints that seem to reveal the solution. If Ollama fails, the application returns the rule issues only.
-- **Usage logs:** the interface logs usage events (start, save, check, hints, memory) without the translation text, exportable as JSON and CSV.
+- **Usage logs:** the interface logs usage events (start, save, check, hints, memory, restored versions) without the translation text, exportable as JSON and CSV.
 
 ## Evaluation results
 
@@ -37,7 +39,7 @@ The full results and discussion are in Section 5 of the paper.
 | `frontend/` | React 19 + TypeScript + Vite interface: `src/App.tsx` (editor), `src/exercise.ts` (segmentation and glossary), `src/api.ts` (HTTP client) and Vitest tests. |
 | `backend/` | FastAPI API: `main.py` (endpoints), `rules.py` (rules), `llm.py` (Ollama adapter), `hybrid.py` (merging and filter), `translation_memory.py`, `database.py` and `models.py` (SQLite). |
 | `backend/prompts/` | `hint-v4.txt` (the application's prompt, revised after the evaluation) and `hint-v3.txt` (the original prompt, kept to reproduce the evaluation). |
-| `tests/` | Backend tests: rules, API, persistence, memory and logging, merging and the evaluation metrics. |
+| `tests/` | Backend tests: rules, API, persistence and version history, memory and logging, merging and the evaluation metrics. |
 | `data/development.json` | Ten development examples used in the pilot. |
 | `experiments/ollama-pilot/` | 23 October pilot with prompts v1 and v2 (script, prompts, reports and notes). |
 | `experiments/evaluation/` | Case sets, scripts, reports and annotation sheets of the evaluation (see below). |
@@ -82,7 +84,7 @@ Model environment variables: `OLLAMA_URL` (default `http://localhost:11434`), `O
 cd frontend && npm test && npm run build
 ```
 
-There are 79 backend tests and 26 frontend tests. The Ollama integration is tested against a simulated server (`httpx.MockTransport`), so the model is not required.
+There are 86 backend tests and 33 frontend tests. The Ollama integration is tested against a simulated server (`httpx.MockTransport`), so the model is not required.
 
 ## API
 
@@ -90,7 +92,8 @@ There are 79 backend tests and 26 frontend tests. The Ollama integration is test
 | --- | --- |
 | `POST /api/check` | Runs the rules on `source`, `target` and `glossary`. Returns `issues` with `category`, `explanation` and `hint`. |
 | `POST /api/hint` | Like `/api/check`, plus `context`. Merges rule and model issues and also returns `source` for each issue, `llm_status`, `sanitized` and `elapsed_ms`. |
-| `GET` · `PUT /api/segments/{id}` | Retrieve and save the translation of a segment. |
+| `GET` · `PUT /api/segments/{id}` | Retrieve and save the translation of a segment and the student's `justification`. Each save that changes either one adds a version. |
+| `GET /api/segments/{id}/versions` | List the saved versions of a segment, oldest first. |
 | `POST /api/memory` · `POST /api/memory/search` | Store a pair and search for similar segments. |
 | `POST /api/events` · `GET /api/events/export` · `GET /api/events/summary` | Log events, export them (JSON or CSV) and summarize them. |
 
@@ -190,7 +193,7 @@ The CSV files use `;` as separator and UTF-8 with BOM, so that they open correct
 
 ## Limitations
 
-- **Segment identity:** translations are associated with the source text, so identical segments share their translation, even across exercises. Memory and logs are shared by the whole instance.
+- **Shared instance:** data is not separated by user, and memory and logs are shared by the whole instance. Exercises started before the per-occurrence identity keep identifiers derived only from the text.
 - **Local use only:** no authentication, permissive CORS and open export endpoints.
-- **Not yet implemented:** version history, student justifications and a chronological view of the logs.
+- **Not yet implemented:** critical comparison of translations and a chronological view of the logs.
 - **Evaluation:** internal, on small synthetic sets, and it does not measure learning effects.
