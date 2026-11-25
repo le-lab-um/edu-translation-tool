@@ -86,6 +86,14 @@ Antes do primeiro caso faz um pedido de aquecimento (`--no-warmup` desativa-o) e
 
 Com `--scope all` analisa todos os casos (útil para os conjuntos de desenvolvimento e diagnóstico, que não têm `rq1_main`).
 
+## Resumo da RQ2
+
+`rq2.py` lê a folha revista e a chave e resume, por prompt, os alertas do modelo em duas versões: a do modelo (antes da fusão) e a apresentada ao aluno (depois do filtro). Para cada versão conta os critérios, a revelação (`parcial` e `total` à parte), as linhas com `incerto` e as etiquetas das notas. As linhas das regras e os casos sem alerta ficam de fora. Só se corre depois da revisão, porque abre a chave.
+
+```sh
+.venv/bin/python -m experiments.evaluation.rq2 experiments/evaluation/anotacao-teste-folha.csv experiments/evaluation/anotacao-teste-chave.csv --json experiments/evaluation/rq2-teste-2026-11-25.json
+```
+
 ## Diagnóstico e prompt v4
 
 `diagnostico.json` tem 20 casos de 10 originais, todos de significado e contexto: tempo e advérbios, falsos cognatos, negação, modalidade, quantificadores, expressão idiomática e condição. Faz parte do desenvolvimento: as suas respostas podem orientar a revisão do prompt e nunca entram no teste. Verificar com `check_overlap --cases experiments/evaluation/diagnostico.json`, que também compara com o teste.
@@ -125,3 +133,14 @@ Com `--scope all` analisa todos os casos (útil para os conjuntos de desenvolvim
 - **Recolhas finais do teste (2026-11-25):** `teste-v3-2026-11-25.json` e `teste-v4-2026-11-25.json`, uma a seguir à outra, no mesmo Mac (Apple M4, 16 GB, Ollama 0.14.3, digest `0edcdef34593`), no commit `7668938` sem alterações por gravar. 40 casos, todas as chamadas válidas. Métricas em `metricas-teste-2026-11-25.json`.
 - **RQ1 (âmbito `rq1_main`, 18 casos, micro-média):** Regras 10/0/0 (VP/FP/FN) nas duas versões. LLM isolado: v3 6/2/4 (P 75,0 %, R 60,0 %, F1 66,7 %); v4 6/1/4 (P 85,7 %, R 60,0 %, F1 70,6 %). Híbrido: v3 10/2/0 (F1 90,9 %); v4 10/1/0 (F1 95,2 %). O LLM não assinalou nenhum dos 4 erros de glossário. Robustez (10 casos, igual nas duas versões): Regras 3/2/2, LLM isolado 4/0/1, Híbrido 4/2/1.
 - **RQ2 (teste):** `anotacao-teste-folha.csv` junta as linhas da v3 e da v4 baralhadas (105 linhas, 76 alertas); a versão e o prompt estão só em `anotacao-teste-chave.csv`. Proposta inicial preparada sem abrir a chave e revista pelos autores (4 linhas alteradas). Limitação: a proposta foi feita depois de calcular as métricas da RQ1, que permitem deduzir a versão de algumas linhas (por exemplo, o falso alerta de glossário em `test-09`).
+- **RQ2 (teste, depois da revisão):** resultado em `rq2-teste-2026-11-25.json`, sem linhas `incerto`.
+  - **Versão do modelo:**
+    - v3: 20 alertas, com revelação nenhuma em 5, parcial em 4 e total em 11 (55,0 %);
+    - v4: 19 alertas, com revelação nenhuma em 18, parcial em 1 e total em 0;
+    - pistas com duas hipóteses: 7 na v3 e 0 na v4;
+    - pistas que afirmam o original: 5 na v3 e 0 na v4.
+  - **Versão apresentada ao aluno:**
+    - v3: 11 alertas, com revelação parcial em 2 e total em 3;
+    - v4: 10 alertas, todos sem revelação.
+    - Há menos alertas apresentados do que do modelo porque, nas categorias que as regras cobrem, prevalece o alerta da regra.
+  - **Outros critérios (versão do modelo):** a correção fica igual (85,0 % na v3 e 84,2 % na v4) e a clareza sobe de 45,0 % para 68,4 % de `sim`.

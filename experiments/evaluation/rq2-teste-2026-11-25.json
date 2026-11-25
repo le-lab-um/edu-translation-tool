@@ -1,0 +1,155 @@
+{
+  "hint-v3.txt": {
+    "modelo": {
+      "alertas": 20,
+      "correcao": {
+        "sim": 17,
+        "não": 3
+      },
+      "fundamentacao": {
+        "sim": 15,
+        "não": 3,
+        "parcial": 2
+      },
+      "clareza": {
+        "sim": 9,
+        "parcial": 11
+      },
+      "utilidade": {
+        "sim": 14,
+        "não": 4,
+        "parcial": 2
+      },
+      "revelacao": {
+        "parcial": 4,
+        "total": 11,
+        "nenhuma": 5
+      },
+      "incerto": 0,
+      "etiquetas": {
+        "[binária]": 7,
+        "[afirmação]": 5,
+        "[inventa]": 2,
+        "[língua]": 1
+      },
+      "por_categoria": {
+        "numeric_mismatch": 9,
+        "meaning_context": 8,
+        "empty_translation": 2,
+        "terminology": 1
+      }
+    },
+    "apresentada": {
+      "alertas": 11,
+      "correcao": {
+        "sim": 8,
+        "não": 3
+      },
+      "fundamentacao": {
+        "parcial": 6,
+        "não": 1,
+        "sim": 4
+      },
+      "clareza": {
+        "sim": 8,
+        "parcial": 3
+      },
+      "utilidade": {
+        "parcial": 5,
+        "não": 3,
+        "sim": 3
+      },
+      "revelacao": {
+        "nenhuma": 6,
+        "total": 3,
+        "parcial": 2
+      },
+      "incerto": 0,
+      "etiquetas": {
+        "[binária]": 4,
+        "[afirmação]": 2,
+        "[inventa]": 1,
+        "[língua]": 0
+      },
+      "por_categoria": {
+        "numeric_mismatch": 2,
+        "meaning_context": 8,
+        "terminology": 1
+      }
+    }
+  },
+  "hint-v4.txt": {
+    "modelo": {
+      "alertas": 19,
+      "correcao": {
+        "sim": 16,
+        "não": 3
+      },
+      "fundamentacao": {
+        "sim": 13,
+        "não": 3,
+        "parcial": 3
+      },
+      "clareza": {
+        "sim": 13,
+        "parcial": 6
+      },
+      "utilidade": {
+        "sim": 15,
+        "não": 2,
+        "parcial": 2
+      },
+      "revelacao": {
+        "nenhuma": 18,
+        "parcial": 1
+      },
+      "incerto": 0,
+      "etiquetas": {
+        "[binária]": 0,
+        "[afirmação]": 0,
+        "[inventa]": 2,
+        "[língua]": 1
+      },
+      "por_categoria": {
+        "numeric_mismatch": 9,
+        "empty_translation": 2,
+        "meaning_context": 8
+      }
+    },
+    "apresentada": {
+      "alertas": 10,
+      "correcao": {
+        "sim": 8,
+        "não": 2
+      },
+      "fundamentacao": {
+        "sim": 5,
+        "parcial": 3,
+        "não": 2
+      },
+      "clareza": {
+        "sim": 6,
+        "parcial": 4
+      },
+      "utilidade": {
+        "sim": 4,
+        "parcial": 4,
+        "não": 2
+      },
+      "revelacao": {
+        "nenhuma": 10
+      },
+      "incerto": 0,
+      "etiquetas": {
+        "[binária]": 0,
+        "[afirmação]": 0,
+        "[inventa]": 1,
+        "[língua]": 0
+      },
+      "por_categoria": {
+        "meaning_context": 8,
+        "numeric_mismatch": 2
+      }
+    }
+  }
+}
