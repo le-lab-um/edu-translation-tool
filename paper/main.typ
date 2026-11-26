@@ -155,7 +155,7 @@ The engineering objectives cover the CAT editor with memory and glossary (*EO1*)
 
 The internal evaluation has two complementary objectives: *EV1* compares the detection of the rules, the model and the hybrid approach on annotated examples; *EV2* assesses the correctness, grounding, clarity, usefulness for guiding revision and solution disclosure of the explanations and hints. These objectives translate into the following research questions:
 
-- *RQ1 — Comparative detection.* What differences in precision, recall and F1 exist between deterministic rules, the local model alone and the hybrid approach in detecting empty translations, non-preserved numeric values and glossary non-compliance, against reference annotations defined by the authors on an EN–PT-PT set?
+- *RQ1 — Comparative detection.* What differences in precision, recall and F1 exist between deterministic rules, the local model alone and the hybrid approach in detecting empty translations, non-preserved numeric values and glossary non-compliance, against reference annotations we defined on an EN–PT-PT set?
 - *RQ2 — Feedback quality.* How are the explanations and hints of the model and of the hybrid approach internally assessed in terms of correctness, grounding, clarity and usefulness, and how often do they disclose the solution?
 
 RQ1 addresses the detection produced by EO2 and EO3, while RQ2 assesses the feedback associated with PO1 and EO3. The features of EO1, EO4 and the implemented components of PO2 are subject to functional verification. The internal evaluation thus characterizes detection and feedback on the examples studied, without measuring learning gains or autonomy.
@@ -403,7 +403,7 @@ The current configuration is intended for local execution, with permissive CORS 
 
 = Evaluation Protocol
 
-We, the two authors, conducted the evaluation internally. RQ1 addresses detection per category and RQ2 the quality of the feedback produced. We fixed the test set, the reference annotations and the experimental configuration before the final run.
+We conducted the evaluation internally. RQ1 addresses detection per category and RQ2 the quality of the feedback produced. We fixed the test set, the reference annotations and the experimental configuration before the final run.
 
 @fig-evaluation summarizes this design. A single model generation per case feeds both the LLM-only and the hybrid conditions, so that differences between them reflect the merge and the filter rather than variation between generations. Detection by the three methods is scored against the reference annotation (RQ1), and the explanations and hints of the model and of the hybrid approach are assessed with the grid (RQ2).
 
@@ -452,7 +452,7 @@ We prepared short source texts, with context and glossary where relevant, along 
 
 We split the data by source, keeping related variants in the same set. Examples from the pilot, calibration, diagnostic analysis, prompts and demonstrations are reserved for development, and an automated check confirms that no test source appears in those files or in the prompts. The test set contains 40 cases from 21 sources. The main RQ1 scope has 18 cases: 8 acceptable translations and 10 with problems (2 empty translations, 4 changed numeric values and 4 glossary violations). A further 12 cases (6 acceptable) target meaning and context, and 10 cases (5 acceptable) form the robustness scope.
 
-The two authors reviewed the reference annotations and fixed them by consensus, based on the source, the translation, the context and the glossary of each case. This review took place before any output of the methods on the test set was collected, and it left the proposed reference unchanged. Once the responses were collected, we assessed the explanations and hints. Because the authors both build and evaluate the system, the independence of the judgements is limited.
+We reviewed the reference annotations together and fixed them by consensus, based on the source, the translation, the context and the glossary of each case. This review took place before any output of the methods on the test set was collected, and it left the proposed reference unchanged. Once the responses were collected, we assessed the explanations and hints. Because we both build and evaluate the system, the independence of the judgements is limited.
 
 == Detection Comparison — RQ1
 
