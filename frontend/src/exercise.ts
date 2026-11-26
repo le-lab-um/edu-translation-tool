@@ -47,18 +47,18 @@ export function newExerciseId(): string {
 }
 
 /**
- * Identificador de uma ocorrência dentro de um exercício: exercício, texto e número da ocorrência.
- * Linhas iguais no mesmo exercício (1.ª, 2.ª, … ocorrência) e em exercícios diferentes ficam
- * com traduções independentes. Editar outras linhas do texto original não muda o identificador.
+ * Identificador por ocorrência (exercício, texto e número da ocorrência), usado pela versão
+ * anterior. Mantém-se só para migrar exercícios guardados nessa versão: os segmentos novos usam
+ * identificadores persistentes (ver reconcileSegments), que não se deslocam quando uma linha
+ * repetida anterior é alterada.
  */
 export function occurrenceId(exerciseId: string, source: string, occurrence: number): string {
   return `${exerciseId}-${textHash(source)}-${occurrence}`;
 }
 
 /**
- * Divide o texto em segmentos: uma linha (ou parágrafo) não vazia por segmento.
- * Com um identificador de exercício, cada ocorrência tem identidade própria; sem ele, usa o
- * identificador antigo, derivado só do texto.
+ * Segmentos com os identificadores das versões anteriores: por ocorrência (com exercício) ou
+ * derivados só do texto (sem exercício). Usado na migração de exercícios guardados.
  */
 export function buildSegments(text: string, exerciseId?: string): Segment[] {
   const seen = new Map<string, number>();
@@ -72,6 +72,81 @@ export function buildSegments(text: string, exerciseId?: string): Segment[] {
       seen.set(source, occurrence);
       return { id: occurrenceId(exerciseId, source, occurrence), source };
     });
+}
+
+/** Linhas não vazias do texto original, sem espaços nas pontas: uma por segmento. */
+export function splitLines(text: string): string[] {
+  return text
+    .split(/\r\n|\r|\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+}
+
+/** Identificador persistente de um segmento: exercício e 8 dígitos hexadecimais aleatórios. */
+export function newSegmentId(exerciseId: string, taken: ReadonlySet<string> = new Set()): string {
+  for (;;) {
+    const bytes = new Uint8Array(4);
+    try {
+      crypto.getRandomValues(bytes);
+    } catch {
+      for (let i = 0; i < bytes.length; i += 1) bytes[i] = Math.floor(Math.random() * 256);
+    }
+    const id = `${exerciseId}-${Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')}`;
+    if (!taken.has(id)) return id;
+  }
+}
+
+/**
+ * Reconcilia os segmentos de um exercício com o texto original editado.
+ *
+ * Alinha a sequência antiga com a nova pela maior subsequência comum de linhas iguais. As linhas
+ * emparelhadas mantêm o identificador (e, com ele, tradução, justificação e histórico); as restantes
+ * recebem identificadores novos. Uma linha alterada conta como removida e nova, por isso nunca
+ * herda o histórico de outra. Entre alinhamentos com o mesmo número de linhas preservadas,
+ * escolhe o que menos desloca as linhas (soma de |i - j|), o que resolve as linhas repetidas:
+ * [A, A] → [B, A] mantém a 2.ª ocorrência e [A, A] → [A, B] mantém a 1.ª. Em empate, prefere
+ * emparelhar, depois descartar a linha antiga, depois a nova; [A, A] → [A] mantém a 1.ª.
+ */
+export function reconcileSegments(
+  previous: readonly Segment[],
+  lines: readonly string[],
+  makeId: (taken: ReadonlySet<string>) => string,
+): Segment[] {
+  const n = previous.length;
+  const m = lines.length;
+  // Cada linha preservada vale mais do que qualquer soma de deslocamentos possível.
+  const unit = (n + 1) * (m + 1) * Math.max(n, m, 1) + 1;
+  const score: number[][] = Array.from({ length: n + 1 }, () => new Array<number>(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i -= 1) {
+    for (let j = m - 1; j >= 0; j -= 1) {
+      const skip = Math.max(score[i + 1][j], score[i][j + 1]);
+      score[i][j] = previous[i].source === lines[j]
+        ? Math.max(unit - Math.abs(i - j) + score[i + 1][j + 1], skip)
+        : skip;
+    }
+  }
+
+  const kept = new Map<number, string>();
+  let i = 0;
+  let j = 0;
+  while (i < n && j < m) {
+    if (previous[i].source === lines[j] && score[i][j] === unit - Math.abs(i - j) + score[i + 1][j + 1]) {
+      kept.set(j, previous[i].id);
+      i += 1;
+      j += 1;
+    } else if (score[i][j] === score[i + 1][j]) {
+      i += 1;
+    } else {
+      j += 1;
+    }
+  }
+
+  const taken = new Set(previous.map((segment) => segment.id));
+  return lines.map((source, position) => {
+    const id = kept.get(position) ?? makeId(taken);
+    taken.add(id);
+    return { id, source };
+  });
 }
 
 /**

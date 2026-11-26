@@ -2,9 +2,14 @@
 Tabelas da base de dados: segmentos e as suas versões, memória de tradução e registos.
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from backend.database import Base
+
+
+def utc_now() -> datetime:
+    """Hora UTC sem fuso associado: o mesmo formato que as colunas já guardavam (utcnow está obsoleto)."""
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 class Segment(Base):
@@ -15,7 +20,7 @@ class Segment(Base):
     id = Column(String(50), primary_key=True, index=True)
     target = Column(Text, nullable=False, default="")
     justification = Column(Text, nullable=False, default="")
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
 
 class SegmentVersion(Base):
@@ -28,7 +33,7 @@ class SegmentVersion(Base):
     number = Column(Integer, nullable=False)
     target = Column(Text, nullable=False, default="")
     justification = Column(Text, nullable=False, default="")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
     __table_args__ = (UniqueConstraint("segment_id", "number", name="uq_segment_version"),)
 
 class MemoryEntry(Base):
@@ -39,7 +44,7 @@ class MemoryEntry(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     source = Column(Text, nullable=False)
     target = Column(Text, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
     __table_args__ = (UniqueConstraint("source", "target", name="uq_memory_pair"),)
 
 
@@ -52,5 +57,6 @@ class Event(Base):
     session_id = Column(String(64), nullable=False, index=True)
     type = Column(String(40), nullable=False)
     segment_id = Column(String(50), nullable=True)
+    exercise_id = Column(String(13), nullable=True, index=True)
     payload = Column(Text, nullable=False, default="{}")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)

@@ -257,13 +257,16 @@ export function getSessionId(): string {
 export async function logEvent(
   type: EventType,
   segmentId?: string,
-  payload: Record<string, unknown> = {}
+  payload: Record<string, unknown> = {},
+  exerciseId?: string,
 ): Promise<void> {
   try {
     await requestJson('/api/events', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ session_id: getSessionId(), type, segment_id: segmentId ?? null, payload }),
+      body: JSON.stringify({
+        session_id: getSessionId(), type, segment_id: segmentId ?? null, exercise_id: exerciseId || null, payload,
+      }),
     });
   } catch {
     // Sem registo, a aplicação continua a funcionar.
@@ -272,7 +275,8 @@ export async function logEvent(
 
 export type TimelineEvent = {
   type: EventType;
-  segmentId: string;
+  /** null nos eventos do exercício sem segmento, como o início. */
+  segmentId: string | null;
   payload: Record<string, unknown>;
   createdAt: string | null;
 };
@@ -288,7 +292,7 @@ export async function getTimeline(exerciseId: string): Promise<TimelineEvent[]> 
     { exercise_id?: unknown; events?: unknown } | null;
   const events = data?.events;
   if (data?.exercise_id !== exerciseId || !Array.isArray(events) || !events.every((e) =>
-    EVENT_TYPES.includes(e?.type) && typeof e?.segment_id === 'string' &&
+    EVENT_TYPES.includes(e?.type) && (e?.segment_id === null || typeof e?.segment_id === 'string') &&
     typeof e?.payload === 'object' && e?.payload !== null && !Array.isArray(e?.payload) &&
     (e?.created_at === null || typeof e?.created_at === 'string'))) {
     throw new Error('A API devolveu um percurso inválido.');

@@ -26,12 +26,15 @@ Base = declarative_base()
 def upgrade_schema(bind) -> None:
     """Acrescenta colunas novas a bases criadas por versões anteriores (o create_all não altera tabelas)."""
     inspector = inspect(bind)
-    if "segments" not in inspector.get_table_names():
-        return
-    columns = {column["name"] for column in inspector.get_columns("segments")}
-    if "justification" not in columns:
-        with bind.begin() as connection:
-            connection.execute(text("ALTER TABLE segments ADD COLUMN justification TEXT NOT NULL DEFAULT ''"))
+    tables = inspector.get_table_names()
+    additions = {
+        "segments": ("justification", "ALTER TABLE segments ADD COLUMN justification TEXT NOT NULL DEFAULT ''"),
+        "events": ("exercise_id", "ALTER TABLE events ADD COLUMN exercise_id VARCHAR(13)"),
+    }
+    for table, (column, statement) in additions.items():
+        if table in tables and column not in {c["name"] for c in inspector.get_columns(table)}:
+            with bind.begin() as connection:
+                connection.execute(text(statement))
 
 
 def get_db():

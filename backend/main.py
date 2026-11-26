@@ -14,6 +14,7 @@ from fastapi import Depends, FastAPI, Path, Query
 from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, StringConstraints
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from backend.database import Base, engine, get_db, upgrade_schema
@@ -322,6 +323,7 @@ class EventRequest(BaseModel):
     session_id: Annotated[str, StringConstraints(strict=True, min_length=1, max_length=64)]
     type: Literal[EVENT_TYPES]  # type: ignore[valid-type]
     segment_id: Annotated[str, StringConstraints(strict=True, max_length=50)] | None = None
+    exercise_id: Annotated[str, StringConstraints(strict=True, pattern=r"^e[0-9a-f]{12}$")] | None = None
     payload: Dict[str, Any] = Field(default_factory=dict)
 
 
@@ -332,7 +334,7 @@ def log_event(request: EventRequest, db: Session = Depends(get_db)) -> dict[str,
         payload = json.dumps({"truncated": True})
     event = Event(
         session_id=request.session_id, type=request.type,
-        segment_id=request.segment_id, payload=payload,
+        segment_id=request.segment_id, exercise_id=request.exercise_id, payload=payload,
     )
     db.add(event)
     db.commit()
@@ -343,7 +345,7 @@ def _event_rows(db: Session) -> list[dict[str, Any]]:
     return [
         {
             "id": e.id, "session_id": e.session_id, "type": e.type,
-            "segment_id": e.segment_id, "payload": json.loads(e.payload),
+            "segment_id": e.segment_id, "exercise_id": e.exercise_id, "payload": json.loads(e.payload),
             "created_at": e.created_at.isoformat() if e.created_at else None,
         }
         for e in db.query(Event).order_by(Event.id).all()
@@ -361,7 +363,7 @@ def export_events(format: Literal["json", "csv"] = Query("json"), db: Session = 
         )
     buffer = io.StringIO()
     writer = csv.DictWriter(
-        buffer, fieldnames=["id", "session_id", "type", "segment_id", "payload", "created_at"]
+        buffer, fieldnames=["id", "session_id", "type", "segment_id", "exercise_id", "payload", "created_at"]
     )
     writer.writeheader()
     for row in rows:
@@ -377,7 +379,7 @@ ExerciseId = Annotated[str, Path(pattern=r"^e[0-9a-f]{12}$")]
 
 class TimelineEvent(BaseModel):
     type: str
-    segment_id: str
+    segment_id: str | None
     payload: Dict[str, Any]
     created_at: str | None
 
@@ -389,14 +391,15 @@ class TimelineResponse(BaseModel):
 
 @app.get("/api/exercises/{exercise_id}/events", response_model=TimelineResponse)
 def exercise_timeline(exercise_id: ExerciseId, db: Session = Depends(get_db)) -> TimelineResponse:
-    """Percurso de um exercício: os eventos dos seus segmentos, por ordem cronológica.
+    """Percurso de um exercício: os eventos dele, por ordem cronológica.
 
-    Os identificadores dos segmentos começam pelo identificador do exercício, que é aleatório
-    e fica no browser do aluno; por isso cada aluno vê apenas o percurso dos seus exercícios.
+    Inclui os eventos marcados com o identificador do exercício (como o início) e, para registos
+    anteriores a essa coluna, os dos segmentos cujo identificador começa por ele. O identificador
+    é aleatório e fica no browser do aluno; por isso cada aluno vê apenas o percurso dos seus exercícios.
     """
     rows = (
         db.query(Event)
-        .filter(Event.segment_id.like(f"{exercise_id}-%"))
+        .filter(or_(Event.exercise_id == exercise_id, Event.segment_id.like(f"{exercise_id}-%")))
         .order_by(Event.id)
         .all()
     )

@@ -186,6 +186,13 @@ describe('pistas híbridas, memória e registos', () => {
   beforeEach(() => {
     fetchMock.mockReset();
     vi.stubGlobal('fetch', fetchMock);
+    // Armazenamento em memória: os testes não dependem do localStorage experimental do Node
+    // (no Node 25 o acesso ao global sem --localstorage-file produz um aviso).
+    const items = new Map<string, string>();
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => items.get(key) ?? null,
+      setItem: (key: string, value: string) => void items.set(key, value),
+    });
   });
   afterEach(() => vi.unstubAllGlobals());
 

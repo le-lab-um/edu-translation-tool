@@ -10,13 +10,13 @@ The interface is in Portuguese; button names are given below as they appear in t
 
 - **Segmented editor:** type or paste text, upload a `.txt` file of up to 200 KiB or pick an example. Each non-empty line is a segment, up to 200 per exercise. The context is shown to the student, and the glossary takes one entry per line (`folder = pasta | diretório`).
 - **Persistence:** the translation is saved in SQLite when the student clicks **Guardar** (Save), moves to another segment or returns to the exercise setup, and it is restored when the segment is reopened. A failed save keeps the text on screen and blocks navigation.
-- **Segment identity:** each occurrence of a segment has its own identity within its exercise, so identical lines, in the same exercise or in different ones, keep independent translations. Choosing an example, loading a file or clicking **Novo exercício** (New exercise) starts a new exercise.
+- **Segment identity:** each segment has a persistent identifier within its exercise, stored in the browser with the source line. When the source is edited and the exercise restarted, the old and new lines are aligned (longest common subsequence of identical lines, preferring the alignment that displaces lines the least), so unchanged lines keep their translation, justification and history, including repeated lines, while new or changed lines start empty. Choosing an example, loading a file or clicking **Novo exercício** (New exercise) starts a new exercise. Exercises saved by earlier versions are migrated to the identifiers they already use.
 - **Justification and version history:** the student can write an optional justification for each translation. Every save that changes the translation or the justification is kept as a version, and the **Histórico de versões** (Version history) button opens a side panel that lists them, newest first, with a **Recuperar** (Restore) button that brings a version back into the editor. Long lists show ten items at a time.
-- **Translation memory:** each confirmed translation is stored as a source–target pair. When a segment is opened, similar segments are suggested (RapidFuzz, threshold 70%) with a **Usar** (Use) button. A **Remover** (Remove) button, after confirmation, deletes a wrong or test pair from the memory without changing any saved translation.
+- **Translation memory:** each confirmed translation is stored as a source–target pair. When a segment is opened, similar segments are suggested (RapidFuzz, threshold 70%) with a **Usar** (Use) button; the percentage is the similarity between the source texts, not a judgement of the translation. A **Remover** (Remove) button, after confirmation, deletes a wrong or test pair from the memory without changing any saved translation.
 - **Five deterministic rules** (**Verificar**, Check): empty translation, changed or missing numbers, missing glossary terms, placeholders (`{name}`) and formatting tags (`<b>`, `<i>`, …).
 - **Hybrid hints** (**Pedir pista**, Ask for a hint): the rules are combined with a local Qwen model (`qwen3:4b-instruct-2507-q4_K_M`, served by Ollama), which adds a **meaning and context** category. Each issue shows its origin (rule or local model). Rules take priority when categories overlap, and a heuristic filter generalizes hints that seem to reveal the solution. If Ollama fails, the application returns the rule issues only.
 - **Version comparison:** in the version history, any two versions can be compared word by word (removed words in red, added words in green), next to their justifications.
-- **Activity timeline:** the **O meu percurso** (My path) button opens a side panel that lists the student's actions in the exercise in chronological order, for the current segment or the whole exercise: saves, checks with the categories of the issues found, hints, memory suggestions and restored versions.
+- **Activity timeline:** the **O meu percurso** (My path) button opens a side panel that lists the student's actions in the exercise in chronological order, for the current segment or the whole exercise: the start (or restart) of the exercise, saves, checks with the categories of the issues found, hints, memory suggestions and restored versions.
 - **Usage logs:** the interface logs usage events (start, save, check, hints, memory, restored versions) without the translation text, exportable as JSON and CSV.
 
 ## Evaluation results
@@ -30,7 +30,7 @@ We evaluated the tool on 40 test cases (21 sources) that were not used during de
 | Hybrid | 10/2/0 | 90.9% | 10/1/0 | 95.2% |
 
 - **Detection (RQ1):** the rules detect every problem within their scope. The model alone misses all glossary violations but complements the rules on units and added numbers. The hybrid approach keeps the recall of the rules.
-- **Hint quality (RQ2):** with v3, 15 of the 20 hints returned by the model disclosed part or all of the correction. With v4, only 1 of 19 did, with the same correctness and greater clarity. None of the hints shown to the student with v4 disclosed the solution.
+- **Hint quality (RQ2):** with v3, 15 of the 20 hints returned by the model disclosed part or all of the correction. With v4, only 1 of 19 did, with comparable correctness (17 of 20 and 16 of 19 correct) and greater clarity (9 and 13 judged clear). After merging and filtering, none of the 10 hints shown to the student with v4 disclosed the solution.
 
 The full results and discussion are in Section 5 of the paper.
 
@@ -86,7 +86,7 @@ Model environment variables: `OLLAMA_URL` (default `http://localhost:11434`), `O
 cd frontend && npm test && npm run build
 ```
 
-There are 90 backend tests and 41 frontend tests. The Ollama integration is tested against a simulated server (`httpx.MockTransport`), so the model is not required.
+There are 94 backend tests and 59 frontend tests. The Ollama integration is tested against a simulated server (`httpx.MockTransport`), so the model is not required.
 
 ## API
 
@@ -98,7 +98,7 @@ There are 90 backend tests and 41 frontend tests. The Ollama integration is test
 | `GET /api/segments/{id}/versions` | List the saved versions of a segment, oldest first. |
 | `GET /api/exercises/{id}/events` | List the events of an exercise in chronological order (used by the activity timeline). |
 | `POST /api/memory` · `POST /api/memory/search` · `POST /api/memory/remove` | Store a pair, search for similar segments and remove a pair. |
-| `POST /api/events` · `GET /api/events/export` · `GET /api/events/summary` | Log events, export them (JSON or CSV) and summarize them. |
+| `POST /api/events` · `GET /api/events/export` · `GET /api/events/summary` | Log events (with optional `segment_id` and `exercise_id`), export them (JSON or CSV) and summarize them. |
 
 The glossary uses the format `{"folder": {"target": "pasta", "variants": ["diretório"]}}`.
 
@@ -196,7 +196,7 @@ The CSV files use `;` as separator and UTF-8 with BOM, so that they open correct
 
 ## Limitations
 
-- **Shared instance:** data is not separated by user, and memory and logs are shared by the whole instance. Exercises started before the per-occurrence identity keep identifiers derived only from the text.
+- **Shared instance:** data is not separated by user, and memory and logs are shared by the whole instance. Exercises started before exercise identifiers existed keep identifiers derived only from the text.
 - **Local use only:** no authentication, permissive CORS and open export endpoints.
 - **No user accounts:** each student is separated by their browser, since exercise identifiers are random and stored there. On a shared server, memory suggestions and log exports are common to everyone.
 - **Evaluation:** internal, on small synthetic sets, and it does not measure learning effects.

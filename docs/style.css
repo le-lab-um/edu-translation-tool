@@ -269,3 +269,23 @@ pre {
 .findings li + li {
   margin-top: 6px;
 }
+
+.shot-pair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}
+
+@media (max-width: 760px) {
+  .shot-pair {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Os comandos longos fazem scroll dentro da caixa, sem alargar a página em ecrãs estreitos. */
+.code-box {
+  min-width: 0;
+}
+
+.code-box pre {
+  overflow-x: auto;
+}

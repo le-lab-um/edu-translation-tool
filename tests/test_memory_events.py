@@ -134,6 +134,25 @@ class MemoryAndEventsApiTests(unittest.TestCase):
         self.assertEqual(body["events"][1]["payload"], {"categories": ["terminology"]})
         self.assertTrue(body["events"][0]["created_at"])
 
+    def test_exercise_start_without_segment_appears_in_timeline_and_export(self):
+        ex = "e0123456789ab"
+        start = {"session_id": "s1", "type": "session_started", "exercise_id": ex, "payload": {"segments": 2}}
+        other = {"session_id": "s2", "type": "session_started", "exercise_id": "e000000000001"}
+        save = {"session_id": "s1", "type": "segment_saved", "segment_id": f"{ex}-0a0b0c0d", "exercise_id": ex}
+        for event in (start, other, save):
+            self.assertEqual(self.client.post("/api/events", json=event).status_code, 201)
+        events = self.client.get(f"/api/exercises/{ex}/events").json()["events"]
+        self.assertEqual([(e["type"], e["segment_id"]) for e in events],
+                         [("session_started", None), ("segment_saved", f"{ex}-0a0b0c0d")])
+        exported = self.client.get("/api/events/export").json()
+        self.assertEqual([r["exercise_id"] for r in exported], [ex, "e000000000001", ex])
+        csv_rows = list(csv.DictReader(io.StringIO(self.client.get("/api/events/export", params={"format": "csv"}).text)))
+        self.assertEqual(csv_rows[0]["exercise_id"], ex)
+
+    def test_event_exercise_id_is_validated(self):
+        bad = {"session_id": "s", "type": "session_started", "exercise_id": "x%"}
+        self.assertEqual(self.client.post("/api/events", json=bad).status_code, 422)
+
     def test_exercise_timeline_rejects_invalid_ids(self):
         for bad in ("custom", "e123", "E0123456789ab", "e0123456789a%"):
             with self.subTest(bad=bad):

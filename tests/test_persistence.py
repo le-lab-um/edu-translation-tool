@@ -104,6 +104,11 @@ class TestPersistence(unittest.TestCase):
         self.assertEqual(res.json()["justification"], "Porque sim.")
         self.assertEqual(self.versions()[-1]["justification"], "Porque sim.")
 
+    def test_version_dates_keep_the_utc_format(self):
+        self.client.put("/api/segments/dev-001", json={"target": "Texto"})
+        created = self.versions()[0]["created_at"]
+        self.assertRegex(created, r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?$")
+
     def test_rejects_invalid_justification_and_long_ids(self):
         self.assertEqual(self.client.put("/api/segments/dev-001", json={"target": "T", "justification": 3}).status_code, 422)
         self.assertEqual(self.client.put("/api/segments/" + "x" * 51, json={"target": "T"}).status_code, 422)
@@ -121,3 +126,14 @@ class TestSchemaUpgrade(unittest.TestCase):
         with old.connect() as connection:
             row = connection.execute(text("SELECT target, justification FROM segments")).one()
         self.assertEqual(tuple(row), ("Antiga", ""))
+
+    def test_adds_exercise_id_column_to_old_events_without_losing_rows(self):
+        old = create_engine("sqlite:///:memory:", poolclass=StaticPool)
+        with old.begin() as connection:
+            connection.execute(text("CREATE TABLE events (id INTEGER PRIMARY KEY, session_id VARCHAR(64) NOT NULL, type VARCHAR(40) NOT NULL, segment_id VARCHAR(50), payload TEXT NOT NULL, created_at DATETIME)"))
+            connection.execute(text("INSERT INTO events (session_id, type, segment_id, payload) VALUES ('s', 'check_run', 'e0123456789ab-1', '{}')"))
+        upgrade_schema(old)
+        self.assertIn("exercise_id", {c["name"] for c in inspect(old).get_columns("events")})
+        with old.connect() as connection:
+            row = connection.execute(text("SELECT type, segment_id, exercise_id FROM events")).one()
+        self.assertEqual(tuple(row), ("check_run", "e0123456789ab-1", None))

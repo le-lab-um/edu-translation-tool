@@ -61,6 +61,14 @@
           <img src="img/editor-segment.png" alt="English source segment and the student's Portuguese translation" />
           <img src="img/editor-hint.png" alt="Editor actions and issues, each labeled with its origin: rule or local model" />
         </figure>
+        <p class="section-note">
+          After revision, the side panel compares the two saved versions word by word, next to their
+          justifications, and lists the student's path in the segment.
+        </p>
+        <figure class="shot shot-pair">
+          <img src="img/editor-compare.png" alt="Comparison of two versions of the translation, with removed and added words highlighted" />
+          <img src="img/editor-timeline.png" alt="Chronological list of the student's actions in the segment" />
+        </figure>
       </section>
 
       <section id="architecture" class="panel architecture-preview">
@@ -70,9 +78,9 @@
             <span class="level-badge">Level 1</span>
             <h3>CAT core and persistence</h3>
             <p>
-              Segmented editor in React 19 with SQLite persistence through SQLAlchemy 2.0. Each occurrence of a
-              segment has its own identity, every saved change is kept in a version history, and the student
-              can justify each translation. A translation memory retrieves similar sources.
+              Segmented editor in React 19 with SQLite persistence through SQLAlchemy 2.0. Each segment keeps a
+              persistent identity when the source is edited, every saved change is kept in a version history,
+              and the student can justify each translation. A translation memory retrieves similar sources.
             </p>
           </article>
           <article class="level-card">
@@ -112,7 +120,7 @@
         </table>
         <ul class="findings">
           <li>The rules detect every problem within their scope; the model alone misses glossary violations but catches unit changes and added numbers.</li>
-          <li>With v3, 15 of the 20 hints returned by the model disclosed part or all of the correction. With v4, only 1 of 19 did, with the same correctness and greater clarity.</li>
+          <li>With v3, 15 of the 20 hints returned by the model disclosed part or all of the correction. With v4, only 1 of 19 did, with comparable correctness and greater clarity.</li>
           <li>None of the hints shown to the student with v4 disclosed the solution.</li>
         </ul>
       </section>

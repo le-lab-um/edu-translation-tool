@@ -16,11 +16,11 @@ import type {
   EventType, HintResult, Issue, IssueCategory, LlmStatus, MemoryMatch, SegmentVersion, TimelineEvent,
 } from './api';
 import { diffWords } from './diff';
-import {
-  EXAMPLES, EXERCISE_ID_PATTERN, MAX_SEGMENTS, MAX_UPLOAD_BYTES, buildSegments, newExerciseId, parseGlossary,
-} from './exercise';
+import { EXAMPLES, MAX_SEGMENTS, MAX_UPLOAD_BYTES, newExerciseId, parseGlossary, splitLines } from './exercise';
+import type { Segment } from './exercise';
+import { browserStorage, loadStoredExercise, segmentsForStart, storeExercise } from './storage';
+import type { Draft } from './storage';
 
-const STORAGE_KEY = 'ett.exercise.v1';
 
 /** Número de versões ou ações mostradas de cada vez no painel lateral. */
 const PAGE_SIZE = 10;
@@ -35,9 +35,6 @@ const CATEGORY_LABELS: Record<IssueCategory, string> = {
   meaning_context: 'Significado e contexto',
 };
 
-type Draft = { sourceText: string; context: string; glossaryText: string };
-/** exerciseId vazio: exercício começado antes da identidade por ocorrência (identificadores antigos). */
-type StoredExercise = Draft & { started: boolean; index: number; exerciseId: string };
 
 type CheckState =
   | { status: 'idle' | 'loading' | 'error' | 'timeout' }
@@ -62,42 +59,6 @@ type SaveState =
 
 type LoadState = { id?: string; status: 'loading' | 'ready' | 'error' };
 
-// O browser pode não permitir localStorage (modo privado, por exemplo): a app funciona sem ele.
-function loadStoredExercise(): StoredExercise | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const data = JSON.parse(raw) as Partial<StoredExercise>;
-    if (
-      typeof data.sourceText !== 'string' ||
-      typeof data.context !== 'string' ||
-      typeof data.glossaryText !== 'string'
-    ) {
-      return null;
-    }
-    return {
-      sourceText: data.sourceText,
-      context: data.context,
-      glossaryText: data.glossaryText,
-      started: data.started === true,
-      index: typeof data.index === 'number' && Number.isInteger(data.index) && data.index >= 0
-        ? data.index : 0,
-      exerciseId: typeof data.exerciseId === 'string' && EXERCISE_ID_PATTERN.test(data.exerciseId)
-        ? data.exerciseId : '',
-    };
-  } catch {
-    return null;
-  }
-}
-
-function storeExercise(exercise: StoredExercise) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(exercise));
-  } catch {
-    // Sem armazenamento local, o exercício só dura até fechar a página.
-  }
-}
-
 /** Data e hora de uma versão, no formato local. */
 function formatVersionDate(createdAt: string | null): string {
   if (!createdAt) return '';
@@ -117,6 +78,10 @@ function describeEvent(event: TimelineEvent): string {
   const p = event.payload;
   const n = (key: string) => (typeof p[key] === 'number' ? (p[key] as number) : 0);
   switch (event.type) {
+    case 'session_started':
+      return p.restarted === true
+        ? `Recomeçou o exercício depois de alterar o texto original (${n('segments')} segmento(s)).`
+        : `Começou o exercício (${n('segments')} segmento(s)).`;
     case 'segment_saved':
       return n('justification_chars') > 0 ? 'Guardou a tradução, com justificação.' : 'Guardou a tradução.';
     case 'check_run': {
@@ -142,7 +107,7 @@ function describeEvent(event: TimelineEvent): string {
 
 /** Editor de segmentos com verificação e persistência local. */
 export default function App() {
-  const [stored] = useState(loadStoredExercise);
+  const [stored] = useState(() => loadStoredExercise(browserStorage()));
   const [draft, setDraft] = useState<Draft>({
     sourceText: stored?.sourceText ?? '',
     context: stored?.context ?? '',
@@ -150,12 +115,14 @@ export default function App() {
   });
   const [started, setStarted] = useState(() => {
     if (!stored?.started) return false;
-    const count = buildSegments(stored.sourceText).length;
+    const count = stored.segments.length;
     return count > 0 && count <= MAX_SEGMENTS
       && parseGlossary(stored.glossaryText).invalidLines.length === 0;
   });
   const [index, setIndex] = useState(stored?.index ?? 0);
   const [exerciseId, setExerciseId] = useState(stored?.exerciseId ?? '');
+  // Lista persistente dos segmentos: o identificador de cada um não muda enquanto o exercício existir.
+  const [segmentList, setSegmentList] = useState<Segment[]>(stored?.segments ?? []);
   const [setupError, setSetupError] = useState('');
   const [navError, setNavError] = useState('');
 
@@ -188,10 +155,7 @@ export default function App() {
   const saving = useRef(false);
   const fileVersion = useRef(0);
 
-  const segments = useMemo(
-    () => (started ? buildSegments(draft.sourceText, exerciseId || undefined) : []),
-    [started, draft.sourceText, exerciseId],
-  );
+  const segments = started ? segmentList : [];
   const { glossary, invalidLines } = useMemo(() => parseGlossary(draft.glossaryText), [draft.glossaryText]);
   const segment = segments[Math.min(index, Math.max(segments.length - 1, 0))];
   const segmentIndex = segment ? segments.indexOf(segment) : 0;
@@ -236,17 +200,42 @@ export default function App() {
     if (panel) drawerRef.current?.focus();
   }, [panel]);
 
-  // Fecha com a tecla Esc.
+  // Fecha com a tecla Esc e mantém o foco do teclado dentro do painel enquanto está aberto.
   useEffect(() => {
     if (!panel) return;
-    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') closePanel(); };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closePanel();
+        return;
+      }
+      const drawer = drawerRef.current;
+      if (event.key !== 'Tab' || !drawer) return;
+      const focusable = [...drawer.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), select:not([disabled]), textarea:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+      )];
+      if (focusable.length === 0) {
+        event.preventDefault();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      const outside = !drawer.contains(active);
+      if (event.shiftKey && (outside || active === first || active === drawer)) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (outside || active === last)) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   });
 
   /** Regista o evento e, com o percurso aberto, atualiza-o. */
   function track(type: EventType, id: string | undefined, payload: Record<string, unknown> = {}) {
-    void logEvent(type, id, payload).then(() => {
+    void logEvent(type, id, payload, exerciseId || undefined).then(() => {
       if (timelineOpen.current) void loadTimeline();
     });
   }
@@ -258,8 +247,8 @@ export default function App() {
 
   // Guarda a configuração; as traduções só são persistidas após Guardar/navegar.
   useEffect(() => {
-    storeExercise({ ...draft, started, index, exerciseId });
-  }, [draft, started, index, exerciseId]);
+    storeExercise(browserStorage(), { ...draft, started, index, exerciseId, segments: segmentList });
+  }, [draft, started, index, exerciseId, segmentList]);
 
   // Não permitir editar antes da leitura: uma falha não equivale a tradução vazia.
   useEffect(() => {
@@ -342,6 +331,7 @@ export default function App() {
   /** Um texto novo (exemplo ou ficheiro) começa um exercício novo, com traduções próprias. */
   function replaceSource(patch: Partial<Draft>) {
     setExerciseId('');
+    setSegmentList([]);
     updateDraft(patch);
   }
 
@@ -379,7 +369,7 @@ export default function App() {
       setSetupError('Corrija as linhas inválidas ou repetidas do glossário antes de começar.');
       return;
     }
-    const total = buildSegments(draft.sourceText).length;
+    const total = splitLines(draft.sourceText).length;
     if (total === 0) {
       setSetupError('Cole, escreva ou carregue um texto em inglês para começar.');
       return;
@@ -389,10 +379,16 @@ export default function App() {
       return;
     }
     setNavError('');
-    if (!exerciseId) setExerciseId(newExerciseId());
+    // Um exercício novo recebe identificador; num exercício existente (incluindo os de versões
+    // anteriores, com identificadores por ocorrência), a lista anterior é reconciliada com o texto,
+    // para cada segmento manter a sua tradução, justificação e histórico.
+    const id = exerciseId || newExerciseId();
+    const restarted = Boolean(exerciseId) && segmentList.length > 0;
+    setExerciseId(id);
+    setSegmentList(segmentsForStart(id, exerciseId ? segmentList : [], draft.sourceText));
     setIndex(0);
     setStarted(true);
-    void logEvent('session_started', undefined, { segments: total });
+    void logEvent('session_started', undefined, { segments: total, restarted }, id);
   }
 
   /** Uma única gravação de cada vez. Enquanto decorre, a edição fica bloqueada. */
@@ -471,7 +467,7 @@ export default function App() {
     if (!segment || !ready || saving.current) return;
     const version = ++requestVersion.current;
     setHint({ status: 'loading' });
-    void logEvent('hint_requested', segment.id);
+    void logEvent('hint_requested', segment.id, {}, exerciseId || undefined);
     try {
       const result = await requestHint(translation, segment.source, glossary, draft.context);
       if (version === requestVersion.current) {
@@ -588,7 +584,7 @@ export default function App() {
                   onChange={handleFile}
                 />
                 <span className="hint">
-                  Até {MAX_UPLOAD_BYTES / 1024} KB · {buildSegments(draft.sourceText).length} segmento(s)
+                  Até {MAX_UPLOAD_BYTES / 1024} KB · {splitLines(draft.sourceText).length} segmento(s)
                 </span>
               </div>
             </div>
@@ -732,12 +728,15 @@ export default function App() {
             {memoryMatches.length > 0 && (
               <section className="memory" aria-labelledby="memory-heading">
                 <h2 id="memory-heading">Memória de tradução</h2>
-                <p>Estas sugestões vêm de traduções guardadas nesta instância. Reveja-as antes de as usar. «Remover» apaga da memória uma sugestão errada, sem alterar as traduções guardadas.</p>
+                <p>Estas sugestões vêm de traduções guardadas nesta instância. A percentagem indica a semelhança entre os textos originais, não a qualidade da tradução. Reveja-as antes de as usar. «Remover» apaga da memória uma sugestão errada, sem alterar as traduções guardadas.</p>
                 {memoryError && <p className="check-error" role="alert">Não foi possível remover a sugestão. Tente novamente.</p>}
                 <ul>
                   {memoryMatches.map((match) => (
                     <li key={`${match.source}|${match.target}`}>
-                      <span className="badge">{match.score}%</span>
+                      <span className="badge" title="Semelhança entre este original e o original guardado; não avalia a tradução."
+                        aria-label={`Original ${match.score}% semelhante`}>
+                        {match.score}%
+                      </span>
                       <span lang="en">{match.source}</span> → <span lang="pt-PT">{match.target}</span>{' '}
                       <button type="button" className="secondary" onClick={() => useMemorySuggestion(match)}
                         disabled={!ready || busy}>
@@ -830,7 +829,7 @@ export default function App() {
                     )}
                     {panel === 'timeline' && (
                       <>
-                        <p>As ações que fez neste exercício, por ordem: gravações, verificações, pistas, sugestões da memória e versões recuperadas.</p>
+                        <p>As ações que fez neste exercício, por ordem: início, gravações, verificações, pistas, sugestões da memória e versões recuperadas.</p>
                         <div className="timeline-scope" role="group" aria-label="Mostrar">
                           <button type="button" className={timelineScope === 'segment' ? '' : 'secondary'}
                             aria-pressed={timelineScope === 'segment'} onClick={() => setTimelineScope('segment')}>
@@ -864,7 +863,8 @@ export default function App() {
                                     <li key={hidden + i}>
                                       <span className="version-meta">
                                         {formatVersionDate(event.createdAt)}
-                                        {timelineScope === 'exercise' && (position >= 0 ? ` · Segmento ${position + 1}` : ' · Segmento já removido')}
+                                        {timelineScope === 'exercise' && event.segmentId !== null
+                                          && (position >= 0 ? ` · Segmento ${position + 1}` : ' · Segmento já removido')}
                                       </span>{' '}
                                       {text}
                                     </li>
